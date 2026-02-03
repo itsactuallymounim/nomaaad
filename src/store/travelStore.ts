@@ -28,6 +28,13 @@ interface TravelState {
   removeActivity: (dayId: string, activityId: string) => void;
   updateActivity: (dayId: string, activityId: string, updates: Partial<Activity>) => void;
   moveActivity: (fromDayId: string, toDayId: string, activityId: string) => void;
+  reorderActivity: (dayId: string, fromIndex: number, toIndex: number) => void;
+  moveActivityBetweenDays: (
+    sourceDayId: string,
+    destDayId: string,
+    sourceIndex: number,
+    destIndex: number
+  ) => void;
   
   addMessage: (message: ChatMessage) => void;
   setIsTyping: (isTyping: boolean) => void;
@@ -232,6 +239,29 @@ export const useTravelStore = create<TravelState>()(
             toDay.activities.push(activity);
             state.activeItinerary.updatedAt = new Date().toISOString();
           }
+        }
+      }
+    }),
+
+    reorderActivity: (dayId, fromIndex, toIndex) => set((state) => {
+      if (state.activeItinerary) {
+        const day = state.activeItinerary.days.find(d => d.id === dayId);
+        if (day) {
+          const [removed] = day.activities.splice(fromIndex, 1);
+          day.activities.splice(toIndex, 0, removed);
+          state.activeItinerary.updatedAt = new Date().toISOString();
+        }
+      }
+    }),
+
+    moveActivityBetweenDays: (sourceDayId, destDayId, sourceIndex, destIndex) => set((state) => {
+      if (state.activeItinerary) {
+        const sourceDay = state.activeItinerary.days.find(d => d.id === sourceDayId);
+        const destDay = state.activeItinerary.days.find(d => d.id === destDayId);
+        if (sourceDay && destDay) {
+          const [removed] = sourceDay.activities.splice(sourceIndex, 1);
+          destDay.activities.splice(destIndex, 0, removed);
+          state.activeItinerary.updatedAt = new Date().toISOString();
         }
       }
     }),
