@@ -1,4 +1,13 @@
-import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
+import { useState, useCallback } from 'react';
+import { 
+  DragDropContext, 
+  Droppable, 
+  Draggable, 
+  type DropResult,
+  type DraggableProvided,
+  type DroppableProvided
+} from '@hello-pangea/dnd';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MapPin, Clock, Star, Trash2, GripVertical, ChevronDown, ChevronRight,
   Hotel, Utensils, Camera, Car, Activity, ShoppingBag, Moon, CalendarDays
@@ -8,11 +17,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { useTravelPlanner } from '@/hooks/useTravelPlanner';
+import { useTravelStore } from '@/store/travelStore';
 import { useMapSync } from '@/hooks/useMapSync';
 import type { Activity as ActivityType, Day } from '@/types/trip';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
 
 const categoryIcons: Record<string, React.ElementType> = {
   accommodation: Hotel,
@@ -24,11 +32,12 @@ const categoryIcons: Record<string, React.ElementType> = {
   nightlife: Moon
 };
 
-const timeSlotOrder = ['morning', 'afternoon', 'evening', 'night'];
-
 interface ActivityCardProps {
   activity: ActivityType;
   dayId: string;
+  index: number;
+  provided: DraggableProvided;
+  isDragging: boolean;
   onDelete: (dayId: string, activityId: string) => void;
   isSelected: boolean;
   isHovered: boolean;
@@ -39,6 +48,9 @@ interface ActivityCardProps {
 function ActivityCard({ 
   activity, 
   dayId, 
+  index,
+  provided,
+  isDragging,
   onDelete, 
   isSelected, 
   isHovered,
@@ -48,16 +60,14 @@ function ActivityCard({
   const Icon = categoryIcons[activity.category] || Activity;
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 20, height: 0 }}
-      transition={{ duration: 0.2 }}
+    <div
+      ref={provided.innerRef}
+      {...provided.draggableProps}
       className={cn(
         "relative group cursor-pointer",
         "before:absolute before:left-4 before:top-0 before:bottom-0 before:w-0.5 before:bg-border",
-        "first:before:top-6 last:before:bottom-1/2"
+        "first:before:top-6 last:before:bottom-1/2",
+        isDragging && "z-50"
       )}
       onClick={onSelect}
       onMouseEnter={() => onHover(activity.id)}
@@ -81,10 +91,19 @@ function ActivityCard({
         <Card className={cn(
           "flex-1 transition-all duration-200",
           isSelected && "ring-2 ring-primary shadow-lg",
-          isHovered && !isSelected && "shadow-md"
+          isHovered && !isSelected && "shadow-md",
+          isDragging && "shadow-xl ring-2 ring-primary rotate-2"
         )}>
           <CardContent className="p-3">
-            <div className="flex items-start gap-3">
+            <div className="flex items-start gap-2">
+              {/* Drag handle */}
+              <div 
+                {...provided.dragHandleProps}
+                className="p-1 -ml-1 rounded hover:bg-muted cursor-grab active:cursor-grabbing"
+              >
+                <GripVertical className="h-4 w-4 text-muted-foreground" />
+              </div>
+
               <div className="p-2 rounded-lg bg-muted shrink-0">
                 <Icon className="h-4 w-4" />
               </div>
@@ -133,14 +152,13 @@ function ActivityCard({
           </CardContent>
         </Card>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
 interface DayGroupProps {
   day: Day;
   onDeleteActivity: (dayId: string, activityId: string) => void;
-  onDeleteDay: (dayId: string) => void;
   selectedActivityId: string | null;
   hoveredActivityId: string | null;
   onSelectActivity: (id: string) => void;
@@ -150,7 +168,6 @@ interface DayGroupProps {
 function DayGroup({ 
   day, 
   onDeleteActivity, 
-  onDeleteDay,
   selectedActivityId,
   hoveredActivityId,
   onSelectActivity,
@@ -158,14 +175,9 @@ function DayGroup({
 }: DayGroupProps) {
   const [isOpen, setIsOpen] = useState(true);
 
-  // Sort activities by time slot
-  const sortedActivities = [...day.activities].sort((a, b) => 
-    timeSlotOrder.indexOf(a.timeSlot) - timeSlotOrder.indexOf(b.timeSlot)
-  );
-
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <Card className="overflow-hidden">
+    <Card className="overflow-hidden">
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
           <CardHeader className="p-4 cursor-pointer hover:bg-muted/50 transition-colors">
             <div className="flex items-center justify-between">
@@ -181,7 +193,7 @@ function DayGroup({
               
               <div className="flex items-center gap-2">
                 <Badge variant="secondary" className="text-xs">
-                  {day.activities.length} activities
+                  {day.activities.length} {day.activities.length === 1 ? 'activity' : 'activities'}
                 </Badge>
                 {isOpen ? (
                   <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -195,40 +207,97 @@ function DayGroup({
 
         <CollapsibleContent>
           <CardContent className="p-4 pt-0">
-            <LayoutGroup>
-              <AnimatePresence mode="popLayout">
-                {sortedActivities.length > 0 ? (
-                  <div className="space-y-2">
-                    {sortedActivities.map(activity => (
-                      <ActivityCard
-                        key={activity.id}
-                        activity={activity}
-                        dayId={day.id}
-                        onDelete={onDeleteActivity}
-                        isSelected={selectedActivityId === activity.id}
-                        isHovered={hoveredActivityId === activity.id}
-                        onSelect={() => onSelectActivity(activity.id)}
-                        onHover={onHoverActivity}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground text-center py-4">
-                    No activities yet. Ask AI for suggestions!
-                  </p>
-                )}
-              </AnimatePresence>
-            </LayoutGroup>
+            <Droppable droppableId={day.id} type="activity">
+              {(provided: DroppableProvided, snapshot) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className={cn(
+                    "min-h-[60px] rounded-lg transition-colors",
+                    snapshot.isDraggingOver && "bg-primary/5 ring-2 ring-primary/20 ring-dashed"
+                  )}
+                >
+                  {day.activities.length > 0 ? (
+                    <div className="space-y-2">
+                      {day.activities.map((activity, index) => (
+                        <Draggable 
+                          key={activity.id} 
+                          draggableId={activity.id} 
+                          index={index}
+                        >
+                          {(dragProvided, dragSnapshot) => (
+                            <ActivityCard
+                              activity={activity}
+                              dayId={day.id}
+                              index={index}
+                              provided={dragProvided}
+                              isDragging={dragSnapshot.isDragging}
+                              onDelete={onDeleteActivity}
+                              isSelected={selectedActivityId === activity.id}
+                              isHovered={hoveredActivityId === activity.id}
+                              onSelect={() => onSelectActivity(activity.id)}
+                              onHover={onHoverActivity}
+                            />
+                          )}
+                        </Draggable>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      Drop activities here or ask AI for suggestions!
+                    </p>
+                  )}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
           </CardContent>
         </CollapsibleContent>
-      </Card>
-    </Collapsible>
+      </Collapsible>
+    </Card>
   );
 }
 
 export function ItineraryTimeline() {
-  const { activeItinerary, deleteDayFromItinerary, deleteActivityFromItinerary } = useTravelPlanner();
-  const { selectedActivityId, hoveredActivityId, handleActivityClick, handleActivityHover } = useMapSync();
+  const { 
+    activeItinerary, 
+    removeActivity, 
+    reorderActivity, 
+    moveActivityBetweenDays 
+  } = useTravelStore();
+  
+  const { 
+    selectedActivityId, 
+    hoveredActivityId, 
+    handleActivityClick, 
+    handleActivityHover 
+  } = useMapSync();
+
+  const handleDragEnd = useCallback((result: DropResult) => {
+    const { source, destination } = result;
+
+    // Dropped outside a droppable area
+    if (!destination) return;
+
+    // No movement
+    if (
+      source.droppableId === destination.droppableId &&
+      source.index === destination.index
+    ) return;
+
+    // Same day reorder
+    if (source.droppableId === destination.droppableId) {
+      reorderActivity(source.droppableId, source.index, destination.index);
+    } else {
+      // Move between days
+      moveActivityBetweenDays(
+        source.droppableId,
+        destination.droppableId,
+        source.index,
+        destination.index
+      );
+    }
+  }, [reorderActivity, moveActivityBetweenDays]);
 
   if (!activeItinerary) {
     return (
@@ -249,31 +318,32 @@ export function ItineraryTimeline() {
         </p>
       </div>
 
-      {/* Timeline */}
+      {/* Timeline with DnD */}
       <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4">
-          <AnimatePresence mode="popLayout">
-            {activeItinerary.days.map(day => (
-              <motion.div
-                key={day.id}
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-              >
-                <DayGroup
-                  day={day}
-                  onDeleteActivity={deleteActivityFromItinerary}
-                  onDeleteDay={deleteDayFromItinerary}
-                  selectedActivityId={selectedActivityId}
-                  hoveredActivityId={hoveredActivityId}
-                  onSelectActivity={handleActivityClick}
-                  onHoverActivity={handleActivityHover}
-                />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <div className="space-y-4">
+            <AnimatePresence mode="popLayout">
+              {activeItinerary.days.map(day => (
+                <motion.div
+                  key={day.id}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                >
+                  <DayGroup
+                    day={day}
+                    onDeleteActivity={removeActivity}
+                    selectedActivityId={selectedActivityId}
+                    hoveredActivityId={hoveredActivityId}
+                    onSelectActivity={handleActivityClick}
+                    onHoverActivity={handleActivityHover}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        </DragDropContext>
       </ScrollArea>
     </div>
   );

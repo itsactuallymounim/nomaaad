@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MessageBubble } from './MessageBubble';
 import { useTravelPlanner } from '@/hooks/useTravelPlanner';
@@ -17,8 +16,8 @@ const quickPrompts = [
 
 export function ChatInterface() {
   const [input, setInput] = useState('');
-  const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   
   const {
     activeItinerary,
@@ -30,8 +29,9 @@ export function ChatInterface() {
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    const scrollContainer = scrollContainerRef.current;
+    if (scrollContainer) {
+      scrollContainer.scrollTop = scrollContainer.scrollHeight;
     }
   }, [messages, isTyping]);
 
@@ -67,7 +67,7 @@ export function ChatInterface() {
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+      <div className="flex-1 overflow-y-auto p-4" ref={scrollContainerRef}>
         <div className="space-y-4">
           <AnimatePresence mode="popLayout">
             {messages.map(message => (
@@ -101,7 +101,7 @@ export function ChatInterface() {
             )}
           </AnimatePresence>
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Quick prompts */}
       <div className="px-4 py-2 border-t bg-muted/30">
