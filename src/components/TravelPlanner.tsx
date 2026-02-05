@@ -1,6 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ChatInterface } from '@/components/chat/ChatInterface';
-import { MapView } from '@/components/map/MapView';
+import { GoogleMap } from '@/components/map/GoogleMap';
 import { ItineraryTimeline } from '@/components/itinerary/ItineraryTimeline';
 import { MobileNavigation } from '@/components/mobile/MobileNavigation';
 import { Header } from '@/components/layout/Header';
@@ -39,7 +39,7 @@ export function TravelPlanner() {
               <div className="flex h-full">
                 <div className="flex-1 p-4">
                   <ErrorBoundary fallbackTitle="Map unavailable">
-                    <MapView />
+                    <GoogleMap />
                   </ErrorBoundary>
                 </div>
                 <div className="w-[350px] border-l overflow-hidden">
@@ -52,7 +52,7 @@ export function TravelPlanner() {
 
             <TabsContent value="map" className="flex-1 m-0 p-4 overflow-hidden">
               <ErrorBoundary fallbackTitle="Map unavailable">
-                <MapView />
+                <GoogleMap />
               </ErrorBoundary>
             </TabsContent>
 
@@ -81,7 +81,7 @@ export function TravelPlanner() {
           mobileView !== 'map' && "hidden"
         )}>
           <ErrorBoundary fallbackTitle="Map unavailable">
-            <MapView />
+            <GoogleMap />
           </ErrorBoundary>
         </div>
 
