@@ -2,6 +2,7 @@ import { Compass, Map, MessageSquare, Route, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import heroImage from '@/assets/hero-travel.jpg';
 
 const features = [
@@ -22,11 +23,25 @@ const features = [
   },
 ];
 
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+};
+
+const stagger = {
+  visible: { transition: { staggerChildren: 0.12 } },
+};
+
 export default function Landing() {
   return (
     <div className="min-h-screen bg-background">
       {/* Nav */}
-      <nav className="flex items-center justify-between px-6 py-4 max-w-6xl mx-auto">
+      <motion.nav
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="flex items-center justify-between px-6 py-4 max-w-6xl mx-auto"
+      >
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
             <Compass className="h-4 w-4 text-primary-foreground" />
@@ -36,21 +51,26 @@ export default function Landing() {
         <Button asChild size="sm">
           <Link to="/planner">Start Planning</Link>
         </Button>
-      </nav>
+      </motion.nav>
 
       {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="max-w-6xl mx-auto px-6 py-20 md:py-32 flex flex-col items-center text-center gap-6">
-          <p className="text-sm font-medium text-primary tracking-wide uppercase">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={stagger}
+          className="max-w-6xl mx-auto px-6 py-20 md:py-32 flex flex-col items-center text-center gap-6"
+        >
+          <motion.p variants={fadeUp} transition={{ duration: 0.5 }} className="text-sm font-medium text-primary tracking-wide uppercase">
             AI-Powered Travel
-          </p>
-          <h1 className="text-4xl md:text-6xl font-serif font-bold tracking-tight text-foreground max-w-3xl leading-tight">
+          </motion.p>
+          <motion.h1 variants={fadeUp} transition={{ duration: 0.5 }} className="text-4xl md:text-6xl font-serif font-bold tracking-tight text-foreground max-w-3xl leading-tight">
             Plan your next adventure in seconds
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-xl">
+          </motion.h1>
+          <motion.p variants={fadeUp} transition={{ duration: 0.5 }} className="text-lg text-muted-foreground max-w-xl">
             Tell us where you want to go. Our AI builds a complete itinerary with maps, timelines, and local insights — instantly.
-          </p>
-          <div className="flex gap-3 mt-2">
+          </motion.p>
+          <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="flex gap-3 mt-2">
             <Button asChild size="lg">
               <Link to="/planner">
                 Get Started
@@ -60,11 +80,16 @@ export default function Landing() {
             <Button asChild variant="outline" size="lg">
               <a href="#features">Learn More</a>
             </Button>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Hero image */}
-        <div className="max-w-5xl mx-auto px-6 pb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 30, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.7, delay: 0.4 }}
+          className="max-w-5xl mx-auto px-6 pb-16"
+        >
           <div className="rounded-xl overflow-hidden border shadow-lg aspect-video">
             <img
               src={heroImage}
@@ -73,30 +98,46 @@ export default function Landing() {
               loading="lazy"
             />
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* Features */}
-      <section id="features" className="max-w-4xl mx-auto px-6 py-20">
+      <motion.section
+        id="features"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
+        variants={stagger}
+        className="max-w-4xl mx-auto px-6 py-20"
+      >
         <div className="grid md:grid-cols-3 gap-6">
           {features.map((feature) => (
-            <Card key={feature.title} className="border bg-card">
-              <CardContent className="pt-6 flex flex-col gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <feature.icon className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="font-semibold text-foreground">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {feature.description}
-                </p>
-              </CardContent>
-            </Card>
+            <motion.div key={feature.title} variants={fadeUp} transition={{ duration: 0.5 }}>
+              <Card className="border bg-card h-full">
+                <CardContent className="pt-6 flex flex-col gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <feature.icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="font-semibold text-foreground">{feature.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {feature.description}
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
         </div>
-      </section>
+      </motion.section>
 
       {/* CTA */}
-      <section className="max-w-6xl mx-auto px-6 py-16 pb-24 text-center">
+      <motion.section
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.4 }}
+        variants={fadeUp}
+        transition={{ duration: 0.6 }}
+        className="max-w-6xl mx-auto px-6 py-16 pb-24 text-center"
+      >
         <div className="rounded-xl bg-primary/5 border border-primary/10 py-14 px-6">
           <h2 className="text-2xl md:text-3xl font-serif font-bold text-foreground mb-3">
             Ready to explore?
@@ -111,12 +152,18 @@ export default function Landing() {
             </Link>
           </Button>
         </div>
-      </section>
+      </motion.section>
 
       {/* Footer */}
-      <footer className="border-t py-6 text-center text-sm text-muted-foreground">
+      <motion.footer
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+        className="border-t py-6 text-center text-sm text-muted-foreground"
+      >
         <p>© {new Date().getFullYear()} nomaaad. Built with Lovable.</p>
-      </footer>
+      </motion.footer>
     </div>
   );
 }
