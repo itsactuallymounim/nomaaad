@@ -77,9 +77,6 @@ export default function Landing() {
                 <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg">
-              <a href="#features">Learn More</a>
-            </Button>
           </motion.div>
         </motion.div>
 
