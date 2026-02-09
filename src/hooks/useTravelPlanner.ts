@@ -1,61 +1,9 @@
 import { useCallback } from 'react';
 import { useTravelStore } from '@/store/travelStore';
-import type { Activity, Day, ChatMessage, ActivityProposal } from '@/types/trip';
+import type { Activity, ChatMessage, ActivityProposal } from '@/types/trip';
+import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
-
-// Simulated AI responses for demo
-const aiResponses: Record<string, { content: string; proposals?: Partial<Activity>[] }> = {
-  default: {
-    content: "I'd be happy to help you plan your trip! What would you like to know or modify in your itinerary?"
-  },
-  restaurant: {
-    content: "I found some amazing restaurants for you! Here are my top recommendations:",
-    proposals: [
-      {
-        name: "Ristorante Il Ritrovo",
-        description: "Authentic Italian cuisine with a panoramic terrace",
-        coordinates: { lat: 40.6298, lng: 14.4861 },
-        category: 'restaurant' as const,
-        timeSlot: 'evening' as const,
-        rating: 4.7,
-        price: 80
-      },
-      {
-        name: "Da Adolfo",
-        description: "Beachside seafood restaurant accessible only by boat",
-        coordinates: { lat: 40.6142, lng: 14.5011 },
-        category: 'restaurant' as const,
-        timeSlot: 'afternoon' as const,
-        rating: 4.8,
-        price: 60
-      }
-    ]
-  },
-  activity: {
-    content: "Here are some exciting activities you might enjoy:",
-    proposals: [
-      {
-        name: "Path of the Gods Hike",
-        description: "Breathtaking hiking trail with stunning coastal views",
-        coordinates: { lat: 40.6389, lng: 14.5025 },
-        category: 'activity' as const,
-        timeSlot: 'morning' as const,
-        duration: 240,
-        rating: 4.9
-      },
-      {
-        name: "Kayak Tour",
-        description: "Explore hidden coves and beaches by kayak",
-        coordinates: { lat: 40.6265, lng: 14.4893 },
-        category: 'activity' as const,
-        timeSlot: 'morning' as const,
-        duration: 180,
-        price: 55,
-        rating: 4.6
-      }
-    ]
-  }
-};
+import { toast } from '@/hooks/use-toast';
 
 export function useTravelPlanner() {
   const {
@@ -76,7 +24,6 @@ export function useTravelPlanner() {
   } = useTravelStore();
 
   const sendMessage = useCallback(async (content: string) => {
-    // Add user message
     const userMessage: ChatMessage = {
       id: uuidv4(),
       role: 'user',
@@ -86,45 +33,91 @@ export function useTravelPlanner() {
     addMessage(userMessage);
     setIsTyping(true);
 
-    // Simulate AI thinking
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+    try {
+      // Build conversation history (last 20 messages for context)
+      const recentMessages = [...useTravelStore.getState().messages]
+        .slice(-20)
+        .map(m => ({ role: m.role, content: m.content }));
 
-    // Determine response based on content
-    let responseKey = 'default';
-    const lowerContent = content.toLowerCase();
-    if (lowerContent.includes('restaurant') || lowerContent.includes('food') || lowerContent.includes('eat') || lowerContent.includes('dinner')) {
-      responseKey = 'restaurant';
-    } else if (lowerContent.includes('activity') || lowerContent.includes('hike') || lowerContent.includes('kayak') || lowerContent.includes('do')) {
-      responseKey = 'activity';
-    }
+      // Build itinerary context
+      const itineraryContext = activeItinerary
+        ? {
+            destination: activeItinerary.destination,
+            name: activeItinerary.name,
+            dates: `${activeItinerary.startDate} to ${activeItinerary.endDate}`,
+            days: activeItinerary.days.map(d => ({
+              dayNumber: d.dayNumber,
+              date: d.date,
+              title: d.title,
+              activities: d.activities.map(a => a.name)
+            }))
+          }
+        : null;
 
-    const response = aiResponses[responseKey];
-    const proposals: ActivityProposal[] = response.proposals?.map(p => ({
-      id: uuidv4(),
-      activity: {
+      const { data, error } = await supabase.functions.invoke('travel-chat', {
+        body: { messages: recentMessages, itineraryContext }
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      // Build proposals from AI-suggested activities
+      const proposals: ActivityProposal[] = (data.activities || []).map((a: any) => ({
         id: uuidv4(),
-        ...p,
-        name: p.name || '',
-        description: p.description || '',
-        coordinates: p.coordinates || { lat: 0, lng: 0 },
-        category: p.category || 'activity',
-        timeSlot: p.timeSlot || 'morning'
-      },
-      suggestedDay: 1,
-      isAdded: false
-    })) || [];
+        activity: {
+          id: uuidv4(),
+          name: a.name,
+          description: a.description,
+          coordinates: { lat: a.lat, lng: a.lng },
+          category: a.category,
+          timeSlot: a.timeSlot,
+          duration: a.duration,
+          price: a.price,
+          rating: a.rating,
+          address: a.address,
+        } as Activity,
+        suggestedDay: 1,
+        isAdded: false
+      }));
 
-    const aiMessage: ChatMessage = {
-      id: uuidv4(),
-      role: 'assistant',
-      content: response.content,
-      timestamp: new Date().toISOString(),
-      proposals: proposals.length > 0 ? proposals : undefined
-    };
+      const aiMessage: ChatMessage = {
+        id: uuidv4(),
+        role: 'assistant',
+        content: data.content,
+        timestamp: new Date().toISOString(),
+        proposals: proposals.length > 0 ? proposals : undefined
+      };
 
-    addMessage(aiMessage);
-    setIsTyping(false);
-  }, [addMessage, setIsTyping]);
+      addMessage(aiMessage);
+    } catch (err: any) {
+      console.error('Travel chat error:', err);
+      
+      const errorContent = err?.message?.includes('Rate limit')
+        ? "I'm getting too many requests right now. Please wait a moment and try again."
+        : err?.message?.includes('usage limit')
+        ? "AI usage limit reached. Please add credits to continue using AI recommendations."
+        : "Sorry, I had trouble processing that. Please try again!";
+
+      toast({
+        title: "AI Error",
+        description: errorContent,
+        variant: "destructive"
+      });
+
+      const errorMessage: ChatMessage = {
+        id: uuidv4(),
+        role: 'assistant',
+        content: errorContent,
+        timestamp: new Date().toISOString()
+      };
+      addMessage(errorMessage);
+    } finally {
+      setIsTyping(false);
+    }
+  }, [addMessage, setIsTyping, activeItinerary]);
 
   const addProposalToItinerary = useCallback((messageId: string, proposal: ActivityProposal, dayId: string) => {
     addActivity(dayId, proposal.activity);
