@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useTravelStore } from '@/store/travelStore';
-import type { Activity, ChatMessage, ActivityProposal } from '@/types/trip';
+import type { Activity, ChatMessage, ActivityProposal, Trip } from '@/types/trip';
 import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from '@/hooks/use-toast';
@@ -24,6 +24,23 @@ export function useTravelPlanner() {
   } = useTravelStore();
 
   const sendMessage = useCallback(async (content: string) => {
+    // Auto-create a trip if none exists
+    let itinerary = activeItinerary;
+    if (!itinerary) {
+      const newTrip: Trip = {
+        id: uuidv4(),
+        name: 'My Trip',
+        destination: '',
+        startDate: '',
+        endDate: '',
+        days: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      useTravelStore.getState().setActiveItinerary(newTrip);
+      itinerary = newTrip;
+    }
+
     const userMessage: ChatMessage = {
       id: uuidv4(),
       role: 'user',
@@ -40,12 +57,12 @@ export function useTravelPlanner() {
         .map(m => ({ role: m.role, content: m.content }));
 
       // Build itinerary context
-      const itineraryContext = activeItinerary
+      const itineraryContext = itinerary
         ? {
-            destination: activeItinerary.destination,
-            name: activeItinerary.name,
-            dates: `${activeItinerary.startDate} to ${activeItinerary.endDate}`,
-            days: activeItinerary.days.map(d => ({
+            destination: itinerary.destination,
+            name: itinerary.name,
+            dates: `${itinerary.startDate} to ${itinerary.endDate}`,
+            days: itinerary.days.map(d => ({
               dayNumber: d.dayNumber,
               date: d.date,
               title: d.title,

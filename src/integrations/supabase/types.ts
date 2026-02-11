@@ -14,13 +14,146 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activities: {
+        Row: {
+          address: string | null
+          category: string
+          created_at: string
+          day_id: string
+          description: string
+          duration: number | null
+          id: string
+          lat: number
+          lng: number
+          media_url: string | null
+          name: string
+          price: number | null
+          rating: number | null
+          sort_order: number
+          time_slot: string
+        }
+        Insert: {
+          address?: string | null
+          category?: string
+          created_at?: string
+          day_id: string
+          description?: string
+          duration?: number | null
+          id?: string
+          lat?: number
+          lng?: number
+          media_url?: string | null
+          name: string
+          price?: number | null
+          rating?: number | null
+          sort_order?: number
+          time_slot?: string
+        }
+        Update: {
+          address?: string | null
+          category?: string
+          created_at?: string
+          day_id?: string
+          description?: string
+          duration?: number | null
+          id?: string
+          lat?: number
+          lng?: number
+          media_url?: string | null
+          name?: string
+          price?: number | null
+          rating?: number | null
+          sort_order?: number
+          time_slot?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_day_id_fkey"
+            columns: ["day_id"]
+            isOneToOne: false
+            referencedRelation: "days"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      days: {
+        Row: {
+          created_at: string
+          date: string | null
+          day_number: number
+          id: string
+          title: string
+          trip_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string | null
+          day_number: number
+          id?: string
+          title?: string
+          trip_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string | null
+          day_number?: number
+          id?: string
+          title?: string
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "days_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trips: {
+        Row: {
+          cover_image: string | null
+          created_at: string
+          destination: string
+          end_date: string | null
+          id: string
+          name: string
+          start_date: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cover_image?: string | null
+          created_at?: string
+          destination?: string
+          end_date?: string | null
+          id?: string
+          name: string
+          start_date?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cover_image?: string | null
+          created_at?: string
+          destination?: string
+          end_date?: string | null
+          id?: string
+          name?: string
+          start_date?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_day_owner: { Args: { day_id: string }; Returns: boolean }
+      is_trip_owner: { Args: { trip_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

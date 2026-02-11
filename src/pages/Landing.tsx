@@ -140,7 +140,7 @@ export default function Landing() {
             Ready to explore?
           </h2>
           <p className="text-muted-foreground mb-6">
-            No sign-up required. Just describe your trip and go.
+            Sign up for free and start planning your dream trip.
           </p>
           <Button asChild size="lg">
             <Link to="/planner">
