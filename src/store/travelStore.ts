@@ -52,109 +52,18 @@ interface TravelState {
   getActivityById: (id: string) => Activity | undefined;
 }
 
-// Sample data for demonstration
-const sampleTrip: Trip = {
-  id: 'trip-1',
-  name: 'Mediterranean Adventure',
-  destination: 'Amalfi Coast, Italy',
-  startDate: '2024-06-15',
-  endDate: '2024-06-22',
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-  days: [
-    {
-      id: 'day-1',
-      dayNumber: 1,
-      date: '2024-06-15',
-      title: 'Arrival in Positano',
-      activities: [
-        {
-          id: 'act-1',
-          name: 'Hotel Le Sirenuse',
-          description: 'Luxury boutique hotel with stunning sea views',
-          coordinates: { lat: 40.6281, lng: 14.4850 },
-          category: 'accommodation',
-          timeSlot: 'afternoon',
-          mediaUrl: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=400',
-          rating: 4.9,
-          address: 'Via Cristoforo Colombo, 30, Positano'
-        },
-        {
-          id: 'act-2',
-          name: 'Dinner at La Sponda',
-          description: 'Romantic candlelit dinner with Mediterranean cuisine',
-          coordinates: { lat: 40.6285, lng: 14.4855 },
-          category: 'restaurant',
-          timeSlot: 'evening',
-          duration: 120,
-          price: 150,
-          rating: 4.8
-        }
-      ]
-    },
-    {
-      id: 'day-2',
-      dayNumber: 2,
-      date: '2024-06-16',
-      title: 'Exploring Amalfi',
-      activities: [
-        {
-          id: 'act-3',
-          name: 'Amalfi Cathedral',
-          description: 'Visit the stunning 9th-century cathedral',
-          coordinates: { lat: 40.6340, lng: 14.6027 },
-          category: 'attraction',
-          timeSlot: 'morning',
-          duration: 90,
-          rating: 4.7
-        },
-        {
-          id: 'act-4',
-          name: 'Boat Tour to Grotta dello Smeraldo',
-          description: 'Explore the famous Emerald Grotto by boat',
-          coordinates: { lat: 40.6178, lng: 14.5333 },
-          category: 'activity',
-          timeSlot: 'afternoon',
-          duration: 180,
-          price: 75,
-          rating: 4.6
-        }
-      ]
-    },
-    {
-      id: 'day-3',
-      dayNumber: 3,
-      date: '2024-06-17',
-      title: 'Ravello & Relaxation',
-      activities: [
-        {
-          id: 'act-5',
-          name: 'Villa Rufolo Gardens',
-          description: 'Stunning gardens with panoramic coastal views',
-          coordinates: { lat: 40.6492, lng: 14.6117 },
-          category: 'attraction',
-          timeSlot: 'morning',
-          duration: 120,
-          price: 10,
-          rating: 4.8
-        }
-      ]
-    }
-  ]
-};
-
 const initialMessages: ChatMessage[] = [
   {
     id: 'msg-1',
     role: 'assistant',
-    content: "Welcome to Nomaaad! 🌍 I'm your AI travel companion. I've prepared a beautiful Mediterranean itinerary for you. Feel free to ask me to modify anything, add new activities, or get recommendations!",
+    content: "Welcome to Nomaaad! 🌍 I'm your AI travel companion. Tell me where you'd like to go, and I'll help you plan the perfect trip with personalized recommendations!",
     timestamp: new Date().toISOString()
   }
 ];
 
 export const useTravelStore = create<TravelState>()(
   immer((set, get) => ({
-    activeItinerary: sampleTrip,
+    activeItinerary: null,
     messages: initialMessages,
     isTyping: false,
     mapViewState: {
