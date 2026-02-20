@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   DragDropContext, 
   Droppable, 
@@ -10,7 +11,8 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MapPin, Clock, Star, Trash2, GripVertical, ChevronDown, ChevronRight,
-  Hotel, Utensils, Camera, Car, Activity, ShoppingBag, Moon, CalendarDays
+  Hotel, Utensils, Camera, Car, Activity, ShoppingBag, Moon, CalendarDays,
+  FileDown, Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +22,8 @@ import { useTravelStore } from '@/store/travelStore';
 import { useMapSync } from '@/hooks/useMapSync';
 import type { Activity as ActivityType, Day } from '@/types/trip';
 import { cn } from '@/lib/utils';
+import { TripPdfTemplate } from './TripPdfTemplate';
+import { exportTripPdf } from '@/lib/exportPdf';
 
 const categoryIcons: Record<string, React.ElementType> = {
   accommodation: Hotel,
@@ -258,6 +262,7 @@ function DayGroup({
 }
 
 export function ItineraryTimeline() {
+  const [isExporting, setIsExporting] = useState(false);
   const { 
     activeItinerary, 
     removeActivity, 
@@ -271,6 +276,20 @@ export function ItineraryTimeline() {
     handleActivityClick, 
     handleActivityHover 
   } = useMapSync();
+
+  const handleExportPdf = useCallback(async () => {
+    if (!activeItinerary) return;
+    setIsExporting(true);
+    try {
+      // Give the hidden template a moment to render
+      await new Promise(r => setTimeout(r, 200));
+      await exportTripPdf('trip-pdf-template', activeItinerary.name || 'trip-itinerary');
+    } catch (e) {
+      console.error('PDF export failed', e);
+    } finally {
+      setIsExporting(false);
+    }
+  }, [activeItinerary]);
 
   const handleDragEnd = useCallback((result: DropResult) => {
     const { source, destination } = result;
@@ -307,43 +326,70 @@ export function ItineraryTimeline() {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="px-4 py-3 border-b bg-card shrink-0">
-        <h2 className="font-semibold">{activeItinerary.name}</h2>
-        <p className="text-sm text-muted-foreground flex items-center gap-1">
-          <MapPin className="h-3 w-3" />
-          {activeItinerary.destination}
-        </p>
-      </div>
+    <>
+      {/* Hidden PDF template rendered off-screen for capture */}
+      {createPortal(
+        <div style={{ position: 'fixed', top: -9999, left: -9999, zIndex: -1, pointerEvents: 'none' }}>
+          <TripPdfTemplate trip={activeItinerary} />
+        </div>,
+        document.body
+      )}
 
-      {/* Timeline with DnD — scrolls within whatever container it's placed in */}
-      <div className="flex-1 overflow-y-auto p-4">
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="space-y-4">
-            <AnimatePresence mode="popLayout">
-              {activeItinerary.days.map(day => (
-                <motion.div
-                  key={day.id}
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                >
-                  <DayGroup
-                    day={day}
-                    onDeleteActivity={removeActivity}
-                    selectedActivityId={selectedActivityId}
-                    hoveredActivityId={hoveredActivityId}
-                    onSelectActivity={handleActivityClick}
-                    onHoverActivity={handleActivityHover}
-                  />
-                </motion.div>
-              ))}
-            </AnimatePresence>
+      <div className="flex flex-col h-full">
+        {/* Header */}
+        <div className="px-4 py-3 border-b bg-card shrink-0 flex items-start justify-between gap-2">
+          <div>
+            <h2 className="font-semibold">{activeItinerary.name}</h2>
+            <p className="text-sm text-muted-foreground flex items-center gap-1">
+              <MapPin className="h-3 w-3" />
+              {activeItinerary.destination}
+            </p>
           </div>
-        </DragDropContext>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportPdf}
+            disabled={isExporting}
+            className="shrink-0 h-8 text-xs gap-1.5"
+          >
+            {isExporting ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <FileDown className="h-3.5 w-3.5" />
+            )}
+            {isExporting ? 'Exporting…' : 'Export PDF'}
+          </Button>
+        </div>
+
+        {/* Timeline with DnD — scrolls within whatever container it's placed in */}
+        <div className="flex-1 overflow-y-auto p-4">
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <div className="space-y-4">
+              <AnimatePresence mode="popLayout">
+                {activeItinerary.days.map(day => (
+                  <motion.div
+                    key={day.id}
+                    layout
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                  >
+                    <DayGroup
+                      day={day}
+                      onDeleteActivity={removeActivity}
+                      selectedActivityId={selectedActivityId}
+                      hoveredActivityId={hoveredActivityId}
+                      onSelectActivity={handleActivityClick}
+                      onHoverActivity={handleActivityHover}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          </DragDropContext>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
+
