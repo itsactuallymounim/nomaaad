@@ -37,12 +37,12 @@ export function TravelPlanner() {
 
             <TabsContent value="split" className="flex-1 m-0 overflow-hidden">
               <div className="flex h-full">
-                <div className="flex-1 p-4">
+                <div className="flex-1 p-4 min-h-0">
                   <ErrorBoundary fallbackTitle="Map unavailable">
                     <LeafletMap />
                   </ErrorBoundary>
                 </div>
-                <div className="w-[350px] border-l overflow-hidden">
+                <div className="w-[350px] border-l flex flex-col min-h-0 overflow-y-auto">
                   <ErrorBoundary fallbackTitle="Timeline unavailable">
                     <ItineraryTimeline />
                   </ErrorBoundary>
@@ -56,7 +56,7 @@ export function TravelPlanner() {
               </ErrorBoundary>
             </TabsContent>
 
-            <TabsContent value="timeline" className="flex-1 m-0 overflow-hidden">
+            <TabsContent value="timeline" className="flex-1 m-0 overflow-y-auto">
               <ErrorBoundary fallbackTitle="Timeline unavailable">
                 <ItineraryTimeline />
               </ErrorBoundary>

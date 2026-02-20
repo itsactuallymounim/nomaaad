@@ -48,9 +48,14 @@ export default function Landing() {
           </div>
           <span className="font-bold text-lg tracking-tight">nomaaad</span>
         </div>
-        <Button asChild size="sm">
-          <Link to="/planner">Start Planning</Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/destinations">Destinations</Link>
+          </Button>
+          <Button asChild size="sm">
+            <Link to="/planner">Start Planning</Link>
+          </Button>
+        </div>
       </motion.nav>
 
       {/* Hero */}
