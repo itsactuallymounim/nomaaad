@@ -15,7 +15,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useTravelStore } from '@/store/travelStore';
 import { useMapSync } from '@/hooks/useMapSync';
@@ -310,7 +309,7 @@ export function ItineraryTimeline() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="px-4 py-3 border-b bg-card">
+      <div className="px-4 py-3 border-b bg-card shrink-0">
         <h2 className="font-semibold">{activeItinerary.name}</h2>
         <p className="text-sm text-muted-foreground flex items-center gap-1">
           <MapPin className="h-3 w-3" />
@@ -318,8 +317,8 @@ export function ItineraryTimeline() {
         </p>
       </div>
 
-      {/* Timeline with DnD */}
-      <ScrollArea className="flex-1 p-4">
+      {/* Timeline with DnD — scrolls within whatever container it's placed in */}
+      <div className="flex-1 overflow-y-auto p-4">
         <DragDropContext onDragEnd={handleDragEnd}>
           <div className="space-y-4">
             <AnimatePresence mode="popLayout">
@@ -344,7 +343,7 @@ export function ItineraryTimeline() {
             </AnimatePresence>
           </div>
         </DragDropContext>
-      </ScrollArea>
+      </div>
     </div>
   );
 }

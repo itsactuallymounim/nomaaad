@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import Planner from "./pages/Planner";
+import Destinations from "./pages/Destinations";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/destinations" element={<Destinations />} />
             <Route path="/planner" element={
               <ProtectedRoute>
                 <Planner />
@@ -37,3 +39,4 @@ const App = () => (
 );
 
 export default App;
+
