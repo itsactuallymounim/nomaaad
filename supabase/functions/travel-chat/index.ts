@@ -21,6 +21,12 @@ Guidelines:
 - Category must be one of: accommodation, restaurant, attraction, transport, activity, shopping, nightlife
 - TimeSlot must be one of: morning, afternoon, evening, night
 
+ACCOMMODATION FOCUS:
+- When users ask about places to stay, hostels, or budget accommodation, recommend real hostels and budget stays that are commonly listed on Hostelworld.
+- Include the hostel name, approximate nightly price, rating, and address.
+- Mention that users can book these on Hostelworld.com for the best hostel deals.
+- Prioritize well-known, highly-rated hostels in the destination.
+
 Current itinerary context will be provided so you can make relevant suggestions.`;
 
 serve(async (req) => {
