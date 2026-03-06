@@ -9,8 +9,9 @@ import { useTravelPlanner } from '@/hooks/useTravelPlanner';
 
 const quickPrompts = [
   "Suggest restaurants",
-  "Find activities",
+  "Find hostels",
   "Add a day",
+  "Coworking spots",
   "Best time to visit"
 ];
 
@@ -18,7 +19,7 @@ export function ChatInterface() {
   const [input, setInput] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  
+
   const {
     activeItinerary,
     messages,
@@ -27,7 +28,6 @@ export function ChatInterface() {
     addProposalToItinerary
   } = useTravelPlanner();
 
-  // Auto-scroll to bottom on new messages
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
     if (scrollContainer) {
@@ -49,15 +49,11 @@ export function ChatInterface() {
     }
   };
 
-  const handleQuickPrompt = (prompt: string) => {
-    sendMessage(prompt);
-  };
-
   return (
     <div className="flex flex-col h-full bg-background">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b bg-card">
-        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-border/40 bg-card/80 backdrop-blur-sm">
+        <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center">
           <Sparkles className="h-5 w-5 text-primary" />
         </div>
         <div>
@@ -80,7 +76,6 @@ export function ChatInterface() {
             ))}
           </AnimatePresence>
 
-          {/* Typing indicator */}
           <AnimatePresence>
             {isTyping && (
               <motion.div
@@ -89,10 +84,10 @@ export function ChatInterface() {
                 exit={{ opacity: 0, y: -10 }}
                 className="flex gap-3"
               >
-                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                <div className="w-8 h-8 rounded-2xl bg-muted flex items-center justify-center">
                   <Sparkles className="h-4 w-4 animate-pulse" />
                 </div>
-                <div className="flex gap-1 items-center px-4 py-3 bg-muted rounded-2xl rounded-bl-md">
+                <div className="flex gap-1.5 items-center px-4 py-3 bg-muted rounded-2xl rounded-bl-lg">
                   <Skeleton className="w-2 h-2 rounded-full animate-bounce [animation-delay:-0.3s]" />
                   <Skeleton className="w-2 h-2 rounded-full animate-bounce [animation-delay:-0.15s]" />
                   <Skeleton className="w-2 h-2 rounded-full animate-bounce" />
@@ -104,15 +99,15 @@ export function ChatInterface() {
       </div>
 
       {/* Quick prompts */}
-      <div className="px-4 py-2 border-t bg-muted/30">
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+      <div className="px-4 py-2.5 border-t border-border/30 bg-muted/20">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {quickPrompts.map(prompt => (
             <Button
               key={prompt}
               variant="outline"
               size="sm"
-              className="shrink-0 text-xs h-7 rounded-full"
-              onClick={() => handleQuickPrompt(prompt)}
+              className="shrink-0 text-xs h-8 rounded-2xl border-border/50 bg-card/50 hover:bg-card"
+              onClick={() => sendMessage(prompt)}
             >
               {prompt}
             </Button>
@@ -121,7 +116,7 @@ export function ChatInterface() {
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t bg-card">
+      <div className="p-3 border-t border-border/40 bg-card/80 backdrop-blur-sm">
         <div className="flex gap-2">
           <Input
             ref={inputRef}
@@ -129,12 +124,13 @@ export function ChatInterface() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ask about your trip..."
-            className="flex-1"
+            className="flex-1 rounded-2xl h-11 bg-background/80"
           />
-          <Button 
-            onClick={handleSend} 
+          <Button
+            onClick={handleSend}
             disabled={!input.trim() || isTyping}
             size="icon"
+            className="rounded-2xl h-11 w-11 shadow-sm"
           >
             <Send className="h-4 w-4" />
           </Button>
