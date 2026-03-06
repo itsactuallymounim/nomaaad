@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
+import Onboarding from "./pages/Onboarding";
 import Planner from "./pages/Planner";
 import Destinations from "./pages/Destinations";
 import NotFound from "./pages/NotFound";
