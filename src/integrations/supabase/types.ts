@@ -162,6 +162,92 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_lists: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      saved_places: {
+        Row: {
+          address: string | null
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          lat: number | null
+          list_id: string
+          lng: number | null
+          name: string
+          price: number | null
+          rating: number | null
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          lat?: number | null
+          list_id: string
+          lng?: number | null
+          name: string
+          price?: number | null
+          rating?: number | null
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          lat?: number | null
+          list_id?: string
+          lng?: number | null
+          name?: string
+          price?: number | null
+          rating?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_places_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "saved_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trips: {
         Row: {
           cover_image: string | null
