@@ -111,6 +111,57 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          accommodation_style: string | null
+          app_goals: string[] | null
+          created_at: string
+          favorite_destinations: string[] | null
+          id: string
+          mascot: string | null
+          monthly_budget: string | null
+          notification_prefs: string[] | null
+          onboarding_completed: boolean
+          search_priorities: string[] | null
+          travel_vibe: string[] | null
+          traveler_type: string | null
+          updated_at: string
+          work_setup: string | null
+        }
+        Insert: {
+          accommodation_style?: string | null
+          app_goals?: string[] | null
+          created_at?: string
+          favorite_destinations?: string[] | null
+          id: string
+          mascot?: string | null
+          monthly_budget?: string | null
+          notification_prefs?: string[] | null
+          onboarding_completed?: boolean
+          search_priorities?: string[] | null
+          travel_vibe?: string[] | null
+          traveler_type?: string | null
+          updated_at?: string
+          work_setup?: string | null
+        }
+        Update: {
+          accommodation_style?: string | null
+          app_goals?: string[] | null
+          created_at?: string
+          favorite_destinations?: string[] | null
+          id?: string
+          mascot?: string | null
+          monthly_budget?: string | null
+          notification_prefs?: string[] | null
+          onboarding_completed?: boolean
+          search_priorities?: string[] | null
+          travel_vibe?: string[] | null
+          traveler_type?: string | null
+          updated_at?: string
+          work_setup?: string | null
+        }
+        Relationships: []
+      }
       trips: {
         Row: {
           cover_image: string | null
