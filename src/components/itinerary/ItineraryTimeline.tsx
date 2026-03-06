@@ -337,7 +337,7 @@ export function ItineraryTimeline() {
 
       <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="px-4 py-3 border-b bg-card shrink-0 flex items-start justify-between gap-2">
+        <div className="px-4 py-3 border-b border-border/40 bg-card/80 backdrop-blur-sm shrink-0 flex items-start justify-between gap-2">
           <div>
             <h2 className="font-semibold">{activeItinerary.name}</h2>
             <p className="text-sm text-muted-foreground flex items-center gap-1">
@@ -345,20 +345,23 @@ export function ItineraryTimeline() {
               {activeItinerary.destination}
             </p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExportPdf}
-            disabled={isExporting}
-            className="shrink-0 h-8 text-xs gap-1.5"
-          >
-            {isExporting ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <FileDown className="h-3.5 w-3.5" />
-            )}
-            {isExporting ? 'Exporting…' : 'Export PDF'}
-          </Button>
+          <div className="flex gap-1.5 shrink-0">
+            <WhatsAppShareButton trip={activeItinerary} />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportPdf}
+              disabled={isExporting}
+              className="shrink-0 h-8 text-xs gap-1.5 rounded-xl"
+            >
+              {isExporting ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <FileDown className="h-3.5 w-3.5" />
+              )}
+              {isExporting ? 'Exporting…' : 'PDF'}
+            </Button>
+          </div>
         </div>
 
         {/* Timeline with DnD — scrolls within whatever container it's placed in */}
