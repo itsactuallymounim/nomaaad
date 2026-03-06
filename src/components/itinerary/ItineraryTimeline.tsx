@@ -24,6 +24,7 @@ import type { Activity as ActivityType, Day } from '@/types/trip';
 import { cn } from '@/lib/utils';
 import { TripPdfTemplate } from './TripPdfTemplate';
 import { exportTripPdf } from '@/lib/exportPdf';
+import { WhatsAppShareButton } from '@/components/sharing/WhatsAppShareButton';
 
 const categoryIcons: Record<string, React.ElementType> = {
   accommodation: Hotel,
