@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
 import Planner from "./pages/Planner";
 import Destinations from "./pages/Destinations";
+import Lists from "./pages/Lists";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,15 +25,20 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/destinations" element={<Destinations />} />
             <Route path="/onboarding" element={
               <ProtectedRoute>
                 <Onboarding />
               </ProtectedRoute>
             } />
-            <Route path="/destinations" element={<Destinations />} />
             <Route path="/planner" element={
               <ProtectedRoute>
                 <Planner />
+              </ProtectedRoute>
+            } />
+            <Route path="/lists" element={
+              <ProtectedRoute>
+                <Lists />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
@@ -45,4 +51,3 @@ const App = () => (
 );
 
 export default App;
-
