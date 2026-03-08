@@ -17,9 +17,9 @@ const STEPS = [
     subtitle: 'Your companion will guide you through trips and recommendations.',
     type: 'single' as const,
     options: [
-      { value: 'gorilla', emoji: '🦍', label: 'Gorilla', desc: 'Bold explorer', image: gorillaCharacter },
-      { value: 'cat', emoji: '🐱', label: 'Cat', desc: 'Curious wanderer', image: catCharacter },
-      { value: 'dog', emoji: '🐶', label: 'Dog', desc: 'Social adventurer', image: dogCharacter },
+      { value: 'gorilla', emoji: '🦍', label: 'Gorilla', desc: 'Bold explorer', lucideIcon: Mountain },
+      { value: 'cat', emoji: '🐱', label: 'Cat', desc: 'Curious wanderer', lucideIcon: Cat },
+      { value: 'dog', emoji: '🐶', label: 'Dog', desc: 'Social adventurer', lucideIcon: Dog },
     ],
   },
   {
