@@ -8,6 +8,8 @@ import {
   BookmarkPlus, Star, Coffee, Utensils, Camera, Wifi, Home, TreePine,
   ChevronRight, X, Sparkles, Loader2, ArrowUpRight
 } from 'lucide-react';
+import { useI18n } from '@/lib/i18n';
+import { LanguageToggle } from '@/components/LanguageToggle';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
