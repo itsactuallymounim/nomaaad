@@ -292,15 +292,15 @@ export default function Explore() {
         {/* AI Travel Plan result */}
         <AnimatePresence>
           {showAiPanel && (
-            <motion.div ref={aiPanelRef} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.4 }} className="mb-6 overflow-hidden">
+            <motion.div ref={aiPanelRef} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.4 }} className="mb-6 overflow-hidden" role="region" aria-label="AI Travel Plan" aria-live="polite">
               <Card className="rounded-[1.75rem] border-border/30 overflow-hidden shadow-lg">
                 <div className="flex items-center justify-between px-5 pt-4 pb-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center" aria-hidden="true">
                       <Sparkles className="h-3.5 w-3.5 text-primary" />
                     </div>
-                    <span className="text-sm font-semibold text-foreground">AI Travel Plan</span>
-                    {aiLoading && <span className="text-xs text-muted-foreground animate-pulse">Generating...</span>}
+                    <span className="text-sm font-semibold text-foreground">{t('explore.aiTitle')}</span>
+                    {aiLoading && <span className="text-xs text-muted-foreground animate-pulse" role="status">{t('explore.generating')}</span>}
                   </div>
                   <button onClick={() => { setShowAiPanel(false); setAiResult(''); setAiQuery(''); }} className="w-7 h-7 rounded-xl hover:bg-secondary flex items-center justify-center transition-colors"><X className="h-3.5 w-3.5 text-muted-foreground" /></button>
                 </div>
