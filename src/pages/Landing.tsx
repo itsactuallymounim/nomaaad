@@ -20,69 +20,99 @@ const CATEGORIES_KEYS = ['cat.all', 'cat.coworking', 'cat.cafes', 'cat.food', 'c
 
 const ALL_PLACES: Place[] = [
   // Batch 1
-  { id: '1', name: 'Canggu, Indonesia', city: 'Canggu', country: 'Indonesia', category: 'cat.coworking', image: 'photo-1537996194471-e657df975ab4', description: 'Surf, cowork and chill in Bali\'s digital nomad capital.', span: 'normal' },
-  { id: '2', name: 'Paris, France', city: 'Paris', country: 'France', category: 'cat.cafes', image: 'photo-1502602898657-3e91760cbb34', description: 'Lose yourself in the charm of Paris, from iconic landmarks to world-class art and cuisine.', span: 'tall' },
-  { id: '3', name: 'Barcelona, Spain', city: 'Barcelona', country: 'Spain', category: 'cat.food', image: 'photo-1539037116277-4db20889f2d4', description: 'Vibrant food markets, stunning architecture and Mediterranean vibes.', span: 'normal' },
-  { id: '4', name: 'Kyoto, Japan', city: 'Kyoto', country: 'Japan', category: 'cat.explore', image: 'photo-1493976040374-85c8e12f0c0e', description: 'Experience the perfect blend of ancient temples and modern culture.', span: 'normal' },
-  { id: '5', name: 'Lisbon, Portugal', city: 'Lisbon', country: 'Portugal', category: 'cat.coliving', image: 'photo-1536663815808-535e2280d2c2', description: 'Affordable coliving, great weather and a thriving nomad community.', span: 'tall' },
-  { id: '6', name: 'Ubud, Indonesia', city: 'Ubud', country: 'Indonesia', category: 'cat.explore', image: 'photo-1555400038-63f5ba517a47', description: 'Relax and rejuvenate among Bali\'s lush rice terraces and vibrant culture.', span: 'normal' },
-  { id: '7', name: 'Chiang Mai, Thailand', city: 'Chiang Mai', country: 'Thailand', category: 'cat.coworking', image: 'photo-1506665531195-3566af2b4dfa', description: 'Affordable living, amazing food and a legendary digital nomad scene.', span: 'normal' },
-  { id: '8', name: 'Cape Town, South Africa', city: 'Cape Town', country: 'South Africa', category: 'cat.explore', image: 'photo-1580060839134-75a5edca2e99', description: 'Where the oceans meet the mountains in spectacular fashion.', span: 'tall' },
-  { id: '9', name: 'Medellín, Colombia', city: 'Medellín', country: 'Colombia', category: 'cat.coworking', image: 'photo-1526392060635-9d6019884377', description: 'Perfect weather year-round with a booming coworking culture.', span: 'normal' },
-  { id: '10', name: 'Marrakech, Morocco', city: 'Marrakech', country: 'Morocco', category: 'cat.coliving', image: 'photo-1539020140153-e479b8c22e70', description: 'A magical city full of colour, spice markets and hidden riads.', span: 'normal' },
-  { id: '11', name: 'Ho Chi Minh, Vietnam', city: 'Ho Chi Minh', country: 'Vietnam', category: 'cat.cafes', image: 'photo-1528127269322-539801943592', description: 'Incredible street food, cheap coffee, and buzzing energy.', span: 'normal' },
-  { id: '12', name: 'Mexico City, Mexico', city: 'Mexico City', country: 'Mexico', category: 'cat.food', image: 'photo-1504544750208-dc0358e63f7f', description: 'Rich culture, world-class tacos and a growing remote work scene.', span: 'tall' },
+  { id: '1', name: 'Canggu, Indonesia', city: 'Canggu', country: 'Indonesia', category: 'cat.coworking', image: '1537996194471-e657df975ab4', description: 'Surf, cowork and chill in Bali\'s digital nomad capital.', span: 'normal' },
+  { id: '2', name: 'Paris, France', city: 'Paris', country: 'France', category: 'cat.cafes', image: '1502602898657-3e91760cbb34', description: 'Lose yourself in the charm of Paris, from iconic landmarks to world-class art and cuisine.', span: 'tall' },
+  { id: '3', name: 'Barcelona, Spain', city: 'Barcelona', country: 'Spain', category: 'cat.food', image: '1539037116277-4db20889f2d4', description: 'Vibrant food markets, stunning architecture and Mediterranean vibes.', span: 'normal' },
+  { id: '4', name: 'Kyoto, Japan', city: 'Kyoto', country: 'Japan', category: 'cat.explore', image: '1493976040374-85c8e12f0c0e', description: 'Experience the perfect blend of ancient temples and modern culture.', span: 'normal' },
+  { id: '5', name: 'Lisbon, Portugal', city: 'Lisbon', country: 'Portugal', category: 'cat.coliving', image: '1536663815808-535e2280d2c2', description: 'Affordable coliving, great weather and a thriving nomad community.', span: 'tall' },
+  { id: '6', name: 'Ubud, Indonesia', city: 'Ubud', country: 'Indonesia', category: 'cat.explore', image: '1555400038-63f5ba517a47', description: 'Relax and rejuvenate among Bali\'s lush rice terraces and vibrant culture.', span: 'normal' },
+  { id: '7', name: 'Chiang Mai, Thailand', city: 'Chiang Mai', country: 'Thailand', category: 'cat.coworking', image: '1506665531195-3566af2b4dfa', description: 'Affordable living, amazing food and a legendary digital nomad scene.', span: 'normal' },
+  { id: '8', name: 'Cape Town, South Africa', city: 'Cape Town', country: 'South Africa', category: 'cat.explore', image: '1580060839134-75a5edca2e99', description: 'Where the oceans meet the mountains in spectacular fashion.', span: 'tall' },
+  { id: '9', name: 'Medellín, Colombia', city: 'Medellín', country: 'Colombia', category: 'cat.coworking', image: '1526392060635-9d6019884377', description: 'Perfect weather year-round with a booming coworking culture.', span: 'normal' },
+  { id: '10', name: 'Marrakech, Morocco', city: 'Marrakech', country: 'Morocco', category: 'cat.coliving', image: '1539020140153-e479b8c22e70', description: 'A magical city full of colour, spice markets and hidden riads.', span: 'normal' },
+  { id: '11', name: 'Ho Chi Minh, Vietnam', city: 'Ho Chi Minh', country: 'Vietnam', category: 'cat.cafes', image: '1528127269322-539801943592', description: 'Incredible street food, cheap coffee, and buzzing energy.', span: 'normal' },
+  { id: '12', name: 'Mexico City, Mexico', city: 'Mexico City', country: 'Mexico', category: 'cat.food', image: '1504544750208-dc0358e63f7f', description: 'Rich culture, world-class tacos and a growing remote work scene.', span: 'tall' },
   // Batch 2
-  { id: '13', name: 'Tokyo, Japan', city: 'Tokyo', country: 'Japan', category: 'cat.explore', image: 'photo-1540959733332-eab4deabeeaf', description: 'Neon-lit streets, ancient shrines and the best ramen on earth.', span: 'normal' },
-  { id: '14', name: 'Berlin, Germany', city: 'Berlin', country: 'Germany', category: 'cat.coworking', image: 'photo-1560969184-10fe8719e047', description: 'Creative capital of Europe with affordable coworking and nightlife.', span: 'tall' },
-  { id: '15', name: 'Buenos Aires, Argentina', city: 'Buenos Aires', country: 'Argentina', category: 'cat.food', image: 'photo-1589909202802-8f4aadce1849', description: 'Tango, steak and a bohemian vibe that never gets old.', span: 'normal' },
-  { id: '16', name: 'Amsterdam, Netherlands', city: 'Amsterdam', country: 'Netherlands', category: 'cat.cafes', image: 'photo-1534351590666-13e3e96b5017', description: 'Canals, world-class museums and the coziest café culture.', span: 'normal' },
-  { id: '17', name: 'Tbilisi, Georgia', city: 'Tbilisi', country: 'Georgia', category: 'cat.coliving', image: 'photo-1565008576549-57569a49371d', description: 'Incredible food, low cost of living and a warm nomad community.', span: 'normal' },
-  { id: '18', name: 'New York, United States', city: 'New York', country: 'United States', category: 'cat.explore', image: 'photo-1496442226666-8d4d0e62e6e9', description: 'The city that never sleeps — endless energy and inspiration.', span: 'tall' },
-  { id: '19', name: 'Dubrovnik, Croatia', city: 'Dubrovnik', country: 'Croatia', category: 'cat.explore', image: 'photo-1555990538-1e15e83f5e9a', description: 'Medieval walls meet crystal-clear Adriatic waters.', span: 'normal' },
-  { id: '20', name: 'Seoul, South Korea', city: 'Seoul', country: 'South Korea', category: 'cat.cafes', image: 'photo-1517154421773-0529f29ea451', description: 'K-culture, incredible street food and lightning-fast wifi.', span: 'normal' },
-  { id: '21', name: 'Playa del Carmen, Mexico', city: 'Playa del Carmen', country: 'Mexico', category: 'cat.coworking', image: 'photo-1552074284-5e88ef1aef18', description: 'Beach life meets coworking on the Caribbean coast.', span: 'normal' },
-  { id: '22', name: 'Prague, Czech Republic', city: 'Prague', country: 'Czech Republic', category: 'cat.cafes', image: 'photo-1519677100203-a0e668c92439', description: 'Fairytale architecture, great beer and a thriving café scene.', span: 'tall' },
-  { id: '23', name: 'Taipei, Taiwan', city: 'Taipei', country: 'Taiwan', category: 'cat.food', image: 'photo-1470004914212-05527e49370b', description: 'Night markets, bubble tea and a tech-savvy nomad paradise.', span: 'normal' },
-  { id: '24', name: 'Santorini, Greece', city: 'Santorini', country: 'Greece', category: 'cat.explore', image: 'photo-1570077188670-e3a8d69ac5ff', description: 'Breathtaking sunsets over white-washed cliffs and blue domes.', span: 'normal' },
+  { id: '13', name: 'Tokyo, Japan', city: 'Tokyo', country: 'Japan', category: 'cat.explore', image: '1540959733332-eab4deabeeaf', description: 'Neon-lit streets, ancient shrines and the best ramen on earth.', span: 'normal' },
+  { id: '14', name: 'Berlin, Germany', city: 'Berlin', country: 'Germany', category: 'cat.coworking', image: '1560969184-10fe8719e047', description: 'Creative capital of Europe with affordable coworking and nightlife.', span: 'tall' },
+  { id: '15', name: 'Buenos Aires, Argentina', city: 'Buenos Aires', country: 'Argentina', category: 'cat.food', image: '1589909202802-8f4aadce1849', description: 'Tango, steak and a bohemian vibe that never gets old.', span: 'normal' },
+  { id: '16', name: 'Amsterdam, Netherlands', city: 'Amsterdam', country: 'Netherlands', category: 'cat.cafes', image: '1534351590666-13e3e96b5017', description: 'Canals, world-class museums and the coziest café culture.', span: 'normal' },
+  { id: '17', name: 'Tbilisi, Georgia', city: 'Tbilisi', country: 'Georgia', category: 'cat.coliving', image: '1565008576549-57569a49371d', description: 'Incredible food, low cost of living and a warm nomad community.', span: 'normal' },
+  { id: '18', name: 'New York, United States', city: 'New York', country: 'United States', category: 'cat.explore', image: '1496442226666-8d4d0e62e6e9', description: 'The city that never sleeps — endless energy and inspiration.', span: 'tall' },
+  { id: '19', name: 'Dubrovnik, Croatia', city: 'Dubrovnik', country: 'Croatia', category: 'cat.explore', image: '1555990538-1e15e83f5e9a', description: 'Medieval walls meet crystal-clear Adriatic waters.', span: 'normal' },
+  { id: '20', name: 'Seoul, South Korea', city: 'Seoul', country: 'South Korea', category: 'cat.cafes', image: '1517154421773-0529f29ea451', description: 'K-culture, incredible street food and lightning-fast wifi.', span: 'normal' },
+  { id: '21', name: 'Playa del Carmen, Mexico', city: 'Playa del Carmen', country: 'Mexico', category: 'cat.coworking', image: '1552074284-5e88ef1aef18', description: 'Beach life meets coworking on the Caribbean coast.', span: 'normal' },
+  { id: '22', name: 'Prague, Czech Republic', city: 'Prague', country: 'Czech Republic', category: 'cat.cafes', image: '1519677100203-a0e668c92439', description: 'Fairytale architecture, great beer and a thriving café scene.', span: 'tall' },
+  { id: '23', name: 'Taipei, Taiwan', city: 'Taipei', country: 'Taiwan', category: 'cat.food', image: '1470004914212-05527e49370b', description: 'Night markets, bubble tea and a tech-savvy nomad paradise.', span: 'normal' },
+  { id: '24', name: 'Santorini, Greece', city: 'Santorini', country: 'Greece', category: 'cat.explore', image: '1570077188670-e3a8d69ac5ff', description: 'Breathtaking sunsets over white-washed cliffs and blue domes.', span: 'normal' },
   // Batch 3
-  { id: '25', name: 'Dubai, UAE', city: 'Dubai', country: 'UAE', category: 'cat.explore', image: 'photo-1512453979798-5ea266f8880c', description: 'Futuristic skyline, desert adventures and world-class luxury.', span: 'tall' },
-  { id: '26', name: 'Reykjavik, Iceland', city: 'Reykjavik', country: 'Iceland', category: 'cat.explore', image: 'photo-1504829857797-ddff29c27927', description: 'Northern lights, geothermal pools and raw natural beauty.', span: 'normal' },
-  { id: '27', name: 'Da Nang, Vietnam', city: 'Da Nang', country: 'Vietnam', category: 'cat.coworking', image: 'photo-1559592413-7cec4d0cae2b', description: 'Beachfront coworking with incredible Vietnamese cuisine.', span: 'normal' },
-  { id: '28', name: 'Split, Croatia', city: 'Split', country: 'Croatia', category: 'cat.coliving', image: 'photo-1580137189272-c9379f8864fd', description: 'Roman ruins, island hopping and Mediterranean slow living.', span: 'normal' },
-  { id: '29', name: 'Bangkok, Thailand', city: 'Bangkok', country: 'Thailand', category: 'cat.food', image: 'photo-1508009603885-50cf7c579365', description: 'Street food heaven with temples, markets and rooftop bars.', span: 'tall' },
-  { id: '30', name: 'Edinburgh, Scotland', city: 'Edinburgh', country: 'Scotland', category: 'cat.cafes', image: 'photo-1506377585622-bedcbb027afc', description: 'Historic charm, cozy pubs and stunning hilltop views.', span: 'normal' },
-  { id: '31', name: 'Lima, Peru', city: 'Lima', country: 'Peru', category: 'cat.food', image: 'photo-1531968455001-5c5272a67c71', description: 'The gastronomic capital of South America awaits.', span: 'normal' },
-  { id: '32', name: 'Singapore', city: 'Singapore', country: 'Singapore', category: 'cat.coworking', image: 'photo-1525625293386-3f8f99389edd', description: 'Ultra-modern city-state with world-class infrastructure.', span: 'normal' },
-  { id: '33', name: 'Oaxaca, Mexico', city: 'Oaxaca', country: 'Mexico', category: 'cat.food', image: 'photo-1547995886-6dc09384c6e6', description: 'Mole, mezcal and the heart of Mexican folk culture.', span: 'tall' },
-  { id: '34', name: 'Tallinn, Estonia', city: 'Tallinn', country: 'Estonia', category: 'cat.coworking', image: 'photo-1560448204-603e6b2a0a04', description: 'Digital nomad visa pioneer with a charming old town.', span: 'normal' },
-  { id: '35', name: 'Cusco, Peru', city: 'Cusco', country: 'Peru', category: 'cat.explore', image: 'photo-1526392060635-9d6019884377', description: 'Gateway to Machu Picchu and Andean adventures.', span: 'normal' },
-  { id: '36', name: 'Porto, Portugal', city: 'Porto', country: 'Portugal', category: 'cat.cafes', image: 'photo-1555881400-74d7acaacd8b', description: 'Port wine, azulejo tiles and riverside charm.', span: 'normal' },
+  { id: '25', name: 'Dubai, UAE', city: 'Dubai', country: 'UAE', category: 'cat.explore', image: '1512453979798-5ea266f8880c', description: 'Futuristic skyline, desert adventures and world-class luxury.', span: 'tall' },
+  { id: '26', name: 'Reykjavik, Iceland', city: 'Reykjavik', country: 'Iceland', category: 'cat.explore', image: '1504829857797-ddff29c27927', description: 'Northern lights, geothermal pools and raw natural beauty.', span: 'normal' },
+  { id: '27', name: 'Da Nang, Vietnam', city: 'Da Nang', country: 'Vietnam', category: 'cat.coworking', image: '1559592413-7cec4d0cae2b', description: 'Beachfront coworking with incredible Vietnamese cuisine.', span: 'normal' },
+  { id: '28', name: 'Split, Croatia', city: 'Split', country: 'Croatia', category: 'cat.coliving', image: '1580137189272-c9379f8864fd', description: 'Roman ruins, island hopping and Mediterranean slow living.', span: 'normal' },
+  { id: '29', name: 'Bangkok, Thailand', city: 'Bangkok', country: 'Thailand', category: 'cat.food', image: '1508009603885-50cf7c579365', description: 'Street food heaven with temples, markets and rooftop bars.', span: 'tall' },
+  { id: '30', name: 'Edinburgh, Scotland', city: 'Edinburgh', country: 'Scotland', category: 'cat.cafes', image: '1506377585622-bedcbb027afc', description: 'Historic charm, cozy pubs and stunning hilltop views.', span: 'normal' },
+  { id: '31', name: 'Lima, Peru', city: 'Lima', country: 'Peru', category: 'cat.food', image: '1531968455001-5c5272a67c71', description: 'The gastronomic capital of South America awaits.', span: 'normal' },
+  { id: '32', name: 'Singapore', city: 'Singapore', country: 'Singapore', category: 'cat.coworking', image: '1525625293386-3f8f99389edd', description: 'Ultra-modern city-state with world-class infrastructure.', span: 'normal' },
+  { id: '33', name: 'Oaxaca, Mexico', city: 'Oaxaca', country: 'Mexico', category: 'cat.food', image: '1547995886-6dc09384c6e6', description: 'Mole, mezcal and the heart of Mexican folk culture.', span: 'tall' },
+  { id: '34', name: 'Tallinn, Estonia', city: 'Tallinn', country: 'Estonia', category: 'cat.coworking', image: '1560448204-603e6b2a0a04', description: 'Digital nomad visa pioneer with a charming old town.', span: 'normal' },
+  { id: '35', name: 'Cusco, Peru', city: 'Cusco', country: 'Peru', category: 'cat.explore', image: '1526392060635-9d6019884377', description: 'Gateway to Machu Picchu and Andean adventures.', span: 'normal' },
+  { id: '36', name: 'Porto, Portugal', city: 'Porto', country: 'Portugal', category: 'cat.cafes', image: '1555881400-74d7acaacd8b', description: 'Port wine, azulejo tiles and riverside charm.', span: 'normal' },
+  // Batch 4
+  { id: '37', name: 'Hanoi, Vietnam', city: 'Hanoi', country: 'Vietnam', category: 'cat.food', image: '1509030450996-dd1a26dda07a', description: 'Vibrant chaos, pho on every corner and French colonial charm.', span: 'tall' },
+  { id: '38', name: 'Copenhagen, Denmark', city: 'Copenhagen', country: 'Denmark', category: 'cat.cafes', image: '1513622470248-c8549fb7869e', description: 'Hygge culture, cycling paradise and New Nordic cuisine.', span: 'normal' },
+  { id: '39', name: 'Valletta, Malta', city: 'Valletta', country: 'Malta', category: 'cat.coliving', image: '1558618666-fcd25c85f82e', description: 'Sun-soaked island with a growing digital nomad community.', span: 'normal' },
+  { id: '40', name: 'Kuala Lumpur, Malaysia', city: 'Kuala Lumpur', country: 'Malaysia', category: 'cat.coworking', image: '1508062878650-88b52897f298', description: 'Petronas Towers, hawker stalls and ultra-fast internet.', span: 'normal' },
+  { id: '41', name: 'Siem Reap, Cambodia', city: 'Siem Reap', country: 'Cambodia', category: 'cat.explore', image: '1569839333583-f09e73631040', description: 'Ancient Angkor temples amid lush tropical jungle.', span: 'tall' },
+  { id: '42', name: 'Vilnius, Lithuania', city: 'Vilnius', country: 'Lithuania', category: 'cat.coliving', image: '1542315192-1f61a1792f33', description: 'Europe\'s best-kept secret with baroque beauty and tech talent.', span: 'normal' },
+  { id: '43', name: 'Cartagena, Colombia', city: 'Cartagena', country: 'Colombia', category: 'cat.explore', image: '1533104816931-20fa691ff6ca', description: 'Colorful colonial streets and Caribbean sea breezes.', span: 'normal' },
+  { id: '44', name: 'Florence, Italy', city: 'Florence', country: 'Italy', category: 'cat.food', image: '1541370976299-4d24ebbc9077', description: 'Renaissance art, Tuscan wine and the birthplace of gelato.', span: 'normal' },
+  { id: '45', name: 'Kathmandu, Nepal', city: 'Kathmandu', country: 'Nepal', category: 'cat.explore', image: '1544735716-392fe2489ffa', description: 'Gateway to the Himalayas with spiritual energy everywhere.', span: 'tall' },
+  { id: '46', name: 'Budapest, Hungary', city: 'Budapest', country: 'Hungary', category: 'cat.cafes', image: '1541343672885-9be56236302a', description: 'Ruin bars, thermal baths and stunning Danube views.', span: 'normal' },
+  { id: '47', name: 'Zanzibar, Tanzania', city: 'Zanzibar', country: 'Tanzania', category: 'cat.explore', image: '1547471080-7cc2caa01a7e', description: 'Spice island paradise with turquoise waters and ancient Stone Town.', span: 'normal' },
+  { id: '48', name: 'Bogotá, Colombia', city: 'Bogotá', country: 'Colombia', category: 'cat.coworking', image: '1568967068165-a45860c3137e', description: 'High-altitude creativity hub with amazing street art scene.', span: 'normal' },
+  // Batch 5
+  { id: '49', name: 'Vienna, Austria', city: 'Vienna', country: 'Austria', category: 'cat.cafes', image: '1516550893923-42d28e5677af', description: 'Coffee house culture, classical music and imperial grandeur.', span: 'tall' },
+  { id: '50', name: 'Hoi An, Vietnam', city: 'Hoi An', country: 'Vietnam', category: 'cat.food', image: '1528181304800-259b08848526', description: 'Lantern-lit streets, tailored suits and the freshest bánh mì.', span: 'normal' },
+  { id: '51', name: 'Nairobi, Kenya', city: 'Nairobi', country: 'Kenya', category: 'cat.coworking', image: '1547553426-58b5e4750d21', description: 'Africa\'s silicon savannah with a booming tech scene.', span: 'normal' },
+  { id: '52', name: 'Tulum, Mexico', city: 'Tulum', country: 'Mexico', category: 'cat.coliving', image: '1518509562904-e7ef99cdcc86', description: 'Jungle-meets-beach bohemian paradise on the Riviera Maya.', span: 'normal' },
+  { id: '53', name: 'Athens, Greece', city: 'Athens', country: 'Greece', category: 'cat.explore', image: '1555993539-1732b0258235', description: 'Ancient ruins, rooftop bars and Mediterranean sunshine.', span: 'tall' },
+  { id: '54', name: 'Penang, Malaysia', city: 'Penang', country: 'Malaysia', category: 'cat.food', image: '1559628233-100c798642d4', description: 'George Town\'s legendary hawker food and colonial heritage.', span: 'normal' },
+  { id: '55', name: 'Riga, Latvia', city: 'Riga', country: 'Latvia', category: 'cat.coliving', image: '1513622470248-c8549fb7869e', description: 'Art Nouveau architecture and a blossoming startup scene.', span: 'normal' },
+  { id: '56', name: 'Jaipur, India', city: 'Jaipur', country: 'India', category: 'cat.explore', image: '1524492412937-b28074a5d7da', description: 'The Pink City — vibrant palaces, bazaars and royal heritage.', span: 'normal' },
+  { id: '57', name: 'Santiago, Chile', city: 'Santiago', country: 'Chile', category: 'cat.coworking', image: '1551801691-f0bce83d4f21', description: 'Wine country capital surrounded by the Andes mountains.', span: 'tall' },
+  { id: '58', name: 'Luang Prabang, Laos', city: 'Luang Prabang', country: 'Laos', category: 'cat.explore', image: '1540611025311-01df3cde54b5', description: 'UNESCO gem with golden temples and Mekong River serenity.', span: 'normal' },
+  { id: '59', name: 'Palermo, Italy', city: 'Palermo', country: 'Italy', category: 'cat.food', image: '1523531294919-4bcd7c65e216', description: 'Sicilian street food, Arab-Norman splendor and raw energy.', span: 'normal' },
+  { id: '60', name: 'Málaga, Spain', city: 'Málaga', country: 'Spain', category: 'cat.coliving', image: '1509840841025-9088ba78a826', description: 'Sun-drenched Costa del Sol with Picasso and tapas culture.', span: 'normal' },
+  // Batch 6
+  { id: '61', name: 'Osaka, Japan', city: 'Osaka', country: 'Japan', category: 'cat.food', image: '1590559899731-a382839e5549', description: 'Japan\'s kitchen — takoyaki, okonomiyaki and pure energy.', span: 'tall' },
+  { id: '62', name: 'Lagos, Nigeria', city: 'Lagos', country: 'Nigeria', category: 'cat.coworking', image: '1572883454114-efb4855ee1fd', description: 'Africa\'s largest city, bursting with creative entrepreneurship.', span: 'normal' },
+  { id: '63', name: 'Seville, Spain', city: 'Seville', country: 'Spain', category: 'cat.explore', image: '1515443961218-a51367888e4b', description: 'Flamenco, tapas and the warmest welcome in Andalusia.', span: 'normal' },
+  { id: '64', name: 'Queenstown, New Zealand', city: 'Queenstown', country: 'New Zealand', category: 'cat.explore', image: '1507699622108-4be3abd695ad', description: 'Adventure capital of the world with jaw-dropping landscapes.', span: 'normal' },
+  { id: '65', name: 'Accra, Ghana', city: 'Accra', country: 'Ghana', category: 'cat.coliving', image: '1568731089284-56e07e4e086c', description: 'West Africa\'s cultural hub with beaches and buzzing nightlife.', span: 'tall' },
+  { id: '66', name: 'Bruges, Belgium', city: 'Bruges', country: 'Belgium', category: 'cat.cafes', image: '1491557345352-5929e343eb89', description: 'Medieval canals, Belgian chocolate and cozy market squares.', span: 'normal' },
+  { id: '67', name: 'Havana, Cuba', city: 'Havana', country: 'Cuba', category: 'cat.explore', image: '1500759285222-a95626b934cb', description: 'Classic cars, salsa rhythms and faded colonial grandeur.', span: 'normal' },
+  { id: '68', name: 'Colombo, Sri Lanka', city: 'Colombo', country: 'Sri Lanka', category: 'cat.food', image: '1552055569-bc4d5e9ab58c', description: 'Tropical curries, colonial charm and Indian Ocean breezes.', span: 'normal' },
+  { id: '69', name: 'Tromsø, Norway', city: 'Tromsø', country: 'Norway', category: 'cat.explore', image: '1531366936337-7c912a4589a7', description: 'Arctic gateway for Northern Lights and midnight sun adventures.', span: 'tall' },
+  { id: '70', name: 'Antigua, Guatemala', city: 'Antigua', country: 'Guatemala', category: 'cat.coliving', image: '1520250497591-112f2f40a3f4', description: 'Cobblestone streets beneath volcanoes and world-class coffee.', span: 'normal' },
+  { id: '71', name: 'Helsinki, Finland', city: 'Helsinki', country: 'Finland', category: 'cat.cafes', image: '1538332576228-eb5b4c4de6f5', description: 'Design capital with sauna culture and waterfront beauty.', span: 'normal' },
+  { id: '72', name: 'Essaouira, Morocco', city: 'Essaouira', country: 'Morocco', category: 'cat.explore', image: '1548018560-b6ebb8a5d6ea', description: 'Windy surf town with blue-and-white medina charm.', span: 'normal' },
 ];
 
 const BATCH_SIZE = 12;
 
-// Generate infinite places by cycling through ALL_PLACES with unique IDs
+// Load unique places in sequential batches — no repetition until all 72 are shown
 function generateBatch(batchIndex: number, category?: string): Place[] {
   const source = category && category !== 'cat.all'
     ? ALL_PLACES.filter(p => p.category === category)
     : ALL_PLACES;
   if (source.length === 0) return [];
 
-  const batch: Place[] = [];
-  for (let i = 0; i < BATCH_SIZE; i++) {
-    const sourceIdx = (batchIndex * BATCH_SIZE + i) % source.length;
-    const place = source[sourceIdx];
-    // Alternate span pattern for visual variety across cycles
-    const cycle = Math.floor((batchIndex * BATCH_SIZE + i) / source.length);
-    const spans: Array<'tall' | 'normal'> = ['normal', 'normal', 'tall', 'normal', 'normal', 'normal', 'tall', 'normal', 'normal', 'tall', 'normal', 'normal'];
-    batch.push({
-      ...place,
-      id: `${place.id}-batch${batchIndex}-${i}`,
-      span: spans[(sourceIdx + cycle) % spans.length],
-    });
-  }
-  return batch;
+  const start = batchIndex * BATCH_SIZE;
+  // If we've shown everything, return empty (finite but large set)
+  if (start >= source.length) return [];
+
+  return source.slice(start, start + BATCH_SIZE);
 }
 
 export default function Landing() {
