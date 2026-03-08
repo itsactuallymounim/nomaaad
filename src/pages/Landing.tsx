@@ -209,7 +209,7 @@ export default function Landing() {
                 <input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="7 days in Bali as a digital nomad..."
+                  placeholder={t('landing.heroSearchPlaceholder')}
                   className="w-full h-14 md:h-16 pl-14 pr-16 rounded-2xl bg-background/95 backdrop-blur-xl text-foreground text-base placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/40 shadow-2xl border-0 transition-all" />
                 
                 <button
