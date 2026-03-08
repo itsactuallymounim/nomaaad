@@ -139,6 +139,8 @@ export default function Explore() {
   const { user, signOut } = useAuth();
   const { profile } = useProfile();
   const { t } = useI18n();
+  const { permission: notifPermission, requestPermission, scheduleRatingReminder } = useNotifications();
+  const [showNotifBanner, setShowNotifBanner] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
