@@ -196,7 +196,7 @@ export default function Explore() {
       embedSavedPlace({ id: inserted.id, name: selectedPlace.name, description: selectedPlace.description, address: `${selectedPlace.city}, ${selectedPlace.country}`, category: selectedPlace.category }).catch(() => {});
     }
     setAddedToList(prev => ({ ...prev, [selectedPlace.id]: [...(prev[selectedPlace.id] || []), listId] }));
-    toast({ title: `Added to list` });
+    toast({ title: t('explore.addedToList') });
     setAddDialogOpen(false); setSelectedPlace(null);
   };
 
