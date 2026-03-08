@@ -5,8 +5,10 @@ import {
   MapPin, Plus, Check, Compass, Moon, Sun, LogOut, User,
   BookmarkPlus, Coffee, Utensils, Camera, Wifi, Heart, Train,
   Sparkles, Loader2, ArrowUpRight, Calendar,
-  CalendarPlus, Clock, DollarSign, X, Share2
+  CalendarPlus, Clock, DollarSign, X, Share2,
+  Wallet, Zap, Globe, SlidersHorizontal
 } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
 import ShareableTripCard from '@/components/ShareableTripCard';
 import { useI18n } from '@/lib/i18n';
 import { LanguageToggle } from '@/components/LanguageToggle';
@@ -86,8 +88,9 @@ export default function Explore() {
 
   // Track which activities have been saved (show check instead of plus)
   const [savedActivities, setSavedActivities] = useState<Set<string>>(new Set());
-  // Track which activity just got saved for tooltip animation
   const [justSaved, setJustSaved] = useState<string | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [sliders, setSliders] = useState({ budget: 50, pace: 50, vibe: 50 });
 
   const [timelineStartDate] = useState(() => {
     const d = new Date();
@@ -153,7 +156,12 @@ export default function Explore() {
     e.preventDefault();
     if (!aiQuery.trim()) return;
     hasTriggeredRef.current = true;
-    generatePlan(aiQuery.trim());
+    // Enrich query with slider context
+    const budgetLabel = sliders.budget < 33 ? 'budget-friendly' : sliders.budget < 66 ? 'mid-range' : 'luxury';
+    const paceLabel = sliders.pace < 33 ? 'relaxed' : sliders.pace < 66 ? 'moderate' : 'action-packed';
+    const vibeLabel = sliders.vibe < 33 ? 'local hidden gems' : sliders.vibe < 66 ? 'mix of local and popular' : 'must-see global highlights';
+    const enriched = `${aiQuery.trim()}. Style: ${budgetLabel} budget, ${paceLabel} pace, focusing on ${vibeLabel}.`;
+    generatePlan(enriched);
   };
 
   const toggleTheme = () => {
@@ -311,7 +319,59 @@ export default function Explore() {
               {aiLoading ? <Loader2 className="h-4 w-4 text-primary-foreground animate-spin" /> : <ArrowUpRight className="h-4 w-4 text-primary-foreground" />}
             </button>
           </form>
+
+          {/* Filter toggle */}
+          <button
+            onClick={() => setFiltersOpen(prev => !prev)}
+            className={`mt-3 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
+              filtersOpen
+                ? 'bg-primary/10 text-primary'
+                : 'bg-secondary/50 text-muted-foreground hover:bg-secondary'
+            }`}
+          >
+            <SlidersHorizontal className="h-3 w-3" />
+            {filtersOpen ? 'Hide filters' : 'Filters'}
+          </button>
         </motion.div>
+
+        {/* Journey-style sliders */}
+        <AnimatePresence>
+          {filtersOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.25 }}
+              className="overflow-hidden max-w-3xl mb-6"
+            >
+              <div className="grid sm:grid-cols-3 gap-4 p-4 rounded-2xl bg-card/80 backdrop-blur-xl border border-border/30">
+                {([
+                  { key: 'budget' as const, icon: Wallet, label: 'Budget', left: 'Budget', right: 'Luxury' },
+                  { key: 'pace' as const, icon: Zap, label: 'Pace', left: 'Relaxed', right: 'Action' },
+                  { key: 'vibe' as const, icon: Globe, label: 'Vibe', left: 'Local', right: 'Global' },
+                ]).map(s => (
+                  <div key={s.key} className="space-y-2">
+                    <div className="flex items-center gap-1.5">
+                      <s.icon className="h-3.5 w-3.5 text-primary" />
+                      <span className="text-xs font-medium text-foreground">{s.label}</span>
+                    </div>
+                    <Slider
+                      value={[sliders[s.key]]}
+                      onValueChange={v => setSliders(prev => ({ ...prev, [s.key]: v[0] }))}
+                      max={100}
+                      step={1}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-[10px] text-muted-foreground">
+                      <span>{s.left}</span>
+                      <span>{s.right}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Loading state */}
         {aiLoading && !aiPlan && (
