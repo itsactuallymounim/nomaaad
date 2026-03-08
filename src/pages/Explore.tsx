@@ -222,6 +222,7 @@ export default function Explore() {
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
         className="sticky top-0 z-50 backdrop-blur-2xl bg-background/60 border-b border-border/20"
+        aria-label="Main navigation"
       >
         <div className="flex items-center justify-between px-4 py-3 max-w-2xl mx-auto">
           <div className="flex items-center gap-2.5">
