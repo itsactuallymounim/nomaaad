@@ -257,7 +257,7 @@ export default function Onboarding() {
           >
             {mascotEmoji}
           </motion.div>
-          <h1 className="text-3xl font-serif font-bold text-foreground">
+          <h1 className="text-3xl font-sans font-bold text-foreground">
             Your nomad profile is ready
           </h1>
           <p className="text-muted-foreground">
