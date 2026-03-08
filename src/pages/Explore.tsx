@@ -326,13 +326,6 @@ export default function Explore() {
           )}
         </AnimatePresence>
 
-        {/* Places search */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-4">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('explore.filterPlaceholder')} className="pl-10 rounded-2xl h-11 bg-card/60 border-border/30" aria-label={t('explore.filterPlaceholder')} />
-          </div>
-        </motion.div>
 
         {/* Category pills */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} className="flex gap-2 overflow-x-auto pb-5 scrollbar-hide -mx-4 px-4">
