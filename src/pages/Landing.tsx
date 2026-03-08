@@ -583,14 +583,14 @@ export default function Landing() {
             <Globe className="h-8 w-8 text-primary" />
           </div>
           <h2 className="text-3xl md:text-4xl font-sans font-bold text-foreground mb-4">
-            Stop planning. Start exploring.
+            {t('landing.ctaBottom')}
           </h2>
           <p className="text-muted-foreground text-sm mb-8">
-            Your entire travel itinerary — generated instantly. Join thousands of travelers who plan smarter.
+            {t('landing.ctaBottomDesc')}
           </p>
           <Button size="lg" className="gap-2" asChild>
             <Link to="/auth">
-              Get started — it's free
+              {t('landing.ctaBottomButton')}
               <ArrowUpRight className="h-4 w-4" />
             </Link>
           </Button>
