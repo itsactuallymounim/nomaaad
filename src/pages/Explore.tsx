@@ -347,7 +347,7 @@ export default function Explore() {
         </div>
       </motion.nav>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 flex-1 flex flex-col">
         {/* Greeting */}
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="pt-8 pb-5">
           <h1 className="text-2xl font-sans font-bold text-foreground">{t('explore.greeting')} 👋</h1>
