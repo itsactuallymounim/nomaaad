@@ -392,7 +392,7 @@ export default function Explore() {
             }`}
           >
             <SlidersHorizontal className="h-3 w-3" />
-            {filtersOpen ? 'Hide filters' : 'Filters'}
+            {filtersOpen ? t('explore.hideFilters') : t('explore.filters')}
           </button>
         </motion.div>
 
