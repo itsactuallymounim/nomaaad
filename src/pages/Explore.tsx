@@ -87,7 +87,7 @@ const FEED_LOCATIONS = [
   { name: 'Hoi An Market', city: 'Hoi An', category: 'Market', rating: 4.6, image: 'photo-1555992336-fb0d29498b13', description: 'Vibrant morning market with fresh produce and Banh Mi.' },
   { name: 'Nusa Dua Beach', city: 'Bali', category: 'Beach', rating: 4.7, image: 'photo-1544551763-46a013bb70d5', description: 'Calm turquoise waters perfect for swimming.' },
   { name: 'KOI Café', city: 'Seoul', category: 'Café', rating: 4.2, image: 'photo-1495474472287-4d71bcdd2085', description: 'Minimalist Korean café with specialty pour-over.' },
-  { name: 'Senso-ji Temple', city: 'Tokyo', category: 'Temple', rating: 4.8, image: 'photo-1540959733332-eab4deabeeaf', description: 'Tokyo's oldest and most significant temple in Asakusa.' },
+  { name: 'Senso-ji Temple', city: 'Tokyo', category: 'Temple', rating: 4.8, image: 'photo-1540959733332-eab4deabeeaf', description: 'Tokyo\'s oldest and most significant temple in Asakusa.' },
   { name: 'Botanischer Garten', city: 'Berlin', category: 'Park', rating: 4.5, image: 'photo-1560969184-10fe8719e047', description: 'One of the largest botanical gardens in the world.' },
   { name: 'Pad Thai Thip Samai', city: 'Bangkok', category: 'Restaurant', rating: 4.7, image: 'photo-1508009603885-50cf7c579365', description: 'Legendary pad thai wrapped in egg, since 1966.' },
   { name: 'A-Work Café', city: 'Amsterdam', category: 'Café', rating: 4.3, image: 'photo-1534351590666-13e3e96b5017', description: 'Laptop-friendly café with strong wifi and flat whites.' },
