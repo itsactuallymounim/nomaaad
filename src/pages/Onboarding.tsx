@@ -215,7 +215,6 @@ export default function Onboarding() {
         onboarding_completed: true,
       });
       // Embed profile in background (non-blocking)
-      const user = (await import('@/hooks/useAuth')).useAuth ? null : null;
       embedProfile({
         traveler_type: answers.traveler_type as string,
         monthly_budget: answers.monthly_budget as string,
@@ -224,7 +223,7 @@ export default function Onboarding() {
         travel_vibe: answers.travel_vibe as string[],
         search_priorities: answers.search_priorities as string[],
         app_goals: answers.app_goals as string[],
-      }, '').catch(() => {}); // userId handled below
+      }, updateProfile.variables?.id || '').catch(() => {});
       setStep(totalSteps); // show final screen
     } catch {
       toast({ title: 'Error saving profile', variant: 'destructive' });
