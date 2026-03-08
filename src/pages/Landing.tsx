@@ -223,12 +223,15 @@ export default function Landing() {
 
             {/* Benefit pills */}
             <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
-              {BENEFITS.map((b) =>
-              <div key={b.text} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-background/10 backdrop-blur-sm border border-background/15">
-                  <b.icon className="h-3.5 w-3.5 text-background/70" />
-                  <span className="text-xs text-background/80 font-medium">{b.text}</span>
-                </div>
-              )}
+              {BENEFITS_KEYS.map((key, i) => {
+                const Icon = BENEFITS_ICONS[i];
+                return (
+                  <div key={key} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-background/10 backdrop-blur-sm border border-background/15">
+                    <Icon className="h-3.5 w-3.5 text-background/70" />
+                    <span className="text-xs text-background/80 font-medium">{t(key)}</span>
+                  </div>
+                );
+              })}
             </div>
           </motion.div>
 
