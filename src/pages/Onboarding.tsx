@@ -141,6 +141,7 @@ const POPULAR_DESTINATIONS = [
 
 export default function Onboarding() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const updateProfile = useUpdateProfile();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({
