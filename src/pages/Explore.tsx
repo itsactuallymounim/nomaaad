@@ -76,7 +76,7 @@ const FEED_LOCATIONS = [
   { name: 'Hubud Coworking', city: 'Bali', category: 'Coworking', rating: 4.6, image: 'photo-1497366216548-37526070297c', description: 'Iconic bamboo coworking in Ubud with fast wifi and rice paddy views.' },
   { name: 'Café de Flore', city: 'Paris', category: 'Café', rating: 4.4, image: 'photo-1509042239860-f550ce710b93', description: 'Historic Parisian café on Boulevard Saint-Germain.' },
   { name: 'Selina Lisbon', city: 'Lisbon', category: 'Hostel', rating: 4.3, image: 'photo-1555854877-bab0e564b8d5', description: 'Trendy co-living & hostel with rooftop terrace and events.' },
-  { name: 'Punspace', city: 'Chiang Mai', category: 'Coworking', rating: 4.7, image: 'photo-1527192491265-7e15c55b1ed2', description: 'One of Chiang Mai's best coworking spaces in Nimman area.' },
+  { name: 'Punspace', city: 'Chiang Mai', category: 'Coworking', rating: 4.7, image: 'photo-1527192491265-7e15c55b1ed2', description: 'One of Chiang Mai\'s best coworking spaces in Nimman area.' },
   { name: 'Tsukiji Outer Market', city: 'Tokyo', category: 'Market', rating: 4.8, image: 'photo-1553621042-f6e147245754', description: 'Fresh sushi and street food paradise near Ginza.' },
   { name: 'Fushimi Inari Shrine', city: 'Kyoto', category: 'Temple', rating: 4.9, image: 'photo-1478436127897-769e1b3f0f36', description: 'Thousands of vermilion torii gates winding through the mountain.' },
   { name: 'Outsite Bali', city: 'Bali', category: 'Hostel', rating: 4.5, image: 'photo-1537996194471-e657df975ab4', description: 'Coliving space for remote workers in Canggu with pool.' },
