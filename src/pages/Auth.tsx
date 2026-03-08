@@ -71,7 +71,7 @@ export default function Auth() {
               transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
               className="mx-auto w-20 h-20 rounded-2xl overflow-hidden mb-3 shadow-xl"
             >
-              <img src={dogCharacter} alt="" className="w-full h-full object-cover" />
+              <Compass className="h-10 w-10 text-primary" />
             </motion.div>
             <CardTitle className="text-2xl font-sans">{t('auth.welcome')}</CardTitle>
             <CardDescription>{t('auth.subtitle')}</CardDescription>
