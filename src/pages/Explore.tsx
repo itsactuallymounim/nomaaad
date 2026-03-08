@@ -1,5 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { embedSavedPlace } from '@/lib/embeddings';
+import penguinCharacter from '@/assets/characters/penguin-icecream.png';
+import catCharacter from '@/assets/characters/cat-banana.png';
+import dogCharacter from '@/assets/characters/dog-icecream.png';
+import gorillaCharacter from '@/assets/characters/gorilla-pizza.png';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useSearchParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
