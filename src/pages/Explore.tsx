@@ -6,7 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import {
   Search, MapPin, Plus, Check, Compass, Moon, Sun, LogOut, User,
   BookmarkPlus, Star, Coffee, Utensils, Camera, Wifi, Home, TreePine,
-  ChevronRight, X, Sparkles, Loader2, ArrowUpRight
+  ChevronRight, X, Sparkles, Loader2, ArrowUpRight, Calendar
 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { LanguageToggle } from '@/components/LanguageToggle';
@@ -234,6 +234,9 @@ export default function Explore() {
           <div className="flex items-center gap-1">
             <LanguageToggle />
             <Button asChild variant="ghost" size="icon" className="h-9 w-9 rounded-xl">
+              <Link to="/plan"><Calendar className="h-4 w-4" /></Link>
+            </Button>
+            <Button asChild variant="ghost" size="icon" className="h-9 w-9 rounded-xl">
               <Link to="/lists"><BookmarkPlus className="h-4 w-4" /></Link>
             </Button>
             <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-9 w-9 rounded-xl">
@@ -454,17 +457,23 @@ export default function Explore() {
       {/* Floating bottom nav — pill style */}
       <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 md:hidden">
         <div className="flex items-center gap-1 px-2 py-2 rounded-full bg-card/90 backdrop-blur-2xl border border-border/20 shadow-2xl shadow-foreground/10">
-          <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-5 rounded-full bg-primary/10">
+          <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-4 rounded-full bg-primary/10">
             <Compass className="h-5 w-5 text-primary" />
             <span className="text-[10px] text-primary font-semibold">{t('cat.explore')}</span>
           </Button>
-          <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-5 rounded-full" asChild>
+          <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-4 rounded-full" asChild>
+            <Link to="/plan">
+              <Calendar className="h-5 w-5 text-muted-foreground" />
+              <span className="text-[10px] text-muted-foreground">Plan</span>
+            </Link>
+          </Button>
+          <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-4 rounded-full" asChild>
             <Link to="/destinations">
               <MapPin className="h-5 w-5 text-muted-foreground" />
               <span className="text-[10px] text-muted-foreground">{t('explore.places')}</span>
             </Link>
           </Button>
-          <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-5 rounded-full" asChild>
+          <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-4 rounded-full" asChild>
             <Link to="/lists">
               <BookmarkPlus className="h-5 w-5 text-muted-foreground" />
               <span className="text-[10px] text-muted-foreground">{t('explore.lists')}</span>

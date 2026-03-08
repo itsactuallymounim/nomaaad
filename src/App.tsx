@@ -12,6 +12,7 @@ import Onboarding from "./pages/Onboarding";
 import Explore from "./pages/Explore";
 import Destinations from "./pages/Destinations";
 import Lists from "./pages/Lists";
+import TripPlanner from "./pages/TripPlanner";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,11 @@ const App = () => (
               <Route path="/lists" element={
                 <ProtectedRoute>
                   <Lists />
+                </ProtectedRoute>
+              } />
+              <Route path="/plan" element={
+                <ProtectedRoute>
+                  <TripPlanner />
                 </ProtectedRoute>
               } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
