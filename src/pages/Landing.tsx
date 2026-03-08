@@ -134,9 +134,9 @@ export default function Landing() {
   const filtered = activeCategory === 'cat.all' ? visiblePlaces : visiblePlaces.filter(p => p.category === activeCategory);
 
   const VALUE_PROPS = [
-    { icon: Compass, titleKey: 'landing.valueProp1Title' as const, descKey: 'landing.valueProp1Desc' as const },
-    { icon: Layers, titleKey: 'landing.valueProp2Title' as const, descKey: 'landing.valueProp2Desc' as const },
-    { icon: Globe, titleKey: 'landing.valueProp3Title' as const, descKey: 'landing.valueProp3Desc' as const },
+    { icon: Compass, titleKey: 'landing.valueProp1Title' as const, descKey: 'landing.valueProp1Desc' as const, character: dogCharacter },
+    { icon: Layers, titleKey: 'landing.valueProp2Title' as const, descKey: 'landing.valueProp2Desc' as const, character: catCharacter },
+    { icon: Globe, titleKey: 'landing.valueProp3Title' as const, descKey: 'landing.valueProp3Desc' as const, character: gorillaCharacter },
   ];
 
   return (
