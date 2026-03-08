@@ -123,6 +123,37 @@ export default function Explore() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [sliders, setSliders] = useState({ budget: 50, pace: 50, vibe: 50 });
 
+  // Infinite scroll feed state
+  const [feedCategory, setFeedCategory] = useState<string>('All');
+  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  const feedSentinelRef = useRef<HTMLDivElement>(null);
+  const [savedFeedItems, setSavedFeedItems] = useState<Set<string>>(new Set());
+
+  const filteredFeed = feedCategory === 'All'
+    ? FEED_LOCATIONS
+    : FEED_LOCATIONS.filter(l => l.category === feedCategory);
+  const feedItems = filteredFeed.slice(0, visibleCount);
+  const hasMoreFeed = visibleCount < filteredFeed.length;
+
+  // Reset visible count when category changes
+  useEffect(() => { setVisibleCount(ITEMS_PER_PAGE); }, [feedCategory]);
+
+  // IntersectionObserver for infinite scroll
+  useEffect(() => {
+    const sentinel = feedSentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMoreFeed) {
+          setVisibleCount(prev => prev + ITEMS_PER_PAGE);
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMoreFeed, feedCategory]);
+
   const [timelineStartDate] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() + 7);
