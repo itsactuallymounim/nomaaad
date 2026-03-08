@@ -596,7 +596,7 @@ export default function Explore() {
             <div className="mt-10 max-w-2xl">
               {aiPlan.tips?.length > 0 && (
                 <div className="mb-6 bg-card border border-border/30 rounded-2xl p-5">
-                  <h3 className="font-semibold text-foreground text-sm mb-2">💡 Nomad Tips</h3>
+                  <h3 className="font-semibold text-foreground text-sm mb-2">💡 {t('explore.nomadTips')}</h3>
                   <ul className="space-y-1">
                     {aiPlan.tips.map((tip, i) => (
                       <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
