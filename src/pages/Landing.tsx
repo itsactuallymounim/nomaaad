@@ -285,7 +285,7 @@ export default function Landing() {
             className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8"
           >
             <div>
-              <h2 className="text-3xl md:text-4xl font-serif font-bold text-foreground">
+              <h2 className="text-3xl md:text-4xl font-sans font-bold text-foreground">
                 {t('landing.explorePlaces')}
               </h2>
               <p className="text-sm text-muted-foreground mt-1.5">{t('landing.exploreSubtitle')}</p>
