@@ -274,8 +274,9 @@ export default function Explore() {
             <input
               value={aiQuery}
               onChange={e => setAiQuery(e.target.value)}
-              placeholder="Plan 7 days in Lisbon for a digital nomad..."
+              placeholder={t('explore.aiPlaceholder')}
               className="relative w-full h-13 pl-11 pr-14 rounded-2xl bg-card/80 backdrop-blur-xl border border-border/30 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/30 transition-all shadow-lg shadow-primary/[0.04]"
+              aria-label={t('explore.aiPlaceholder')}
             />
             <button
               type="submit"
