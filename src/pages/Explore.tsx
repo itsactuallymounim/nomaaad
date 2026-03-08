@@ -70,6 +70,37 @@ const CATEGORY_IMAGES: Record<string, string> = {
   wellness: 'photo-1544161515-4ab6ce6db874',
 };
 
+const FEED_CATEGORIES = ['Coworking', 'Café', 'Hostel', 'Restaurant', 'Temple', 'Market', 'Beach', 'Park'] as const;
+
+const FEED_LOCATIONS = [
+  { name: 'Hubud Coworking', city: 'Bali', category: 'Coworking', rating: 4.6, image: 'photo-1497366216548-37526070297c', description: 'Iconic bamboo coworking in Ubud with fast wifi and rice paddy views.' },
+  { name: 'Café de Flore', city: 'Paris', category: 'Café', rating: 4.4, image: 'photo-1509042239860-f550ce710b93', description: 'Historic Parisian café on Boulevard Saint-Germain.' },
+  { name: 'Selina Lisbon', city: 'Lisbon', category: 'Hostel', rating: 4.3, image: 'photo-1555854877-bab0e564b8d5', description: 'Trendy co-living & hostel with rooftop terrace and events.' },
+  { name: 'Punspace', city: 'Chiang Mai', category: 'Coworking', rating: 4.7, image: 'photo-1527192491265-7e15c55b1ed2', description: 'One of Chiang Mai\'s best coworking spaces in Nimman area.' },
+  { name: 'Tsukiji Outer Market', city: 'Tokyo', category: 'Market', rating: 4.8, image: 'photo-1553621042-f6e147245754', description: 'Fresh sushi and street food paradise near Ginza.' },
+  { name: 'Fushimi Inari Shrine', city: 'Kyoto', category: 'Temple', rating: 4.9, image: 'photo-1478436127897-769e1b3f0f36', description: 'Thousands of vermilion torii gates winding through the mountain.' },
+  { name: 'Outsite Bali', city: 'Bali', category: 'Hostel', rating: 4.5, image: 'photo-1537996194471-e657df975ab4', description: 'Coliving space for remote workers in Canggu with pool.' },
+  { name: 'Café Lempicka', city: 'Prague', category: 'Café', rating: 4.3, image: 'photo-1501339847302-ac426a4a7cbb', description: 'Art deco café with great pastries near Old Town.' },
+  { name: 'El Born Market', city: 'Barcelona', category: 'Market', rating: 4.5, image: 'photo-1534531173927-aeb928d54385', description: 'Historic cast-iron market turned cultural center.' },
+  { name: 'Echo Beach', city: 'Bali', category: 'Beach', rating: 4.4, image: 'photo-1507525428034-b723cf961d3e', description: 'Surfer beach with sunset bars in Canggu.' },
+  { name: 'Dojo Bali', city: 'Bali', category: 'Coworking', rating: 4.5, image: 'photo-1517502884422-41eaead166d4', description: 'Open-air coworking with pool, right in Canggu.' },
+  { name: 'Hoi An Market', city: 'Hoi An', category: 'Market', rating: 4.6, image: 'photo-1555992336-fb0d29498b13', description: 'Vibrant morning market with fresh produce and Banh Mi.' },
+  { name: 'Nusa Dua Beach', city: 'Bali', category: 'Beach', rating: 4.7, image: 'photo-1544551763-46a013bb70d5', description: 'Calm turquoise waters perfect for swimming.' },
+  { name: 'KOI Café', city: 'Seoul', category: 'Café', rating: 4.2, image: 'photo-1495474472287-4d71bcdd2085', description: 'Minimalist Korean café with specialty pour-over.' },
+  { name: 'Senso-ji Temple', city: 'Tokyo', category: 'Temple', rating: 4.8, image: 'photo-1540959733332-eab4deabeeaf', description: 'Tokyo\'s oldest and most significant temple in Asakusa.' },
+  { name: 'Botanischer Garten', city: 'Berlin', category: 'Park', rating: 4.5, image: 'photo-1560969184-10fe8719e047', description: 'One of the largest botanical gardens in the world.' },
+  { name: 'Pad Thai Thip Samai', city: 'Bangkok', category: 'Restaurant', rating: 4.7, image: 'photo-1508009603885-50cf7c579365', description: 'Legendary pad thai wrapped in egg, since 1966.' },
+  { name: 'A-Work Café', city: 'Amsterdam', category: 'Café', rating: 4.3, image: 'photo-1534351590666-13e3e96b5017', description: 'Laptop-friendly café with strong wifi and flat whites.' },
+  { name: 'Lumpini Park', city: 'Bangkok', category: 'Park', rating: 4.4, image: 'photo-1506665531195-3566af2b4dfa', description: 'Green oasis in downtown Bangkok with monitor lizards.' },
+  { name: 'La Boqueria', city: 'Barcelona', category: 'Market', rating: 4.6, image: 'photo-1539020140153-e479b8c22e70', description: 'Famous La Rambla market with tapas and fresh juices.' },
+  { name: 'Kata Beach', city: 'Phuket', category: 'Beach', rating: 4.5, image: 'photo-1519046904884-53103b34b206', description: 'Beautiful crescent bay popular with swimmers.' },
+  { name: 'Fabrika Tbilisi', city: 'Tbilisi', category: 'Hostel', rating: 4.6, image: 'photo-1565008576549-57569a49371d', description: 'Soviet-era factory turned creative hostel and hub.' },
+  { name: 'Warung Babi Guling', city: 'Bali', category: 'Restaurant', rating: 4.7, image: 'photo-1537996194471-e657df975ab4', description: 'Famous Balinese suckling pig in Ubud.' },
+  { name: 'Retiro Park', city: 'Madrid', category: 'Park', rating: 4.8, image: 'photo-1543783207-ec64e4d95325', description: 'Grand park with crystal palace and rowing boats.' },
+];
+
+const ITEMS_PER_PAGE = 8;
+
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/travel-chat`;
 
 export default function Explore() {
@@ -91,6 +122,37 @@ export default function Explore() {
   const [justSaved, setJustSaved] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [sliders, setSliders] = useState({ budget: 50, pace: 50, vibe: 50 });
+
+  // Infinite scroll feed state
+  const [feedCategory, setFeedCategory] = useState<string>('All');
+  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  const feedSentinelRef = useRef<HTMLDivElement>(null);
+  const [savedFeedItems, setSavedFeedItems] = useState<Set<string>>(new Set());
+
+  const filteredFeed = feedCategory === 'All'
+    ? FEED_LOCATIONS
+    : FEED_LOCATIONS.filter(l => l.category === feedCategory);
+  const feedItems = filteredFeed.slice(0, visibleCount);
+  const hasMoreFeed = visibleCount < filteredFeed.length;
+
+  // Reset visible count when category changes
+  useEffect(() => { setVisibleCount(ITEMS_PER_PAGE); }, [feedCategory]);
+
+  // IntersectionObserver for infinite scroll
+  useEffect(() => {
+    const sentinel = feedSentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMoreFeed) {
+          setVisibleCount(prev => prev + ITEMS_PER_PAGE);
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMoreFeed, feedCategory]);
 
   const [timelineStartDate] = useState(() => {
     const d = new Date();
@@ -581,20 +643,123 @@ export default function Explore() {
           </motion.div>
         )}
 
-        {/* Empty state */}
+        {/* Infinite scroll location feed */}
         {!aiPlan && !aiLoading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex flex-col items-center justify-center py-20 text-center"
-          >
-            <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center mb-5">
-              <Sparkles className="h-9 w-9 text-primary" />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            {/* Category filter tabs */}
+            <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4">
+              {['All', ...FEED_CATEGORIES].map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setFeedCategory(cat)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                    feedCategory === cat
+                      ? 'bg-foreground text-background shadow-sm'
+                      : 'bg-secondary/50 text-muted-foreground hover:bg-secondary'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
-            <h2 className="text-xl font-bold text-foreground mb-2">Plan your perfect trip</h2>
-            <p className="text-sm text-muted-foreground max-w-md">
-              Type a destination above — like "7 days in Tokyo as a foodie" — and we'll generate a complete day-by-day itinerary in 30 seconds.
-            </p>
+
+            {/* Cards grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {feedItems.map((loc, idx) => {
+                const isSaved = savedFeedItems.has(loc.name);
+                return (
+                  <motion.div
+                    key={loc.name}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: (idx % ITEMS_PER_PAGE) * 0.04 }}
+                  >
+                    <Card className="rounded-[1.5rem] border-border/30 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-500 group">
+                      <div className="relative aspect-[4/3] overflow-hidden">
+                        <img
+                          src={`https://images.unsplash.com/${loc.image}?auto=format&fit=crop&w=800&q=80`}
+                          alt={loc.name}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-foreground/50 via-transparent to-transparent" />
+
+                        {/* Save button */}
+                        <div className="absolute top-3 right-3">
+                          <motion.button
+                            whileTap={{ scale: 0.85 }}
+                            onClick={async () => {
+                              if (!user || isSaved) return;
+                              try {
+                                let { data: lists } = await supabase
+                                  .from('saved_lists')
+                                  .select('id')
+                                  .eq('user_id', user.id)
+                                  .eq('name', 'Saved Places')
+                                  .limit(1);
+                                let listId: string;
+                                if (lists && lists.length > 0) {
+                                  listId = lists[0].id;
+                                } else {
+                                  const { data: newList, error } = await supabase
+                                    .from('saved_lists')
+                                    .insert({ user_id: user.id, name: 'Saved Places', icon: '📍' })
+                                    .select()
+                                    .single();
+                                  if (error) throw error;
+                                  listId = newList.id;
+                                }
+                                const { error } = await supabase
+                                  .from('saved_places')
+                                  .insert({ list_id: listId, user_id: user.id, name: loc.name, description: loc.description, category: loc.category });
+                                if (error) throw error;
+                                setSavedFeedItems(prev => new Set(prev).add(loc.name));
+                                toast({ title: '📍 Saved!', description: `${loc.name} added to Saved Places.` });
+                              } catch (e) {
+                                toast({ title: 'Error', description: e instanceof Error ? e.message : 'Unknown', variant: 'destructive' });
+                              }
+                            }}
+                            className={`w-9 h-9 rounded-2xl backdrop-blur-md flex items-center justify-center shadow-lg transition-all ${
+                              isSaved ? 'bg-primary text-primary-foreground' : 'bg-background/80 hover:bg-background hover:scale-110'
+                            }`}
+                          >
+                            {isSaved ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4 text-foreground" />}
+                          </motion.button>
+                        </div>
+
+                        {/* Bottom info */}
+                        <div className="absolute bottom-3 left-3 right-3">
+                          <p className="text-xs text-primary-foreground/70 font-medium">{loc.city}</p>
+                          <h3 className="text-sm font-bold text-primary-foreground leading-tight">{loc.name}</h3>
+                        </div>
+                      </div>
+
+                      <CardContent className="p-4">
+                        <p className="text-xs text-muted-foreground line-clamp-2">{loc.description}</p>
+                        <div className="flex items-center gap-2 mt-3">
+                          <Badge variant="secondary" className="rounded-full text-[11px]">{loc.category}</Badge>
+                          <span className="text-xs text-muted-foreground flex items-center gap-0.5">⭐ {loc.rating}</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* Infinite scroll sentinel */}
+            <div ref={feedSentinelRef} className="h-10" />
+            {hasMoreFeed && (
+              <div className="flex justify-center py-6">
+                <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+              </div>
+            )}
+            {!hasMoreFeed && feedItems.length > 0 && (
+              <p className="text-center text-xs text-muted-foreground py-6">You've seen all locations ✨</p>
+            )}
+            {feedItems.length === 0 && (
+              <p className="text-center text-muted-foreground py-16">No locations found in this category.</p>
+            )}
           </motion.div>
         )}
       </div>
