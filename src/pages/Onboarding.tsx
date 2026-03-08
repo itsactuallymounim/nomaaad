@@ -1,10 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, ArrowLeft, Check, Search } from 'lucide-react';
-import catCharacter from '@/assets/characters/cat-banana.png';
-import dogCharacter from '@/assets/characters/dog-icecream.png';
-import gorillaCharacter from '@/assets/characters/gorilla-pizza.png';
+import { ArrowRight, ArrowLeft, Check, Search, Mountain, Cat, Dog, Compass } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
@@ -20,9 +17,9 @@ const STEPS = [
     subtitle: 'Your companion will guide you through trips and recommendations.',
     type: 'single' as const,
     options: [
-      { value: 'gorilla', emoji: '🦍', label: 'Gorilla', desc: 'Bold explorer', image: gorillaCharacter },
-      { value: 'cat', emoji: '🐱', label: 'Cat', desc: 'Curious wanderer', image: catCharacter },
-      { value: 'dog', emoji: '🐶', label: 'Dog', desc: 'Social adventurer', image: dogCharacter },
+      { value: 'gorilla', emoji: '🦍', label: 'Gorilla', desc: 'Bold explorer', lucideIcon: Mountain },
+      { value: 'cat', emoji: '🐱', label: 'Cat', desc: 'Curious wanderer', lucideIcon: Cat },
+      { value: 'dog', emoji: '🐶', label: 'Dog', desc: 'Social adventurer', lucideIcon: Dog },
     ],
   },
   {
@@ -240,7 +237,7 @@ export default function Onboarding() {
     d.toLowerCase().includes(destSearch.toLowerCase())
   );
 
-  const mascotImage = answers.mascot === 'gorilla' ? gorillaCharacter : answers.mascot === 'cat' ? catCharacter : answers.mascot === 'dog' ? dogCharacter : catCharacter;
+  const MascotIcon = answers.mascot === 'gorilla' ? Mountain : answers.mascot === 'cat' ? Cat : answers.mascot === 'dog' ? Dog : Cat;
 
   // Final screen
   if (step === totalSteps) {
@@ -257,7 +254,9 @@ export default function Onboarding() {
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
           >
-            <img src={mascotImage} alt="" className="w-32 h-32 mx-auto rounded-3xl object-cover shadow-xl" />
+            <div className="w-24 h-24 mx-auto rounded-3xl bg-primary/10 flex items-center justify-center shadow-xl">
+              <MascotIcon className="h-12 w-12 text-primary" />
+            </div>
           </motion.div>
           <h1 className="text-3xl font-sans font-bold text-foreground">
             Your nomad profile is ready
@@ -372,8 +371,10 @@ export default function Onboarding() {
                             : 'border-border bg-card hover:border-primary/30 hover:bg-card/80'
                         }`}
                       >
-                        {(opt as any).image ? (
-                          <img src={(opt as any).image} alt="" className="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
+                        {(opt as any).lucideIcon ? (
+                          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            {(() => { const Icon = (opt as any).lucideIcon; return <Icon className="h-5 w-5 text-primary" />; })()}
+                          </div>
                         ) : (
                           <span className="text-2xl flex-shrink-0">{opt.emoji}</span>
                         )}
