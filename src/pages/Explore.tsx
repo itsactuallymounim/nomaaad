@@ -7,6 +7,9 @@ import {
   Search, MapPin, Plus, Check, Compass, Moon, Sun, LogOut, User,
   BookmarkPlus, Star, Coffee, Utensils, Camera, Wifi, Home, TreePine,
   ChevronRight, X, Sparkles, Loader2, ArrowUpRight
+  Search, MapPin, Plus, Check, Compass, Moon, Sun, LogOut, User,
+  BookmarkPlus, Star, Coffee, Utensils, Camera, Wifi, Home, TreePine,
+  ChevronRight, X, Sparkles, Loader2, ArrowUpRight, Calendar
 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { LanguageToggle } from '@/components/LanguageToggle';
