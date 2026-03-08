@@ -7,14 +7,12 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-async function callLLM(messages: any[], openrouterKey: string, lovableKey?: string) {
-  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+async function callLLM(messages: any[], apiKey: string) {
+  return await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${openrouterKey}`,
+      Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
-      "HTTP-Referer": "https://nomaaad.lovable.app",
-      "X-Title": "nomaaad",
     },
     body: JSON.stringify({
       model: "google/gemini-2.5-flash",
@@ -22,27 +20,6 @@ async function callLLM(messages: any[], openrouterKey: string, lovableKey?: stri
       stream: true,
     }),
   });
-
-  if (response.ok) return response;
-
-  if ((response.status === 402 || response.status === 429) && lovableKey) {
-    console.log("OpenRouter unavailable, falling back to Lovable AI");
-    await response.text();
-    return await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${lovableKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages,
-        stream: true,
-      }),
-    });
-  }
-
-  return response;
 }
 
 serve(async (req) => {
