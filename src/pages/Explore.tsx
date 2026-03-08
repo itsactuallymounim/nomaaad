@@ -621,11 +621,11 @@ export default function Explore() {
                 className="w-full rounded-xl h-12 gap-2"
                 size="lg"
               >
-                <BookmarkPlus className="h-4 w-4" />
-                Save all {aiPlan.activities.length} activities to My Itinerary
-              </Button>
+              <BookmarkPlus className="h-4 w-4" />
+              {t('explore.saveAll')}
+            </Button>
               <p className="text-[10px] text-muted-foreground text-center mt-2">
-                Find your saved schedule in <Link to="/lists" className="text-primary underline">Lists</Link> — export to Google Calendar from there
+                {t('explore.savedToLists')} <Link to="/lists" className="text-primary underline">{t('explore.listsLink')}</Link>
               </p>
 
               {/* Shareable trip summary card */}
