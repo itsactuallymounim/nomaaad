@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { usePremium } from '@/hooks/usePremium';
+import { useI18n } from '@/lib/i18n';
+import { LanguageToggle } from '@/components/LanguageToggle';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +18,7 @@ export function Header() {
   const [isDark, setIsDark] = useState(false);
   const { user, signOut } = useAuth();
   const { isPremium, startCheckout } = usePremium();
+  const { t } = useI18n();
 
   useEffect(() => {
     const isDarkMode = document.documentElement.classList.contains('dark');
@@ -42,20 +45,22 @@ export function Header() {
         {user && !isPremium && (
           <Button size="sm" onClick={startCheckout} className="gap-1.5">
             <Crown className="h-4 w-4" />
-            <span className="hidden sm:inline">Upgrade</span>
+            <span className="hidden sm:inline">{t('header.upgrade')}</span>
           </Button>
         )}
         {user && isPremium && (
           <span className="text-xs font-medium text-primary flex items-center gap-1 px-2">
-            <Crown className="h-3.5 w-3.5" /> Premium
+            <Crown className="h-3.5 w-3.5" /> {t('header.premium')}
           </span>
         )}
         <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
           <Link to="/lists">
             <BookmarkPlus className="h-4 w-4 mr-1.5" />
-            Lists
+            {t('header.lists')}
           </Link>
         </Button>
+
+        <LanguageToggle />
 
         <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-9 w-9">
           {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -76,13 +81,13 @@ export function Header() {
               <DropdownMenuItem asChild>
                 <Link to="/lists" className="cursor-pointer">
                   <BookmarkPlus className="h-4 w-4 mr-2" />
-                  My Lists
+                  {t('header.myLists')}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={signOut}>
                 <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
+                {t('header.signOut')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

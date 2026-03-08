@@ -72,11 +72,8 @@ const SAMPLE_ITINERARY = [
 { time: '20:00', title: 'Local dinner', icon: '🍽️' }];
 
 
-const BENEFITS = [
-{ icon: Route, text: 'Geographically optimized' },
-{ icon: Wallet, text: 'Budget-aware' },
-{ icon: MapPin, text: 'Walkability optimized' },
-{ icon: Clock, text: 'Realistic timing' }];
+const BENEFITS_KEYS = ['landing.benefitGeo', 'landing.benefitBudget', 'landing.benefitWalk', 'landing.benefitTime'] as const;
+const BENEFITS_ICONS = [Route, Wallet, MapPin, Clock];
 
 
 /* ── Component ── */
@@ -185,12 +182,12 @@ export default function Landing() {
             </div>
 
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-sans font-bold text-background tracking-tight leading-[1.05] mb-5">
-              Your entire trip.<br />
-              <span className="text-slate-300">Planned in 30 seconds.</span>
+              {t('landing.heroTitle1')}<br />
+              <span className="text-slate-300">{t('landing.heroTitle2')}</span>
             </h1>
 
             <p className="text-background/70 text-base md:text-lg leading-relaxed mb-8 max-w-md mx-auto lg:mx-0">
-              Enter a city, pick your style. Get a complete day-by-day itinerary — geographically optimized, budget-aware, and realistically timed.
+              {t('landing.heroDesc')}
             </p>
 
             {/* ── Dynamic search bar ── */}
@@ -212,7 +209,7 @@ export default function Landing() {
                 <input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="7 days in Bali as a digital nomad..."
+                  placeholder={t('landing.heroSearchPlaceholder')}
                   className="w-full h-14 md:h-16 pl-14 pr-16 rounded-2xl bg-background/95 backdrop-blur-xl text-foreground text-base placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/40 shadow-2xl border-0 transition-all" />
                 
                 <button
@@ -226,12 +223,15 @@ export default function Landing() {
 
             {/* Benefit pills */}
             <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
-              {BENEFITS.map((b) =>
-              <div key={b.text} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-background/10 backdrop-blur-sm border border-background/15">
-                  <b.icon className="h-3.5 w-3.5 text-background/70" />
-                  <span className="text-xs text-background/80 font-medium">{b.text}</span>
-                </div>
-              )}
+              {BENEFITS_KEYS.map((key, i) => {
+                const Icon = BENEFITS_ICONS[i];
+                return (
+                  <div key={key} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-background/10 backdrop-blur-sm border border-background/15">
+                    <Icon className="h-3.5 w-3.5 text-background/70" />
+                    <span className="text-xs text-background/80 font-medium">{t(key)}</span>
+                  </div>
+                );
+              })}
             </div>
           </motion.div>
 
@@ -246,10 +246,10 @@ export default function Landing() {
               <div className="px-5 pt-5 pb-3 border-b border-border/20">
                 <div className="flex items-center gap-2 mb-1">
                   <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                  <span className="text-xs font-mono text-primary font-semibold">Generated in 28s</span>
+                  <span className="text-xs font-mono text-primary font-semibold">{t('landing.sampleGenerated')}</span>
                 </div>
-                <h3 className="font-bold text-foreground text-lg">Lisbon — Day 1</h3>
-                <p className="text-xs text-muted-foreground">Budget · Digital Nomad · 7 Days</p>
+                <h3 className="font-bold text-foreground text-lg">{t('landing.sampleDay')}</h3>
+                <p className="text-xs text-muted-foreground">{t('landing.sampleMeta')}</p>
               </div>
 
               <div className="px-5 py-4 space-y-1">
@@ -274,8 +274,8 @@ export default function Landing() {
 
               <div className="px-5 pb-5 pt-2 border-t border-border/20">
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>6 activities · ~€35 estimated</span>
-                  <span className="text-primary font-medium">View full plan →</span>
+                  <span>{t('landing.sampleFooter')}</span>
+                  <span className="text-primary font-medium">{t('landing.sampleViewPlan')}</span>
                 </div>
               </div>
             </div>
@@ -309,20 +309,20 @@ export default function Landing() {
             transition={{ duration: 0.5 }}
             className="text-center mb-16">
             
-            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary mb-3 block">How it works</span>
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary mb-3 block">{t('landing.howItWorks')}</span>
             <h2 className="text-3xl md:text-4xl font-sans font-bold text-foreground mb-4">
-              Three inputs. One perfect plan.
+              {t('landing.howItWorksTitle')}
             </h2>
             <p className="text-muted-foreground max-w-lg mx-auto text-sm">
-              No more hours of research, no decision fatigue. Just tell us where and how — we handle the rest.
+              {t('landing.howItWorksDesc')}
             </p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-5">
             {[
-            { step: '01', icon: MapPin, title: 'Pick your city', desc: 'Type any destination — Tokyo, Rome, Lisbon, Medellín... anywhere in the world.' },
-            { step: '02', icon: Sparkles, title: 'Set your style', desc: 'Budget or luxury? Relaxed or action-packed? Local secrets or global highlights?' },
-            { step: '03', icon: Zap, title: 'Get your plan', desc: 'In 30 seconds: a complete day-by-day itinerary with time blocks, places, costs, and routes.' }].
+            { step: '01', icon: MapPin, titleKey: 'landing.step1Title' as const, descKey: 'landing.step1Desc' as const },
+            { step: '02', icon: Sparkles, titleKey: 'landing.step2Title' as const, descKey: 'landing.step2Desc' as const },
+            { step: '03', icon: Zap, titleKey: 'landing.step3Title' as const, descKey: 'landing.step3Desc' as const }].
             map((item, i) =>
             <motion.div
               key={i}
@@ -336,8 +336,8 @@ export default function Landing() {
                 <div className="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
                   <item.icon className="h-5 w-5 text-primary" />
                 </div>
-                <h3 className="font-semibold text-foreground mb-2">{item.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                <h3 className="font-semibold text-foreground mb-2">{t(item.titleKey)}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{t(item.descKey)}</p>
               </motion.div>
             )}
           </div>
@@ -355,19 +355,19 @@ export default function Landing() {
             className="text-center mb-14">
             
             <h2 className="text-3xl md:text-4xl font-sans font-bold text-foreground mb-4">
-              Not just another AI chatbot.
+              {t('landing.whyTitle')}
             </h2>
             <p className="text-muted-foreground max-w-lg mx-auto text-sm">
-              ChatGPT gives ideas. Nomaaad gives you a <strong className="text-foreground">complete, optimized travel plan</strong> you can follow step by step.
+              {t('landing.whyDesc')}
             </p>
           </motion.div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-            { icon: Clock, title: 'Structured day plans', desc: 'Time-blocked activities from morning to evening.' },
-            { icon: Route, title: 'Distance optimized', desc: 'Activities ordered to minimize walking and transit.' },
-            { icon: Wallet, title: 'Budget estimation', desc: 'Know your daily costs before you leave.' },
-            { icon: Brain, title: 'Zero decision fatigue', desc: 'Everything planned — just show up and enjoy.' }].
+            { icon: Clock, titleKey: 'landing.whyStructured' as const, descKey: 'landing.whyStructuredDesc' as const },
+            { icon: Route, titleKey: 'landing.whyDistance' as const, descKey: 'landing.whyDistanceDesc' as const },
+            { icon: Wallet, titleKey: 'landing.whyBudget' as const, descKey: 'landing.whyBudgetDesc' as const },
+            { icon: Brain, titleKey: 'landing.whyDecision' as const, descKey: 'landing.whyDecisionDesc' as const }].
             map((item, i) =>
             <motion.div
               key={i}
@@ -380,8 +380,8 @@ export default function Landing() {
                 <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
                   <item.icon className="h-5 w-5 text-primary" />
                 </div>
-                <h3 className="font-semibold text-foreground text-sm mb-1">{item.title}</h3>
-                <p className="text-xs text-muted-foreground">{item.desc}</p>
+                <h3 className="font-semibold text-foreground text-sm mb-1">{t(item.titleKey)}</h3>
+                <p className="text-xs text-muted-foreground">{t(item.descKey)}</p>
               </motion.div>
             )}
           </div>
@@ -583,14 +583,14 @@ export default function Landing() {
             <Globe className="h-8 w-8 text-primary" />
           </div>
           <h2 className="text-3xl md:text-4xl font-sans font-bold text-foreground mb-4">
-            Stop planning. Start exploring.
+            {t('landing.ctaBottom')}
           </h2>
           <p className="text-muted-foreground text-sm mb-8">
-            Your entire travel itinerary — generated instantly. Join thousands of travelers who plan smarter.
+            {t('landing.ctaBottomDesc')}
           </p>
           <Button size="lg" className="gap-2" asChild>
             <Link to="/auth">
-              Get started — it's free
+              {t('landing.ctaBottomButton')}
               <ArrowUpRight className="h-4 w-4" />
             </Link>
           </Button>

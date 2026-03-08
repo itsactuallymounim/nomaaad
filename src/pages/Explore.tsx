@@ -295,7 +295,7 @@ export default function Explore() {
     : [];
 
   return (
-    <div className="min-h-screen bg-background pb-28">
+    <div className="min-h-screen bg-background pb-28 flex flex-col">
       {/* Ambient blobs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10" aria-hidden="true">
         <div className="absolute -top-[30%] -right-[15%] w-[60vw] h-[60vw] rounded-full bg-primary/[0.03] blur-[100px]" />
@@ -347,12 +347,12 @@ export default function Explore() {
         </div>
       </motion.nav>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 flex-1 flex flex-col">
         {/* Greeting */}
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="pt-8 pb-5">
           <h1 className="text-2xl font-sans font-bold text-foreground">{t('explore.greeting')} 👋</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            {aiPlan ? aiPlan.summary : 'Generate your personalized travel plan below.'}
+            {aiPlan ? aiPlan.summary : t('explore.greetingSub')}
           </p>
         </motion.div>
 
@@ -392,7 +392,7 @@ export default function Explore() {
             }`}
           >
             <SlidersHorizontal className="h-3 w-3" />
-            {filtersOpen ? 'Hide filters' : 'Filters'}
+            {filtersOpen ? t('explore.hideFilters') : t('explore.filters')}
           </button>
         </motion.div>
 
@@ -408,9 +408,9 @@ export default function Explore() {
             >
               <div className="grid sm:grid-cols-3 gap-4 p-4 rounded-2xl bg-card/80 backdrop-blur-xl border border-border/30">
                 {([
-                  { key: 'budget' as const, icon: Wallet, label: 'Budget', left: 'Budget', right: 'Luxury' },
-                  { key: 'pace' as const, icon: Zap, label: 'Pace', left: 'Relaxed', right: 'Action' },
-                  { key: 'vibe' as const, icon: Globe, label: 'Vibe', left: 'Local', right: 'Global' },
+                  { key: 'budget' as const, icon: Wallet, label: t('explore.budget'), left: t('explore.budgetLeft'), right: t('explore.budgetRight') },
+                  { key: 'pace' as const, icon: Zap, label: t('explore.pace'), left: t('explore.paceLeft'), right: t('explore.paceRight') },
+                  { key: 'vibe' as const, icon: Globe, label: t('explore.vibe'), left: t('explore.vibeLeft'), right: t('explore.vibeRight') },
                 ]).map(s => (
                   <div key={s.key} className="space-y-2">
                     <div className="flex items-center gap-1.5">
@@ -446,8 +446,8 @@ export default function Explore() {
               <Loader2 className="h-7 w-7 text-primary animate-spin" />
             </div>
             <div className="text-center">
-              <p className="font-semibold text-foreground">Crafting your itinerary...</p>
-              <p className="text-sm text-muted-foreground mt-1">This usually takes about 30 seconds</p>
+              <p className="font-semibold text-foreground">{t('explore.crafting')}</p>
+              <p className="text-sm text-muted-foreground mt-1">{t('explore.craftingSub')}</p>
             </div>
           </motion.div>
         )}
@@ -596,7 +596,7 @@ export default function Explore() {
             <div className="mt-10 max-w-2xl">
               {aiPlan.tips?.length > 0 && (
                 <div className="mb-6 bg-card border border-border/30 rounded-2xl p-5">
-                  <h3 className="font-semibold text-foreground text-sm mb-2">💡 Nomad Tips</h3>
+                  <h3 className="font-semibold text-foreground text-sm mb-2">💡 {t('explore.nomadTips')}</h3>
                   <ul className="space-y-1">
                     {aiPlan.tips.map((tip, i) => (
                       <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
@@ -621,11 +621,11 @@ export default function Explore() {
                 className="w-full rounded-xl h-12 gap-2"
                 size="lg"
               >
-                <BookmarkPlus className="h-4 w-4" />
-                Save all {aiPlan.activities.length} activities to My Itinerary
-              </Button>
+              <BookmarkPlus className="h-4 w-4" />
+              {t('explore.saveAll')}
+            </Button>
               <p className="text-[10px] text-muted-foreground text-center mt-2">
-                Find your saved schedule in <Link to="/lists" className="text-primary underline">Lists</Link> — export to Google Calendar from there
+                {t('explore.savedToLists')} <Link to="/lists" className="text-primary underline">{t('explore.listsLink')}</Link>
               </p>
 
               {/* Shareable trip summary card */}
@@ -645,7 +645,7 @@ export default function Explore() {
 
         {/* Infinite scroll location feed */}
         {!aiPlan && !aiLoading && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col">
             {/* Category filter tabs */}
             <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4">
               {['All', ...FEED_CATEGORIES].map(cat => (
@@ -664,7 +664,7 @@ export default function Explore() {
             </div>
 
             {/* Cards grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 flex-1">
               {feedItems.map((loc, idx) => {
                 const isSaved = savedFeedItems.has(loc.name);
                 return (
@@ -755,10 +755,10 @@ export default function Explore() {
               </div>
             )}
             {!hasMoreFeed && feedItems.length > 0 && (
-              <p className="text-center text-xs text-muted-foreground py-6">You've seen all locations ✨</p>
+              <p className="text-center text-xs text-muted-foreground py-6">{t('explore.seenAll')}</p>
             )}
             {feedItems.length === 0 && (
-              <p className="text-center text-muted-foreground py-16">No locations found in this category.</p>
+              <p className="text-center text-muted-foreground py-16">{t('explore.noCategory')}</p>
             )}
           </motion.div>
         )}
@@ -769,24 +769,24 @@ export default function Explore() {
         <div className="flex items-center gap-1 px-2 py-2 rounded-full bg-card/90 backdrop-blur-2xl border border-border/20 shadow-2xl shadow-foreground/10">
           <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-4 rounded-full bg-primary/10">
             <Compass className="h-5 w-5 text-primary" />
-            <span className="text-[10px] text-primary font-semibold">Explore</span>
+            <span className="text-[10px] text-primary font-semibold">{t('explore.explore')}</span>
           </Button>
           <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-4 rounded-full" asChild>
             <Link to="/journey">
               <Sparkles className="h-5 w-5 text-muted-foreground" />
-              <span className="text-[10px] text-muted-foreground">Journey</span>
+              <span className="text-[10px] text-muted-foreground">{t('explore.journey')}</span>
             </Link>
           </Button>
           <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-4 rounded-full" asChild>
             <Link to="/destinations">
               <MapPin className="h-5 w-5 text-muted-foreground" />
-              <span className="text-[10px] text-muted-foreground">Places</span>
+              <span className="text-[10px] text-muted-foreground">{t('explore.placesNav')}</span>
             </Link>
           </Button>
           <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-4 rounded-full" asChild>
             <Link to="/lists">
               <BookmarkPlus className="h-5 w-5 text-muted-foreground" />
-              <span className="text-[10px] text-muted-foreground">Lists</span>
+              <span className="text-[10px] text-muted-foreground">{t('explore.lists')}</span>
             </Link>
           </Button>
         </div>
