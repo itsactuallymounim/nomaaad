@@ -240,7 +240,7 @@ export default function Onboarding() {
     d.toLowerCase().includes(destSearch.toLowerCase())
   );
 
-  const mascotEmoji = answers.mascot === 'panda' ? '🐼' : answers.mascot === 'cat' ? '🐱' : answers.mascot === 'dog' ? '🐶' : '🧭';
+  const mascotImage = answers.mascot === 'gorilla' ? gorillaCharacter : answers.mascot === 'cat' ? catCharacter : answers.mascot === 'dog' ? dogCharacter : catCharacter;
 
   // Final screen
   if (step === totalSteps) {
@@ -256,9 +256,8 @@ export default function Onboarding() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-            className="text-7xl"
           >
-            {mascotEmoji}
+            <img src={mascotImage} alt="" className="w-32 h-32 mx-auto rounded-3xl object-cover shadow-xl" />
           </motion.div>
           <h1 className="text-3xl font-sans font-bold text-foreground">
             Your nomad profile is ready
