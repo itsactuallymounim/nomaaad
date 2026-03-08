@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowUpRight, MapPin, BookmarkPlus, Share2, Compass } from 'lucide-react';
+import { ArrowUpRight, MapPin, BookmarkPlus, Share2, Compass, Search, Sparkles } from 'lucide-react';
 
 const CATEGORIES = ['All', 'Coworking', 'Cafés', 'Food', 'Explore', 'Coliving'];
 
