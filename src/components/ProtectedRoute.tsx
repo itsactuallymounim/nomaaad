@@ -8,7 +8,8 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { profile, isLoading: profileLoading } = useProfile();
   const location = useLocation();
 
-  if (loading || (user && profileLoading)) {
+  // Only wait for auth loading, not profile — profile loads in background
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-background">
         <Skeleton className="w-32 h-8" />

@@ -29,10 +29,23 @@ export function useProfile() {
         .select('*')
         .eq('id', user.id)
         .single();
-      if (error) throw error;
+      if (error) {
+        // Profile doesn't exist yet (trigger may not have fired) — create it
+        if (error.code === 'PGRST116') {
+          const { data: newProfile, error: insertError } = await supabase
+            .from('profiles')
+            .insert({ id: user.id })
+            .select()
+            .single();
+          if (insertError) throw insertError;
+          return newProfile as Profile;
+        }
+        throw error;
+      }
       return data as Profile;
     },
     enabled: !!user,
+    retry: 1,
   });
 
   return { profile, isLoading };
