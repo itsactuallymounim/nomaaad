@@ -62,6 +62,39 @@ export default function Landing() {
   const heroOpacity = useTransform(scrollYProgress, [0, 1], [1, 0]);
   const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.95]);
 
+  // Infinite scroll — load more places when sentinel is visible
+  const loadMore = useCallback(() => {
+    setBatchCount(prev => {
+      const next = prev + 1;
+      const newBatch = shuffleSpans(BASE_PLACES.map((p, i) => ({
+        ...p,
+        id: `${p.id}-batch${next}-${i}`,
+      })));
+      setVisiblePlaces(curr => [...curr, ...newBatch]);
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      (entries) => { if (entries[0].isIntersecting) loadMore(); },
+      { rootMargin: '600px' }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [loadMore]);
+
+  // Reset infinite scroll when category changes
+  useEffect(() => {
+    const base = activeCategory === 'cat.all'
+      ? BASE_PLACES
+      : BASE_PLACES.filter(p => p.category === activeCategory);
+    setVisiblePlaces(base);
+    setBatchCount(1);
+  }, [activeCategory]);
+
   const EXAMPLE_QUERY = 'Plan 7 days in Lisbon for a digital nomad — Budget: €900';
 
   useEffect(() => {
