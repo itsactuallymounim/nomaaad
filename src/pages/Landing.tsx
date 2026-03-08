@@ -193,7 +193,7 @@ export default function Landing() {
               <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
               {t('landing.badge')}
             </div>
-            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-serif font-bold text-foreground tracking-tight leading-[1.05]">
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-sans font-bold text-foreground tracking-tight leading-[1.05]">
               {t('landing.headline1')}
               <br />
               <span className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
