@@ -309,12 +309,12 @@ export default function Landing() {
             transition={{ duration: 0.5 }}
             className="text-center mb-16">
             
-            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary mb-3 block">How it works</span>
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary mb-3 block">{t('landing.howItWorks')}</span>
             <h2 className="text-3xl md:text-4xl font-sans font-bold text-foreground mb-4">
-              Three inputs. One perfect plan.
+              {t('landing.howItWorksTitle')}
             </h2>
             <p className="text-muted-foreground max-w-lg mx-auto text-sm">
-              No more hours of research, no decision fatigue. Just tell us where and how — we handle the rest.
+              {t('landing.howItWorksDesc')}
             </p>
           </motion.div>
 
