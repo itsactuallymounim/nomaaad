@@ -319,7 +319,7 @@ export default function Landing() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.45, delay: i * 0.04 }}
+                  transition={{ duration: 0.45, delay: Math.min(i * 0.04, 0.4) }}
                   className="break-inside-avoid mb-3 md:mb-4"
                 >
                   <Link
