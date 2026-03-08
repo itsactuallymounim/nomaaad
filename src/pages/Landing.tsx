@@ -146,13 +146,17 @@ export default function Landing() {
             </p>
           </motion.div>
 
-          {/* Search bar */}
+          {/* Search bar with glassmorphism */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="max-w-xl mx-auto mb-4"
+            className="max-w-xl mx-auto mb-4 relative"
           >
+            {/* Gradient glow behind */}
+            <div className="absolute -inset-4 md:-inset-6 rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent blur-2xl pointer-events-none" />
+            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-primary/20 via-primary/5 to-primary/20 opacity-60 blur-md pointer-events-none" />
+
             <form onSubmit={handleSearchSubmit} className="relative group">
               <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
                 <Sparkles className="h-4 w-4 text-primary" />
@@ -163,12 +167,12 @@ export default function Landing() {
                 onChange={e => { setIsTyping(true); setSearchValue(e.target.value); }}
                 onFocus={handleSearchFocus}
                 onBlur={() => { if (!searchValue) setIsTyping(false); }}
-                className="w-full h-14 pl-11 pr-14 rounded-2xl bg-card border border-border/60 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all shadow-sm"
+                className="relative w-full h-14 pl-11 pr-14 rounded-2xl bg-card/80 backdrop-blur-xl border border-border/40 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all shadow-lg shadow-primary/5"
                 placeholder="Where do you want to go?"
               />
               <button
                 type="submit"
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-primary flex items-center justify-center hover:opacity-90 transition-opacity shadow-sm"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-primary flex items-center justify-center hover:opacity-90 transition-opacity shadow-md shadow-primary/20"
               >
                 <ArrowUpRight className="h-4 w-4 text-primary-foreground" />
               </button>
