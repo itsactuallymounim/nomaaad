@@ -755,10 +755,10 @@ export default function Explore() {
               </div>
             )}
             {!hasMoreFeed && feedItems.length > 0 && (
-              <p className="text-center text-xs text-muted-foreground py-6">You've seen all locations ✨</p>
+              <p className="text-center text-xs text-muted-foreground py-6">{t('explore.seenAll')}</p>
             )}
             {feedItems.length === 0 && (
-              <p className="text-center text-muted-foreground py-16">No locations found in this category.</p>
+              <p className="text-center text-muted-foreground py-16">{t('explore.noCategory')}</p>
             )}
           </motion.div>
         )}
