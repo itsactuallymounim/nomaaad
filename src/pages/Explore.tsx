@@ -232,6 +232,21 @@ export default function Explore() {
         window.open(buildGoogleCalendarUrl(activity, timelineStartDate, city), '_blank');
       }, i * 400);
     });
+    // Schedule rating reminders for each activity
+    if (notifPermission === 'granted') {
+      timeline.forEach(activity => {
+        const [hours, minutes] = activity.time.split(':').map(Number);
+        const d = new Date(timelineStartDate);
+        d.setDate(d.getDate() + activity.day - 1);
+        d.setHours(hours, minutes, 0, 0);
+        const endTime = d.getTime() + activity.duration * 60 * 1000;
+        const delayMs = endTime - Date.now();
+        if (delayMs > 0) {
+          scheduleRatingReminder(activity.title, delayMs);
+        }
+      });
+      toast({ title: '🔔 Reminders set', description: 'We\'ll remind you to rate each activity when it ends' });
+    }
   };
 
   const fetchLists = useCallback(async () => {
