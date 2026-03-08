@@ -249,9 +249,9 @@ export default function Explore() {
                 <DropdownMenuContent align="end" className="rounded-2xl w-56">
                   <DropdownMenuItem disabled className="text-xs text-muted-foreground">{user.email}</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild><Link to="/lists" className="cursor-pointer"><BookmarkPlus className="h-4 w-4 mr-2" /> My Lists</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link to="/lists" className="cursor-pointer"><BookmarkPlus className="h-4 w-4 mr-2" /> {t('explore.myLists')}</Link></DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={signOut}><LogOut className="h-4 w-4 mr-2" /> Sign Out</DropdownMenuItem>
+                  <DropdownMenuItem onClick={signOut}><LogOut className="h-4 w-4 mr-2" /> {t('explore.signOut')}</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
