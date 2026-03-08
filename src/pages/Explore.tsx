@@ -224,7 +224,7 @@ export default function Explore() {
         className="sticky top-0 z-50 backdrop-blur-2xl bg-background/60 border-b border-border/20"
         aria-label="Main navigation"
       >
-        <div className="flex items-center justify-between px-4 py-3 max-w-2xl mx-auto">
+        <div className="flex items-center justify-between px-4 md:px-8 py-3 max-w-7xl mx-auto">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-2xl bg-primary flex items-center justify-center shadow-md shadow-primary/20">
               <Compass className="h-4 w-4 text-primary-foreground" aria-hidden="true" />
