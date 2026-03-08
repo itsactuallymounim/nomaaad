@@ -269,13 +269,14 @@ export default function Landing() {
                 key={i}
                 variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0 } }}
                 transition={{ duration: 0.5 }}
-                className="group relative text-center md:text-left p-7 rounded-[1.75rem] bg-card/60 backdrop-blur-sm border border-border/30 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/[0.04] transition-all duration-500"
+                className="group relative text-center md:text-left p-7 rounded-[1.75rem] bg-card/60 backdrop-blur-sm border border-border/30 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/[0.04] transition-all duration-500 overflow-hidden"
               >
+                <img src={prop.character} alt="" className="absolute -bottom-4 -right-4 w-28 h-28 object-cover opacity-10 group-hover:opacity-20 transition-opacity duration-500 rounded-full" aria-hidden="true" />
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center mb-5 mx-auto md:mx-0 group-hover:scale-110 transition-transform duration-500" aria-hidden="true">
                   <prop.icon className="h-5 w-5 text-primary" />
                 </div>
-                <h3 className="font-semibold text-foreground text-base mb-2">{t(prop.titleKey)}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{t(prop.descKey)}</p>
+                <h3 className="font-semibold text-foreground text-base mb-2 relative">{t(prop.titleKey)}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed relative">{t(prop.descKey)}</p>
               </motion.div>
             ))}
           </motion.div>
