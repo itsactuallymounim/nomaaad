@@ -117,55 +117,21 @@ const fadeUp = {
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/travel-chat`;
 
-async function streamTravelPlan({
-  query, profile, onDelta, onDone, onError,
-}: {
-  query: string; profile: any;
-  onDelta: (text: string) => void; onDone: () => void; onError: (error: string) => void;
-}) {
-  try {
-    const resp = await fetch(CHAT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
-      body: JSON.stringify({ query, profile }),
-    });
-    if (!resp.ok) { const err = await resp.json().catch(() => ({ error: 'Failed to generate plan' })); onError(err.error || `Error ${resp.status}`); return; }
-    if (!resp.body) { onError('No response body'); return; }
-    const reader = resp.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      let newlineIdx: number;
-      while ((newlineIdx = buffer.indexOf('\n')) !== -1) {
-        let line = buffer.slice(0, newlineIdx);
-        buffer = buffer.slice(newlineIdx + 1);
-        if (line.endsWith('\r')) line = line.slice(0, -1);
-        if (line.startsWith(':') || line.trim() === '') continue;
-        if (!line.startsWith('data: ')) continue;
-        const jsonStr = line.slice(6).trim();
-        if (jsonStr === '[DONE]') { onDone(); return; }
-        try {
-          const parsed = JSON.parse(jsonStr);
-          const content = parsed.choices?.[0]?.delta?.content;
-          if (content) onDelta(content);
-        } catch { buffer = line + '\n' + buffer; break; }
-      }
-    }
-    if (buffer.trim()) {
-      for (let raw of buffer.split('\n')) {
-        if (!raw) continue;
-        if (raw.endsWith('\r')) raw = raw.slice(0, -1);
-        if (!raw.startsWith('data: ')) continue;
-        const jsonStr = raw.slice(6).trim();
-        if (jsonStr === '[DONE]') continue;
-        try { const parsed = JSON.parse(jsonStr); const content = parsed.choices?.[0]?.delta?.content; if (content) onDelta(content); } catch { /* ignore */ }
-      }
-    }
-    onDone();
-  } catch (e) { onError(e instanceof Error ? e.message : 'Network error'); }
+function buildGoogleCalendarUrl(activity: AiActivity, startDate: string, city: string) {
+  const [hours, minutes] = activity.time.split(':').map(Number);
+  const d = new Date(startDate);
+  d.setDate(d.getDate() + activity.day - 1);
+  d.setHours(hours, minutes, 0, 0);
+  const end = new Date(d.getTime() + activity.duration * 60 * 1000);
+  const fmt = (dt: Date) => dt.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: activity.title,
+    details: `${activity.description}\n💰 ${activity.cost}\n📍 ${activity.location}`,
+    location: `${activity.location}, ${city}`,
+    dates: `${fmt(d)}/${fmt(end)}`,
+  });
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
 export default function Explore() {
@@ -182,11 +148,20 @@ export default function Explore() {
   const [addedToList, setAddedToList] = useState<Record<string, string[]>>({});
 
   const [aiQuery, setAiQuery] = useState('');
-  const [aiResult, setAiResult] = useState('');
+  const [aiPlan, setAiPlan] = useState<AiPlan | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [showAiPanel, setShowAiPanel] = useState(false);
   const aiPanelRef = useRef<HTMLDivElement>(null);
   const hasTriggeredRef = useRef(false);
+
+  // Timeline state
+  const [timeline, setTimeline] = useState<AiActivity[]>([]);
+  const [showTimeline, setShowTimeline] = useState(false);
+  const [timelineStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return d.toISOString().split('T')[0];
+  });
 
   useEffect(() => { setIsDark(document.documentElement.classList.contains('dark')); }, []);
 
@@ -200,15 +175,28 @@ export default function Explore() {
     }
   }, [searchParams]);
 
-  const generatePlan = (query: string) => {
-    setAiLoading(true); setAiResult(''); setShowAiPanel(true);
-    let accumulated = '';
-    streamTravelPlan({
-      query, profile,
-      onDelta: (chunk) => { accumulated += chunk; setAiResult(accumulated); },
-      onDone: () => setAiLoading(false),
-      onError: (error) => { setAiLoading(false); toast({ title: 'AI Error', description: error, variant: 'destructive' }); },
-    });
+  const generatePlan = async (query: string) => {
+    setAiLoading(true); setAiPlan(null); setShowAiPanel(true);
+    try {
+      const resp = await fetch(CHAT_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ query, profile }),
+      });
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({ error: 'Failed' }));
+        throw new Error(err.error || 'Failed to generate plan');
+      }
+      const data = await resp.json();
+      setAiPlan(data.plan);
+    } catch (e) {
+      toast({ title: 'AI Error', description: e instanceof Error ? e.message : 'Unknown error', variant: 'destructive' });
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   const handleAiSearch = (e: React.FormEvent) => { e.preventDefault(); if (!aiQuery.trim()) return; generatePlan(aiQuery.trim()); };
