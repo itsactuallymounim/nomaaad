@@ -38,6 +38,43 @@ interface CuratedPlace {
   tags: string[];
 }
 
+interface AiActivity {
+  day: number;
+  time: string;
+  duration: number;
+  title: string;
+  description: string;
+  category: string;
+  location: string;
+  cost: string;
+}
+
+interface AiPlan {
+  title: string;
+  summary: string;
+  budget_summary: string;
+  activities: AiActivity[];
+  tips: string[];
+}
+
+const AI_CATEGORY_ICONS: Record<string, typeof Coffee> = {
+  food: Utensils,
+  work: Wifi,
+  explore: Camera,
+  transport: Train,
+  social: Heart,
+  wellness: Heart,
+};
+
+const AI_CATEGORY_COLORS: Record<string, string> = {
+  food: 'bg-chart-1/10 text-chart-1',
+  work: 'bg-primary/10 text-primary',
+  explore: 'bg-chart-2/10 text-chart-2',
+  transport: 'bg-chart-3/10 text-chart-3',
+  social: 'bg-chart-4/10 text-chart-4',
+  wellness: 'bg-chart-5/10 text-chart-5',
+};
+
 const CURATED_PLACES: CuratedPlace[] = [
   { id: '1', name: 'Dojo Bali', city: 'Canggu', country: 'Indonesia', description: 'Iconic coworking space with pool and tropical vibes', category: 'coworking', image: 'photo-1537996194471-e657df975ab4', rating: 4.7, tags: ['wifi', 'pool', 'community'] },
   { id: '2', name: 'Selina Lisbon', city: 'Lisbon', country: 'Portugal', description: 'Coliving and coworking in the heart of the city', category: 'coliving', image: 'photo-1536663815808-535e2280d2c2', rating: 4.5, tags: ['coliving', 'events', 'rooftop'] },
