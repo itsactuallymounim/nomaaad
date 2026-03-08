@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
   Plus, Trash2, ArrowLeft, Search, MapPin, Star, Share2, Compass,
-  BookmarkPlus, MoreHorizontal, Edit2, Check, X
+  BookmarkPlus, MoreHorizontal, Edit2, Check, X, Calendar, StarIcon
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -63,6 +63,47 @@ function getCachedData(): SavedList[] | null {
   }
 }
 
+// Build Google Calendar URL from a saved place
+function buildGoogleCalendarUrlFromPlace(place: SavedPlace, startDate: string) {
+  // Try to extract time from name pattern: "Day X · HH:MM — Title"
+  const timeMatch = place.name.match(/(\d{2}:\d{2})/);
+  const dayMatch = place.name.match(/Day\s+(\d+)/i);
+
+  const day = dayMatch ? parseInt(dayMatch[1]) : 1;
+  const time = timeMatch ? timeMatch[1] : '09:00';
+  const [hours, minutes] = time.split(':').map(Number);
+
+  const d = new Date(startDate);
+  d.setDate(d.getDate() + day - 1);
+  d.setHours(hours, minutes, 0, 0);
+  const end = new Date(d.getTime() + 60 * 60 * 1000); // default 1h
+
+  const fmt = (dt: Date) => dt.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: place.name.replace(/Day\s+\d+\s*·\s*\d{2}:\d{2}\s*—\s*/, ''),
+    details: place.description || '',
+    location: place.address || '',
+    dates: `${fmt(d)}/${fmt(end)}`,
+  });
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
+// Google Calendar SVG icon
+function GoogleCalendarIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="4" width="18" height="18" rx="2" className="stroke-current" strokeWidth="1.5" fill="none" />
+      <path d="M3 9h18" className="stroke-current" strokeWidth="1.5" />
+      <path d="M9 4V2M15 4V2" className="stroke-current" strokeWidth="1.5" strokeLinecap="round" />
+      <rect x="7" y="12" width="3" height="3" rx="0.5" fill="#4285F4" />
+      <rect x="14" y="12" width="3" height="3" rx="0.5" fill="#EA4335" />
+      <rect x="7" y="17" width="3" height="2" rx="0.5" fill="#FBBC04" />
+      <rect x="14" y="17" width="3" height="2" rx="0.5" fill="#34A853" />
+    </svg>
+  );
+}
+
 export default function Lists() {
   const { user } = useAuth();
   const [lists, setLists] = useState<SavedList[]>([]);
@@ -74,6 +115,16 @@ export default function Lists() {
   const [searchQuery, setSearchQuery] = useState('');
   const [addPlaceOpen, setAddPlaceOpen] = useState(false);
   const [newPlace, setNewPlace] = useState({ name: '', description: '', address: '', category: 'activity' });
+
+  // Rating state
+  const [ratingPlaceId, setRatingPlaceId] = useState<string | null>(null);
+  const [ratingValue, setRatingValue] = useState(0);
+
+  const [timelineStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return d.toISOString().split('T')[0];
+  });
 
   const fetchLists = useCallback(async () => {
     if (!user) return;
@@ -97,7 +148,6 @@ export default function Lists() {
       setLists(listsWithPlaces);
       cacheData(listsWithPlaces);
     } catch {
-      // Load from cache on failure (offline)
       const cached = getCachedData();
       if (cached) {
         setLists(cached);
@@ -109,7 +159,6 @@ export default function Lists() {
   }, [user]);
 
   useEffect(() => {
-    // Load cache first for instant display
     const cached = getCachedData();
     if (cached) {
       setLists(cached);
@@ -183,6 +232,41 @@ export default function Lists() {
     }
   };
 
+  const ratePlace = async (placeId: string, rating: number) => {
+    const { error } = await supabase
+      .from('saved_places')
+      .update({ rating })
+      .eq('id', placeId);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      return;
+    }
+    // Update local state
+    const updatePlaces = (places?: SavedPlace[]) =>
+      places?.map(p => p.id === placeId ? { ...p, rating } : p);
+
+    setLists(prev => prev.map(l => ({ ...l, places: updatePlaces(l.places) })));
+    if (selectedList) {
+      setSelectedList(prev => prev ? { ...prev, places: updatePlaces(prev.places) } : null);
+    }
+    setRatingPlaceId(null);
+    setRatingValue(0);
+    toast({ title: '⭐ Rating saved!', description: 'Thanks for your feedback.' });
+  };
+
+  const exportListToGoogleCalendar = (list: SavedList) => {
+    if (!list.places?.length) return;
+    list.places.forEach((place, i) => {
+      setTimeout(() => {
+        window.open(buildGoogleCalendarUrlFromPlace(place, timelineStartDate), '_blank');
+      }, i * 400);
+    });
+    toast({
+      title: '📅 Exporting to Google Calendar',
+      description: `Opening ${list.places.length} events. Confirm each in Google Calendar.`,
+    });
+  };
+
   const shareOnWhatsApp = (list: SavedList) => {
     const places = list.places?.map((p, i) => `${i + 1}. ${p.name}${p.address ? ` — ${p.address}` : ''}`).join('\n') || '';
     const text = `🗺 ${list.icon} ${list.name}\n\n${places}\n\nShared from nomaaad ✈️`;
@@ -209,6 +293,8 @@ export default function Lists() {
   // Detail view
   if (selectedList) {
     const list = lists.find(l => l.id === selectedList.id) || selectedList;
+    const unratedPlaces = list.places?.filter(p => !p.rating) || [];
+
     return (
       <div className="min-h-screen bg-background">
         <nav className="sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border/40">
@@ -225,11 +311,43 @@ export default function Lists() {
         </nav>
 
         <div className="max-w-2xl mx-auto px-4 py-8">
-          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
             <div className="text-4xl mb-3">{list.icon}</div>
             <h1 className="text-2xl font-sans font-bold text-foreground">{list.name}</h1>
             <p className="text-sm text-muted-foreground mt-1">{list.places?.length || 0} places</p>
           </motion.div>
+
+          {/* Google Calendar export button */}
+          {list.places && list.places.length > 0 && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+              <Button
+                onClick={() => exportListToGoogleCalendar(list)}
+                variant="outline"
+                className="w-full rounded-2xl h-12 mb-4 gap-2 border-border/50 hover:border-primary/30 hover:bg-primary/5"
+              >
+                <GoogleCalendarIcon className="h-5 w-5" />
+                <span>Add to Google Calendar</span>
+              </Button>
+            </motion.div>
+          )}
+
+          {/* Rating reminder banner */}
+          {unratedPlaces.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="mb-5 p-3 rounded-2xl bg-chart-1/10 border border-chart-1/20"
+            >
+              <div className="flex items-center gap-2">
+                <Star className="h-4 w-4 text-chart-1 shrink-0" />
+                <p className="text-xs text-foreground">
+                  <span className="font-medium">{unratedPlaces.length} activit{unratedPlaces.length === 1 ? 'y' : 'ies'} to rate!</span>
+                  {' '}Tap the ⭐ on each card to share your experience.
+                </p>
+              </div>
+            </motion.div>
+          )}
 
           <Dialog open={addPlaceOpen} onOpenChange={setAddPlaceOpen}>
             <DialogTrigger asChild>
@@ -279,19 +397,69 @@ export default function Lists() {
                       <h3 className="font-medium text-sm">{place.name}</h3>
                       {place.address && <p className="text-xs text-muted-foreground mt-0.5">{place.address}</p>}
                       {place.description && <p className="text-xs text-muted-foreground mt-1">{place.description}</p>}
-                      <div className="flex gap-2 mt-2">
+                      <div className="flex gap-2 mt-2 items-center flex-wrap">
                         <Badge variant="secondary" className="text-xs rounded-xl capitalize">{place.category}</Badge>
-                        {place.rating && (
+
+                        {/* Rating display or prompt */}
+                        {place.rating ? (
                           <div className="flex items-center gap-0.5 text-xs text-muted-foreground">
                             <Star className="h-3 w-3 fill-chart-1 text-chart-1" />
-                            {place.rating}
+                            {place.rating}/5
                           </div>
+                        ) : (
+                          ratingPlaceId === place.id ? (
+                            <div className="flex items-center gap-1">
+                              {[1, 2, 3, 4, 5].map(star => (
+                                <button
+                                  key={star}
+                                  onClick={() => ratePlace(place.id, star)}
+                                  onMouseEnter={() => setRatingValue(star)}
+                                  onMouseLeave={() => setRatingValue(0)}
+                                  className="p-0.5 transition-transform hover:scale-125"
+                                >
+                                  <Star
+                                    className={`h-4 w-4 transition-colors ${
+                                      star <= ratingValue
+                                        ? 'fill-chart-1 text-chart-1'
+                                        : 'text-muted-foreground/40'
+                                    }`}
+                                  />
+                                </button>
+                              ))}
+                              <button
+                                onClick={() => { setRatingPlaceId(null); setRatingValue(0); }}
+                                className="ml-1 p-0.5"
+                              >
+                                <X className="h-3 w-3 text-muted-foreground" />
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setRatingPlaceId(place.id)}
+                              className="flex items-center gap-1 text-xs text-chart-1 hover:underline"
+                            >
+                              <Star className="h-3 w-3" /> Rate
+                            </button>
+                          )
                         )}
                       </div>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl shrink-0" onClick={() => deletePlace(place.id)}>
-                      <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                    </Button>
+                    <div className="flex flex-col gap-1 shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-xl"
+                        onClick={() => {
+                          window.open(buildGoogleCalendarUrlFromPlace(place, timelineStartDate), '_blank');
+                        }}
+                        title="Add to Google Calendar"
+                      >
+                        <GoogleCalendarIcon className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl" onClick={() => deletePlace(place.id)}>
+                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -398,6 +566,16 @@ export default function Lists() {
                       <h3 className="font-semibold text-sm">{list.name}</h3>
                       <p className="text-xs text-muted-foreground">{list.places?.length || 0} places</p>
                     </div>
+                    {/* Google Calendar quick-export on list card */}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 rounded-xl shrink-0"
+                      onClick={e => { e.stopPropagation(); exportListToGoogleCalendar(list); }}
+                      title="Export to Google Calendar"
+                    >
+                      <GoogleCalendarIcon className="h-4 w-4" />
+                    </Button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
                         <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl shrink-0">

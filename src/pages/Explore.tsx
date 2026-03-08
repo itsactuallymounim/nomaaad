@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import {
   MapPin, Plus, Check, Compass, Moon, Sun, LogOut, User,
   BookmarkPlus, Coffee, Utensils, Camera, Wifi, Heart, Train,
@@ -58,7 +58,6 @@ const AI_CATEGORY_COLORS: Record<string, string> = {
   wellness: 'bg-chart-5/10 text-chart-5',
 };
 
-// Unsplash images for activity categories
 const CATEGORY_IMAGES: Record<string, string> = {
   food: 'photo-1504674900247-0877df9cc836',
   work: 'photo-1497366216548-37526070297c',
@@ -70,27 +69,11 @@ const CATEGORY_IMAGES: Record<string, string> = {
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/travel-chat`;
 
-function buildGoogleCalendarUrl(activity: AiActivity, startDate: string, city: string) {
-  const [hours, minutes] = activity.time.split(':').map(Number);
-  const d = new Date(startDate);
-  d.setDate(d.getDate() + activity.day - 1);
-  d.setHours(hours, minutes, 0, 0);
-  const end = new Date(d.getTime() + activity.duration * 60 * 1000);
-  const fmt = (dt: Date) => dt.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-  const params = new URLSearchParams({
-    action: 'TEMPLATE',
-    text: activity.title,
-    details: `${activity.description}\n💰 ${activity.cost}\n📍 ${activity.location}`,
-    location: `${activity.location}, ${city}`,
-    dates: `${fmt(d)}/${fmt(end)}`,
-  });
-  return `https://calendar.google.com/calendar/render?${params.toString()}`;
-}
-
 export default function Explore() {
   const { user, signOut } = useAuth();
   const { profile } = useProfile();
   const { t } = useI18n();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isDark, setIsDark] = useState(false);
 
@@ -100,6 +83,11 @@ export default function Explore() {
   const [activeDay, setActiveDay] = useState(1);
   const hasTriggeredRef = useRef(false);
 
+  // Track which activities have been saved (show check instead of plus)
+  const [savedActivities, setSavedActivities] = useState<Set<string>>(new Set());
+  // Track which activity just got saved for tooltip animation
+  const [justSaved, setJustSaved] = useState<string | null>(null);
+
   const [timelineStartDate] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() + 7);
@@ -108,7 +96,6 @@ export default function Explore() {
 
   useEffect(() => { setIsDark(document.documentElement.classList.contains('dark')); }, []);
 
-  // Handle query param from landing page
   useEffect(() => {
     const q = searchParams.get('q');
     if (q && !hasTriggeredRef.current) {
@@ -120,7 +107,6 @@ export default function Explore() {
     }
   }, [searchParams]);
 
-  // Auto-generate a plan from profile after onboarding if no query
   useEffect(() => {
     if (hasTriggeredRef.current || aiPlan || aiLoading) return;
     if (!profile?.onboarding_completed) return;
@@ -138,6 +124,7 @@ export default function Explore() {
   const generatePlan = async (query: string) => {
     setAiLoading(true);
     setAiPlan(null);
+    setSavedActivities(new Set());
     try {
       const resp = await fetch(CHAT_URL, {
         method: 'POST',
@@ -173,17 +160,61 @@ export default function Explore() {
     setIsDark(!isDark);
   };
 
-  const exportAllToGoogleCalendar = () => {
-    if (!aiPlan) return;
-    const city = aiPlan.title?.split('—')?.[0]?.trim() || 'Trip';
-    aiPlan.activities.forEach((activity, i) => {
-      setTimeout(() => {
-        window.open(buildGoogleCalendarUrl(activity, timelineStartDate, city), '_blank');
-      }, i * 400);
-    });
+  // Save activity to a list (auto-create "My Itinerary" list if none exists)
+  const saveActivityToList = async (activity: AiActivity) => {
+    if (!user) return;
+    const activityKey = `${activity.day}-${activity.time}-${activity.title}`;
+    if (savedActivities.has(activityKey)) return;
+
+    try {
+      // Find or create "My Itinerary" list
+      let { data: lists } = await supabase
+        .from('saved_lists')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('name', 'My Itinerary')
+        .limit(1);
+
+      let listId: string;
+      if (lists && lists.length > 0) {
+        listId = lists[0].id;
+      } else {
+        const { data: newList, error } = await supabase
+          .from('saved_lists')
+          .insert({ user_id: user.id, name: 'My Itinerary', icon: '✈️' })
+          .select()
+          .single();
+        if (error) throw error;
+        listId = newList.id;
+      }
+
+      // Save the place
+      const city = aiPlan?.title?.split('—')?.[0]?.trim() || '';
+      const { error } = await supabase
+        .from('saved_places')
+        .insert({
+          list_id: listId,
+          user_id: user.id,
+          name: `Day ${activity.day} · ${activity.time} — ${activity.title}`,
+          description: `${activity.description}\n💰 ${activity.cost}`,
+          address: `${activity.location}${city ? `, ${city}` : ''}`,
+          category: activity.category,
+        });
+      if (error) throw error;
+
+      setSavedActivities(prev => new Set(prev).add(activityKey));
+      setJustSaved(activityKey);
+      setTimeout(() => setJustSaved(null), 2500);
+
+      toast({
+        title: '✅ Saved to My Itinerary',
+        description: 'Find your schedule in Lists. Don\'t forget to rate it later!',
+      });
+    } catch (e) {
+      toast({ title: 'Error saving', description: e instanceof Error ? e.message : 'Unknown error', variant: 'destructive' });
+    }
   };
 
-  // Get unique days from plan
   const days = aiPlan
     ? Array.from(new Set(aiPlan.activities.map(a => a.day))).sort((a, b) => a - b)
     : [];
@@ -327,7 +358,7 @@ export default function Explore() {
               ))}
             </div>
 
-            {/* Activity cards grid — reference design style */}
+            {/* Activity cards grid */}
             <motion.div
               key={activeDay}
               initial={{ opacity: 0, x: 10 }}
@@ -339,6 +370,9 @@ export default function Explore() {
                 const Icon = AI_CATEGORY_ICONS[activity.category] || Camera;
                 const colorClass = AI_CATEGORY_COLORS[activity.category] || 'bg-secondary text-muted-foreground';
                 const imgKey = CATEGORY_IMAGES[activity.category] || CATEGORY_IMAGES.explore;
+                const activityKey = `${activity.day}-${activity.time}-${activity.title}`;
+                const isSaved = savedActivities.has(activityKey);
+                const isJustSaved = justSaved === activityKey;
 
                 return (
                   <motion.div
@@ -358,18 +392,45 @@ export default function Explore() {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-foreground/50 via-transparent to-transparent" />
 
-                        {/* Add to calendar button */}
+                        {/* Save to list button */}
                         <div className="absolute top-3 right-3">
-                          <button
-                            onClick={() => {
-                              const city = aiPlan.title?.split('—')?.[0]?.trim() || 'Trip';
-                              window.open(buildGoogleCalendarUrl(activity, timelineStartDate, city), '_blank');
-                            }}
-                            className="w-9 h-9 rounded-2xl bg-background/80 backdrop-blur-md flex items-center justify-center shadow-lg hover:bg-background hover:scale-110 active:scale-95 transition-all"
-                            title="Add to Google Calendar"
-                          >
-                            <Plus className="h-4 w-4 text-foreground" />
-                          </button>
+                          <div className="relative">
+                            <motion.button
+                              onClick={() => saveActivityToList(activity)}
+                              whileTap={{ scale: 0.85 }}
+                              animate={isSaved ? { scale: [1, 1.3, 1] } : {}}
+                              transition={{ duration: 0.3 }}
+                              className={`w-9 h-9 rounded-2xl backdrop-blur-md flex items-center justify-center shadow-lg transition-all ${
+                                isSaved
+                                  ? 'bg-primary text-primary-foreground'
+                                  : 'bg-background/80 hover:bg-background hover:scale-110'
+                              }`}
+                              title="Save to My Itinerary"
+                            >
+                              {isSaved ? (
+                                <Check className="h-4 w-4" />
+                              ) : (
+                                <Plus className="h-4 w-4 text-foreground" />
+                              )}
+                            </motion.button>
+
+                            {/* Animated tooltip: "Saved to Lists!" */}
+                            <AnimatePresence>
+                              {isJustSaved && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: 4, scale: 0.9 }}
+                                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                                  exit={{ opacity: 0, y: -4, scale: 0.9 }}
+                                  className="absolute top-full right-0 mt-2 whitespace-nowrap"
+                                >
+                                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-medium shadow-lg">
+                                    <BookmarkPlus className="h-3 w-3" />
+                                    Saved! Check Lists 📋
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
                         </div>
 
                         {/* Bottom badges */}
@@ -408,7 +469,7 @@ export default function Explore() {
               })}
             </motion.div>
 
-            {/* Tips + Export */}
+            {/* Tips + Save All */}
             <div className="mt-10 max-w-2xl">
               {aiPlan.tips?.length > 0 && (
                 <div className="mb-6 bg-card border border-border/30 rounded-2xl p-5">
@@ -423,18 +484,31 @@ export default function Explore() {
                 </div>
               )}
 
-              <Button onClick={exportAllToGoogleCalendar} className="w-full rounded-xl h-12 gap-2" size="lg">
-                <CalendarPlus className="h-4 w-4" />
-                Export all {aiPlan.activities.length} activities to Google Calendar
+              <Button
+                onClick={async () => {
+                  if (!aiPlan) return;
+                  for (const activity of aiPlan.activities) {
+                    await saveActivityToList(activity);
+                  }
+                  toast({
+                    title: '🎉 All activities saved!',
+                    description: 'Go to Lists to view your itinerary & export to Google Calendar.',
+                  });
+                }}
+                className="w-full rounded-xl h-12 gap-2"
+                size="lg"
+              >
+                <BookmarkPlus className="h-4 w-4" />
+                Save all {aiPlan.activities.length} activities to My Itinerary
               </Button>
               <p className="text-[10px] text-muted-foreground text-center mt-2">
-                Each activity opens in a new tab for you to confirm
+                Find your saved schedule in <Link to="/lists" className="text-primary underline">Lists</Link> — export to Google Calendar from there
               </p>
             </div>
           </motion.div>
         )}
 
-        {/* Empty state — no plan yet, not loading */}
+        {/* Empty state */}
         {!aiPlan && !aiLoading && (
           <motion.div
             initial={{ opacity: 0 }}
