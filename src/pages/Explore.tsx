@@ -88,8 +88,9 @@ export default function Explore() {
 
   // Track which activities have been saved (show check instead of plus)
   const [savedActivities, setSavedActivities] = useState<Set<string>>(new Set());
-  // Track which activity just got saved for tooltip animation
   const [justSaved, setJustSaved] = useState<string | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [sliders, setSliders] = useState({ budget: 50, pace: 50, vibe: 50 });
 
   const [timelineStartDate] = useState(() => {
     const d = new Date();
