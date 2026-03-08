@@ -280,9 +280,9 @@ export default function Landing() {
             className="grid md:grid-cols-3 gap-5 md:gap-6 mb-20 md:mb-28"
           >
             {[
-              { icon: Compass, titleKey: 'landing.valueProp1Title' as const, descKey: 'landing.valueProp1Desc' as const, character: dogCharacter },
-              { icon: MapPin, titleKey: 'landing.valueProp2Title' as const, descKey: 'landing.valueProp2Desc' as const, character: catCharacter },
-              { icon: Sparkles, titleKey: 'landing.valueProp3Title' as const, descKey: 'landing.valueProp3Desc' as const, character: gorillaCharacter },
+              { icon: Compass, titleKey: 'landing.valueProp1Title' as const, descKey: 'landing.valueProp1Desc' as const },
+              { icon: MapPin, titleKey: 'landing.valueProp2Title' as const, descKey: 'landing.valueProp2Desc' as const },
+              { icon: Sparkles, titleKey: 'landing.valueProp3Title' as const, descKey: 'landing.valueProp3Desc' as const },
             ].map((prop, i) => (
               <motion.div
                 key={i}
