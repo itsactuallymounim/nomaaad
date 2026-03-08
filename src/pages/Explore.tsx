@@ -2,11 +2,11 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { embedSavedPlace } from '@/lib/embeddings';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useSearchParams } from 'react-router-dom';
-import ReactMarkdown from 'react-markdown';
 import {
   Search, MapPin, Plus, Check, Compass, Moon, Sun, LogOut, User,
   BookmarkPlus, Star, Coffee, Utensils, Camera, Wifi, Home, TreePine,
-  ChevronRight, X, Sparkles, Loader2, ArrowUpRight, Calendar
+  ChevronRight, X, Sparkles, Loader2, ArrowUpRight, Calendar,
+  CalendarPlus, Clock, DollarSign, Heart, Train, ChevronDown
 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { LanguageToggle } from '@/components/LanguageToggle';
