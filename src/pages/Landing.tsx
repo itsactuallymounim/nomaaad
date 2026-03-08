@@ -399,6 +399,13 @@ export default function Landing() {
             </AnimatePresence>
           </motion.div>
 
+          {/* Loading indicator */}
+          {isLoadingMore && (
+            <div className="flex justify-center py-8">
+              <div className="w-6 h-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+            </div>
+          )}
+
           {/* Infinite scroll sentinel */}
           <div ref={sentinelRef} className="h-px w-full" aria-hidden="true" />
         </div>
