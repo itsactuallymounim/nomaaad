@@ -364,10 +364,10 @@ export default function Landing() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-            { icon: Clock, title: 'Structured day plans', desc: 'Time-blocked activities from morning to evening.' },
-            { icon: Route, title: 'Distance optimized', desc: 'Activities ordered to minimize walking and transit.' },
-            { icon: Wallet, title: 'Budget estimation', desc: 'Know your daily costs before you leave.' },
-            { icon: Brain, title: 'Zero decision fatigue', desc: 'Everything planned — just show up and enjoy.' }].
+            { icon: Clock, titleKey: 'landing.whyStructured' as const, descKey: 'landing.whyStructuredDesc' as const },
+            { icon: Route, titleKey: 'landing.whyDistance' as const, descKey: 'landing.whyDistanceDesc' as const },
+            { icon: Wallet, titleKey: 'landing.whyBudget' as const, descKey: 'landing.whyBudgetDesc' as const },
+            { icon: Brain, titleKey: 'landing.whyDecision' as const, descKey: 'landing.whyDecisionDesc' as const }].
             map((item, i) =>
             <motion.div
               key={i}
