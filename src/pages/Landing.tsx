@@ -61,7 +61,29 @@ const ALL_PLACES: Place[] = [
 ];
 
 const BATCH_SIZE = 12;
-const BASE_PLACES = ALL_PLACES.slice(0, BATCH_SIZE);
+
+// Generate infinite places by cycling through ALL_PLACES with unique IDs
+function generateBatch(batchIndex: number, category?: string): Place[] {
+  const source = category && category !== 'cat.all'
+    ? ALL_PLACES.filter(p => p.category === category)
+    : ALL_PLACES;
+  if (source.length === 0) return [];
+
+  const batch: Place[] = [];
+  for (let i = 0; i < BATCH_SIZE; i++) {
+    const sourceIdx = (batchIndex * BATCH_SIZE + i) % source.length;
+    const place = source[sourceIdx];
+    // Alternate span pattern for visual variety across cycles
+    const cycle = Math.floor((batchIndex * BATCH_SIZE + i) / source.length);
+    const spans: Array<'tall' | 'normal'> = ['normal', 'normal', 'tall', 'normal', 'normal', 'normal', 'tall', 'normal', 'normal', 'tall', 'normal', 'normal'];
+    batch.push({
+      ...place,
+      id: `${place.id}-batch${batchIndex}-${i}`,
+      span: spans[(sourceIdx + cycle) % spans.length],
+    });
+  }
+  return batch;
+}
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -69,9 +91,10 @@ export default function Landing() {
   const [activeCategory, setActiveCategory] = useState('cat.all');
   const [searchValue, setSearchValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [visiblePlaces, setVisiblePlaces] = useState<Place[]>(() => BASE_PLACES);
+  const [visiblePlaces, setVisiblePlaces] = useState<Place[]>(() => generateBatch(0));
   const [batchCount, setBatchCount] = useState(1);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const EXAMPLE_QUERY = 'Plan 7 days in Lisbon for a digital nomad — Budget: €900';
 
@@ -98,18 +121,17 @@ export default function Landing() {
     return () => clearInterval(interval);
   }, [isTyping]);
 
-  // Infinite scroll — load next unique batch of cities
+  // Infinite scroll — endlessly generate more batches
   const loadMore = useCallback(() => {
+    setIsLoadingMore(true);
     setBatchCount(prev => {
       const next = prev + 1;
-      const start = next * BATCH_SIZE;
-      const end = start + BATCH_SIZE;
-      if (start >= ALL_PLACES.length) return prev; // no more unique cities
-      const newBatch = ALL_PLACES.slice(start, end);
+      const newBatch = generateBatch(next - 1, activeCategory);
       setVisiblePlaces(curr => [...curr, ...newBatch]);
+      setTimeout(() => setIsLoadingMore(false), 300);
       return next;
     });
-  }, []);
+  }, [activeCategory]);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -123,10 +145,7 @@ export default function Landing() {
   }, [loadMore]);
 
   useEffect(() => {
-    const base = activeCategory === 'cat.all'
-      ? ALL_PLACES.slice(0, BATCH_SIZE)
-      : ALL_PLACES.filter(p => p.category === activeCategory).slice(0, BATCH_SIZE);
-    setVisiblePlaces(base);
+    setVisiblePlaces(generateBatch(0, activeCategory));
     setBatchCount(1);
   }, [activeCategory]);
 
