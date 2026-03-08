@@ -310,9 +310,9 @@ export default function Explore() {
                       <ReactMarkdown>{aiResult}</ReactMarkdown>
                     </div>
                   ) : aiLoading ? (
-                    <div className="flex items-center gap-3 py-8 justify-center">
-                      <Loader2 className="h-5 w-5 text-primary animate-spin" />
-                      <span className="text-sm text-muted-foreground">Building your perfect trip...</span>
+                    <div className="flex items-center gap-3 py-8 justify-center" role="status">
+                      <Loader2 className="h-5 w-5 text-primary animate-spin" aria-hidden="true" />
+                      <span className="text-sm text-muted-foreground">{t('explore.building')}</span>
                     </div>
                   ) : null}
                 </CardContent>
