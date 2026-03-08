@@ -469,7 +469,7 @@ export default function Explore() {
           <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-5 rounded-full" asChild>
             <Link to="/lists">
               <BookmarkPlus className="h-5 w-5 text-muted-foreground" />
-              <span className="text-[10px] text-muted-foreground">Lists</span>
+              <span className="text-[10px] text-muted-foreground">{t('explore.lists')}</span>
             </Link>
           </Button>
         </div>
