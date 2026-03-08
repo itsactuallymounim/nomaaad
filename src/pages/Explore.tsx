@@ -361,37 +361,197 @@ export default function Explore() {
           </form>
         </motion.div>
 
-        {/* AI Travel Plan result */}
+        {/* AI Travel Plan — Activity Cards */}
         <AnimatePresence>
           {showAiPanel && (
-            <motion.div ref={aiPanelRef} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.4 }} className="mb-6 overflow-hidden" role="region" aria-label="AI Travel Plan" aria-live="polite">
+            <motion.div ref={aiPanelRef} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.4 }} className="mb-6 overflow-hidden" role="region" aria-label="AI Travel Plan">
               <Card className="rounded-[1.75rem] border-border/30 overflow-hidden shadow-lg">
                 <div className="flex items-center justify-between px-5 pt-4 pb-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center" aria-hidden="true">
-                      <Sparkles className="h-3.5 w-3.5 text-primary" />
-                    </div>
+                    <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center"><Sparkles className="h-3.5 w-3.5 text-primary" /></div>
                     <span className="text-sm font-semibold text-foreground">{t('explore.aiTitle')}</span>
-                    {aiLoading && <span className="text-xs text-muted-foreground animate-pulse" role="status">{t('explore.generating')}</span>}
+                    {aiLoading && <span className="text-xs text-muted-foreground animate-pulse">{t('explore.generating')}</span>}
                   </div>
-                  <button onClick={() => { setShowAiPanel(false); setAiResult(''); setAiQuery(''); }} className="w-7 h-7 rounded-xl hover:bg-secondary flex items-center justify-center transition-colors" aria-label="Close AI panel"><X className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" /></button>
+                  <button onClick={() => { setShowAiPanel(false); setAiPlan(null); setAiQuery(''); }} className="w-7 h-7 rounded-xl hover:bg-secondary flex items-center justify-center transition-colors"><X className="h-3.5 w-3.5 text-muted-foreground" /></button>
                 </div>
                 <CardContent className="px-5 pb-5 pt-2">
-                  {aiResult ? (
-                    <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:font-sans prose-headings:text-foreground prose-p:text-muted-foreground prose-li:text-muted-foreground prose-strong:text-foreground prose-h2:text-xl prose-h2:mt-6 prose-h2:mb-3 prose-h3:text-base prose-h3:mt-4 prose-h3:mb-2">
-                      <ReactMarkdown>{aiResult}</ReactMarkdown>
-                    </div>
-                  ) : aiLoading ? (
-                    <div className="flex items-center gap-3 py-8 justify-center" role="status">
-                      <Loader2 className="h-5 w-5 text-primary animate-spin" aria-hidden="true" />
+                  {aiLoading && !aiPlan && (
+                    <div className="flex items-center gap-3 py-8 justify-center">
+                      <Loader2 className="h-5 w-5 text-primary animate-spin" />
                       <span className="text-sm text-muted-foreground">{t('explore.building')}</span>
                     </div>
-                  ) : null}
+                  )}
+                  {aiPlan && (
+                    <div className="space-y-4">
+                      {/* Plan header */}
+                      <div>
+                        <h2 className="text-lg font-bold text-foreground">{aiPlan.title}</h2>
+                        <p className="text-sm text-muted-foreground mt-1">{aiPlan.summary}</p>
+                        <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1"><DollarSign className="h-3 w-3" />{aiPlan.budget_summary}</p>
+                      </div>
+
+                      {/* Activity cards grouped by day */}
+                      {Array.from(new Set(aiPlan.activities.map(a => a.day))).sort((a, b) => a - b).map(day => (
+                        <div key={day}>
+                          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Day {day}</h3>
+                          <div className="space-y-2">
+                            {aiPlan.activities.filter(a => a.day === day).sort((a, b) => a.time.localeCompare(b.time)).map((activity, idx) => {
+                              const Icon = AI_CATEGORY_ICONS[activity.category] || Camera;
+                              const colorClass = AI_CATEGORY_COLORS[activity.category] || 'bg-secondary text-muted-foreground';
+                              const added = isInTimeline(activity);
+
+                              return (
+                                <motion.div
+                                  key={`${day}-${idx}`}
+                                  initial={{ opacity: 0, y: 8 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: idx * 0.03 }}
+                                  className={`flex items-start gap-3 p-3 rounded-2xl border transition-all ${
+                                    added ? 'bg-primary/[0.04] border-primary/20' : 'bg-card border-border/30 hover:border-border/50'
+                                  }`}
+                                >
+                                  {/* Add button */}
+                                  <button
+                                    onClick={() => added ? undefined : addToTimeline(activity)}
+                                    disabled={added}
+                                    className={`mt-0.5 w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all ${
+                                      added
+                                        ? 'bg-primary border-2 border-primary'
+                                        : 'border-2 border-dashed border-border hover:border-primary/50 hover:bg-primary/5'
+                                    }`}
+                                  >
+                                    {added ? <Check className="h-3.5 w-3.5 text-primary-foreground" /> : <Plus className="h-3.5 w-3.5 text-muted-foreground" />}
+                                  </button>
+
+                                  {/* Content */}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                      <span className="text-xs font-mono text-muted-foreground">{activity.time}</span>
+                                      <Badge variant="secondary" className={`rounded-full text-[10px] px-2 py-0 h-5 capitalize ${colorClass}`}>
+                                        <Icon className="h-2.5 w-2.5 mr-1" />{activity.category}
+                                      </Badge>
+                                      <span className="text-[10px] text-muted-foreground">{activity.duration}min</span>
+                                      <span className="text-[10px] text-muted-foreground font-medium">{activity.cost}</span>
+                                    </div>
+                                    <h4 className="text-sm font-medium text-foreground">{activity.title}</h4>
+                                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{activity.description}</p>
+                                    {activity.location && (
+                                      <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                                        <MapPin className="h-3 w-3 shrink-0" /><span className="truncate">{activity.location}</span>
+                                      </p>
+                                    )}
+                                  </div>
+                                </motion.div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Tips */}
+                      {aiPlan.tips && aiPlan.tips.length > 0 && (
+                        <div className="pt-2">
+                          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">💡 Nomad Tips</h3>
+                          <ul className="space-y-1">
+                            {aiPlan.tips.map((tip, i) => (
+                              <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
+                                <span className="text-primary mt-0.5">•</span>{tip}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Timeline Review Panel */}
+        <AnimatePresence>
+          {showTimeline && timeline.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 12 }}
+              className="mb-6"
+            >
+              <Card className="rounded-[1.75rem] border-primary/20 overflow-hidden shadow-lg bg-primary/[0.02]">
+                <div className="flex items-center justify-between px-5 pt-4 pb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center"><Calendar className="h-3.5 w-3.5 text-primary" /></div>
+                    <span className="text-sm font-semibold text-foreground">My Timeline</span>
+                    <Badge variant="secondary" className="rounded-full text-[10px]">{timeline.length} activities</Badge>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => setShowTimeline(false)} className="w-7 h-7 rounded-xl hover:bg-secondary flex items-center justify-center transition-colors">
+                      <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                    </button>
+                  </div>
+                </div>
+                <CardContent className="px-5 pb-5 pt-2">
+                  <div className="space-y-2 mb-4">
+                    {timeline.map((activity, idx) => {
+                      const Icon = AI_CATEGORY_ICONS[activity.category] || Camera;
+                      const colorClass = AI_CATEGORY_COLORS[activity.category] || 'bg-secondary text-muted-foreground';
+                      return (
+                        <motion.div
+                          key={`tl-${idx}`}
+                          initial={{ opacity: 0, x: -8 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className="flex items-center gap-3 p-2.5 rounded-xl bg-card border border-border/30"
+                        >
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <span className="text-[10px] font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded">D{activity.day}</span>
+                            <span className="text-xs font-mono text-muted-foreground">{activity.time}</span>
+                          </div>
+                          <Badge variant="secondary" className={`rounded-full text-[10px] px-1.5 py-0 h-5 capitalize shrink-0 ${colorClass}`}>
+                            <Icon className="h-2.5 w-2.5" />
+                          </Badge>
+                          <span className="text-sm font-medium text-foreground truncate flex-1">{activity.title}</span>
+                          <button
+                            onClick={() => removeFromTimeline(idx)}
+                            className="w-6 h-6 rounded-lg hover:bg-destructive/10 flex items-center justify-center shrink-0 transition-colors"
+                          >
+                            <X className="h-3 w-3 text-muted-foreground hover:text-destructive" />
+                          </button>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Export to Google Calendar */}
+                  <Button
+                    onClick={addAllToGoogleCalendar}
+                    className="w-full rounded-xl h-11 gap-2"
+                    size="lg"
+                  >
+                    <CalendarPlus className="h-4 w-4" />
+                    Add {timeline.length} activities to Google Calendar
+                  </Button>
+                  <p className="text-[10px] text-muted-foreground text-center mt-2">
+                    Each activity will open in a new tab for you to confirm
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Timeline floating badge when collapsed */}
+        {!showTimeline && timeline.length > 0 && (
+          <motion.button
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            onClick={() => setShowTimeline(true)}
+            className="fixed bottom-24 right-4 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary text-primary-foreground shadow-xl shadow-primary/25 hover:scale-105 active:scale-95 transition-transform"
+          >
+            <Calendar className="h-4 w-4" />
+            <span className="text-sm font-semibold">{timeline.length}</span>
+          </motion.button>
+        )}
 
 
         {/* Category pills */}
