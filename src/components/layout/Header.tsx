@@ -15,6 +15,7 @@ import {
 export function Header() {
   const [isDark, setIsDark] = useState(false);
   const { user, signOut } = useAuth();
+  const { isPremium, startCheckout } = usePremium();
 
   useEffect(() => {
     const isDarkMode = document.documentElement.classList.contains('dark');
