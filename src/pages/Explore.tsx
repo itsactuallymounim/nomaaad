@@ -409,8 +409,9 @@ export default function Explore() {
 
       {/* Add to list dialog */}
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-        <DialogContent className="rounded-[1.75rem] max-w-sm">
-          <DialogHeader><DialogTitle className="text-lg">Save to list</DialogTitle></DialogHeader>
+        <DialogContent className="rounded-[1.75rem] max-w-sm" aria-describedby="save-dialog-desc">
+          <DialogHeader><DialogTitle className="text-lg">{t('explore.saveToList')}</DialogTitle></DialogHeader>
+          <p id="save-dialog-desc" className="sr-only">Choose a list to save this place to.</p>
           {selectedPlace && (
             <div className="space-y-3 pt-2">
               <div className="flex items-center gap-3 p-3 rounded-2xl bg-secondary/30">
