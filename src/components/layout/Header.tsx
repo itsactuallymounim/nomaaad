@@ -1,8 +1,9 @@
-import { Compass, Moon, Sun, LogOut, User, BookmarkPlus, Share2 } from 'lucide-react';
+import { Compass, Moon, Sun, LogOut, User, BookmarkPlus, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { usePremium } from '@/hooks/usePremium';
 import {
   DropdownMenu,
   DropdownMenuContent,
