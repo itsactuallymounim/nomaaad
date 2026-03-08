@@ -6,7 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { useUpdateProfile } from '@/hooks/useProfile';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { embedProfile } from '@/lib/embeddings';
 
 const STEPS = [
   {
