@@ -79,48 +79,26 @@ const fadeUp = {
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/travel-chat`;
 
 async function streamTravelPlan({
-  query,
-  profile,
-  onDelta,
-  onDone,
-  onError,
+  query, profile, onDelta, onDone, onError,
 }: {
-  query: string;
-  profile: any;
-  onDelta: (text: string) => void;
-  onDone: () => void;
-  onError: (error: string) => void;
+  query: string; profile: any;
+  onDelta: (text: string) => void; onDone: () => void; onError: (error: string) => void;
 }) {
   try {
     const resp = await fetch(CHAT_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-      },
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
       body: JSON.stringify({ query, profile }),
     });
-
-    if (!resp.ok) {
-      const err = await resp.json().catch(() => ({ error: 'Failed to generate plan' }));
-      onError(err.error || `Error ${resp.status}`);
-      return;
-    }
-
-    if (!resp.body) {
-      onError('No response body');
-      return;
-    }
-
+    if (!resp.ok) { const err = await resp.json().catch(() => ({ error: 'Failed to generate plan' })); onError(err.error || `Error ${resp.status}`); return; }
+    if (!resp.body) { onError('No response body'); return; }
     const reader = resp.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
-
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
       buffer += decoder.decode(value, { stream: true });
-
       let newlineIdx: number;
       while ((newlineIdx = buffer.indexOf('\n')) !== -1) {
         let line = buffer.slice(0, newlineIdx);
@@ -134,14 +112,9 @@ async function streamTravelPlan({
           const parsed = JSON.parse(jsonStr);
           const content = parsed.choices?.[0]?.delta?.content;
           if (content) onDelta(content);
-        } catch {
-          buffer = line + '\n' + buffer;
-          break;
-        }
+        } catch { buffer = line + '\n' + buffer; break; }
       }
     }
-
-    // Final flush
     if (buffer.trim()) {
       for (let raw of buffer.split('\n')) {
         if (!raw) continue;
@@ -149,17 +122,11 @@ async function streamTravelPlan({
         if (!raw.startsWith('data: ')) continue;
         const jsonStr = raw.slice(6).trim();
         if (jsonStr === '[DONE]') continue;
-        try {
-          const parsed = JSON.parse(jsonStr);
-          const content = parsed.choices?.[0]?.delta?.content;
-          if (content) onDelta(content);
-        } catch { /* ignore */ }
+        try { const parsed = JSON.parse(jsonStr); const content = parsed.choices?.[0]?.delta?.content; if (content) onDelta(content); } catch { /* ignore */ }
       }
     }
     onDone();
-  } catch (e) {
-    onError(e instanceof Error ? e.message : 'Network error');
-  }
+  } catch (e) { onError(e instanceof Error ? e.message : 'Network error'); }
 }
 
 export default function Explore() {
@@ -174,7 +141,6 @@ export default function Explore() {
   const [lists, setLists] = useState<SavedListOption[]>([]);
   const [addedToList, setAddedToList] = useState<Record<string, string[]>>({});
 
-  // AI travel plan state
   const [aiQuery, setAiQuery] = useState('');
   const [aiResult, setAiResult] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
@@ -182,63 +148,35 @@ export default function Explore() {
   const aiPanelRef = useRef<HTMLDivElement>(null);
   const hasTriggeredRef = useRef(false);
 
-  useEffect(() => {
-    setIsDark(document.documentElement.classList.contains('dark'));
-  }, []);
+  useEffect(() => { setIsDark(document.documentElement.classList.contains('dark')); }, []);
 
-  // Auto-trigger from URL query param
   useEffect(() => {
     const q = searchParams.get('q');
     if (q && !hasTriggeredRef.current) {
       hasTriggeredRef.current = true;
       sessionStorage.removeItem('nomaaad_pending_query');
-      setAiQuery(q);
-      setShowAiPanel(true);
-      generatePlan(q);
-      // Clean URL
+      setAiQuery(q); setShowAiPanel(true); generatePlan(q);
       setSearchParams({}, { replace: true });
     }
   }, [searchParams]);
 
   const generatePlan = (query: string) => {
-    setAiLoading(true);
-    setAiResult('');
-    setShowAiPanel(true);
-
+    setAiLoading(true); setAiResult(''); setShowAiPanel(true);
     let accumulated = '';
     streamTravelPlan({
-      query,
-      profile,
-      onDelta: (chunk) => {
-        accumulated += chunk;
-        setAiResult(accumulated);
-      },
+      query, profile,
+      onDelta: (chunk) => { accumulated += chunk; setAiResult(accumulated); },
       onDone: () => setAiLoading(false),
-      onError: (error) => {
-        setAiLoading(false);
-        toast({ title: 'AI Error', description: error, variant: 'destructive' });
-      },
+      onError: (error) => { setAiLoading(false); toast({ title: 'AI Error', description: error, variant: 'destructive' }); },
     });
   };
 
-  const handleAiSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!aiQuery.trim()) return;
-    generatePlan(aiQuery.trim());
-  };
-
-  const toggleTheme = () => {
-    document.documentElement.classList.toggle('dark');
-    setIsDark(!isDark);
-  };
+  const handleAiSearch = (e: React.FormEvent) => { e.preventDefault(); if (!aiQuery.trim()) return; generatePlan(aiQuery.trim()); };
+  const toggleTheme = () => { document.documentElement.classList.toggle('dark'); setIsDark(!isDark); };
 
   const fetchLists = useCallback(async () => {
     if (!user) return;
-    const { data } = await supabase
-      .from('saved_lists')
-      .select('id, name, icon')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
+    const { data } = await supabase.from('saved_lists').select('id, name, icon').eq('user_id', user.id).order('created_at', { ascending: false });
     if (data) setLists(data as SavedListOption[]);
   }, [user]);
 
@@ -247,45 +185,22 @@ export default function Explore() {
   const handleAddToList = async (listId: string) => {
     if (!user || !selectedPlace) return;
     const { data: inserted, error } = await supabase.from('saved_places').insert({
-      list_id: listId,
-      user_id: user.id,
-      name: selectedPlace.name,
-      description: selectedPlace.description,
-      address: `${selectedPlace.city}, ${selectedPlace.country}`,
-      category: selectedPlace.category,
+      list_id: listId, user_id: user.id, name: selectedPlace.name, description: selectedPlace.description,
+      address: `${selectedPlace.city}, ${selectedPlace.country}`, category: selectedPlace.category,
     }).select('id').single();
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-      return;
-    }
-    // Embed in background
+    if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
     if (inserted) {
-      embedSavedPlace({
-        id: inserted.id,
-        name: selectedPlace.name,
-        description: selectedPlace.description,
-        address: `${selectedPlace.city}, ${selectedPlace.country}`,
-        category: selectedPlace.category,
-      }).catch(() => {});
+      embedSavedPlace({ id: inserted.id, name: selectedPlace.name, description: selectedPlace.description, address: `${selectedPlace.city}, ${selectedPlace.country}`, category: selectedPlace.category }).catch(() => {});
     }
-    setAddedToList(prev => ({
-      ...prev,
-      [selectedPlace.id]: [...(prev[selectedPlace.id] || []), listId],
-    }));
+    setAddedToList(prev => ({ ...prev, [selectedPlace.id]: [...(prev[selectedPlace.id] || []), listId] }));
     toast({ title: `Added to list` });
-    setAddDialogOpen(false);
-    setSelectedPlace(null);
+    setAddDialogOpen(false); setSelectedPlace(null);
   };
 
-  const openAddDialog = (place: CuratedPlace) => {
-    setSelectedPlace(place);
-    setAddDialogOpen(true);
-  };
+  const openAddDialog = (place: CuratedPlace) => { setSelectedPlace(place); setAddDialogOpen(true); };
 
   const filtered = CURATED_PLACES.filter(p => {
-    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.city.toLowerCase().includes(search.toLowerCase()) ||
-      p.country.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.city.toLowerCase().includes(search.toLowerCase()) || p.country.toLowerCase().includes(search.toLowerCase());
     const matchCategory = category === 'all' || p.category === category;
     return matchSearch && matchCategory;
   });
@@ -293,21 +208,26 @@ export default function Explore() {
   const mascotEmoji = profile?.mascot === 'panda' ? '🐼' : profile?.mascot === 'cat' ? '🐱' : profile?.mascot === 'dog' ? '🐶' : '👋';
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-28">
+      {/* Ambient blobs */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+        <div className="absolute -top-[30%] -right-[15%] w-[60vw] h-[60vw] rounded-full bg-primary/[0.03] blur-[100px]" />
+      </div>
+
       {/* Nav */}
       <motion.nav
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border/40"
+        className="sticky top-0 z-50 backdrop-blur-2xl bg-background/60 border-b border-border/20"
       >
         <div className="flex items-center justify-between px-4 py-3 max-w-2xl mx-auto">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-2xl bg-primary flex items-center justify-center shadow-sm">
+            <div className="w-9 h-9 rounded-2xl bg-primary flex items-center justify-center shadow-md shadow-primary/20">
               <Compass className="h-4 w-4 text-primary-foreground" />
             </div>
             <span className="font-bold text-lg tracking-tight">nomaaad</span>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             <Button asChild variant="ghost" size="icon" className="h-9 w-9 rounded-xl">
               <Link to="/lists"><BookmarkPlus className="h-4 w-4" /></Link>
             </Button>
@@ -322,19 +242,11 @@ export default function Explore() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="rounded-2xl w-56">
-                  <DropdownMenuItem disabled className="text-xs text-muted-foreground">
-                    {user.email}
-                  </DropdownMenuItem>
+                  <DropdownMenuItem disabled className="text-xs text-muted-foreground">{user.email}</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/lists" className="cursor-pointer">
-                      <BookmarkPlus className="h-4 w-4 mr-2" /> My Lists
-                    </Link>
-                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link to="/lists" className="cursor-pointer"><BookmarkPlus className="h-4 w-4 mr-2" /> My Lists</Link></DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={signOut}>
-                    <LogOut className="h-4 w-4 mr-2" /> Sign Out
-                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={signOut}><LogOut className="h-4 w-4 mr-2" /> Sign Out</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
@@ -344,47 +256,28 @@ export default function Explore() {
 
       <div className="max-w-2xl mx-auto px-4">
         {/* Greeting */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="pt-8 pb-4"
-        >
-          <h1 className="text-2xl font-serif font-bold text-foreground">
-            {mascotEmoji} Hey, explorer
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Discover curated places or generate an AI travel plan.
-          </p>
+        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="pt-8 pb-5">
+          <h1 className="text-2xl font-serif font-bold text-foreground">{mascotEmoji} Hey, explorer</h1>
+          <p className="text-sm text-muted-foreground mt-1">Discover curated places or generate an AI travel plan.</p>
         </motion.div>
 
         {/* AI Search bar */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
-          className="mb-5 relative"
-        >
-          <div className="absolute -inset-3 rounded-3xl bg-gradient-to-br from-primary/8 via-primary/4 to-transparent blur-xl pointer-events-none" />
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="mb-6 relative">
+          <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-primary/8 via-primary/4 to-transparent blur-xl pointer-events-none" />
           <form onSubmit={handleAiSearch} className="relative">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
-              <Sparkles className="h-4 w-4 text-primary" />
-            </div>
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"><Sparkles className="h-4 w-4 text-primary" /></div>
             <input
               value={aiQuery}
               onChange={e => setAiQuery(e.target.value)}
               placeholder="Plan 7 days in Lisbon for a digital nomad..."
-              className="relative w-full h-13 pl-11 pr-14 rounded-2xl bg-card/80 backdrop-blur-xl border border-border/40 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all shadow-lg shadow-primary/5"
+              className="relative w-full h-13 pl-11 pr-14 rounded-2xl bg-card/80 backdrop-blur-xl border border-border/30 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/30 transition-all shadow-lg shadow-primary/[0.04]"
             />
             <button
               type="submit"
               disabled={aiLoading || !aiQuery.trim()}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-primary flex items-center justify-center hover:opacity-90 transition-opacity shadow-md shadow-primary/20 disabled:opacity-50"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-primary flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-primary/25 disabled:opacity-50"
             >
-              {aiLoading ? (
-                <Loader2 className="h-4 w-4 text-primary-foreground animate-spin" />
-              ) : (
-                <ArrowUpRight className="h-4 w-4 text-primary-foreground" />
-              )}
+              {aiLoading ? <Loader2 className="h-4 w-4 text-primary-foreground animate-spin" /> : <ArrowUpRight className="h-4 w-4 text-primary-foreground" />}
             </button>
           </form>
         </motion.div>
@@ -392,29 +285,17 @@ export default function Explore() {
         {/* AI Travel Plan result */}
         <AnimatePresence>
           {showAiPanel && (
-            <motion.div
-              ref={aiPanelRef}
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.4 }}
-              className="mb-6 overflow-hidden"
-            >
-              <Card className="rounded-3xl border-border/40 overflow-hidden">
+            <motion.div ref={aiPanelRef} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.4 }} className="mb-6 overflow-hidden">
+              <Card className="rounded-[1.75rem] border-border/30 overflow-hidden shadow-lg">
                 <div className="flex items-center justify-between px-5 pt-4 pb-2">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-primary" />
+                    <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Sparkles className="h-3.5 w-3.5 text-primary" />
+                    </div>
                     <span className="text-sm font-semibold text-foreground">AI Travel Plan</span>
-                    {aiLoading && (
-                      <span className="text-xs text-muted-foreground animate-pulse">Generating...</span>
-                    )}
+                    {aiLoading && <span className="text-xs text-muted-foreground animate-pulse">Generating...</span>}
                   </div>
-                  <button
-                    onClick={() => { setShowAiPanel(false); setAiResult(''); setAiQuery(''); }}
-                    className="w-7 h-7 rounded-xl hover:bg-secondary flex items-center justify-center transition-colors"
-                  >
-                    <X className="h-3.5 w-3.5 text-muted-foreground" />
-                  </button>
+                  <button onClick={() => { setShowAiPanel(false); setAiResult(''); setAiQuery(''); }} className="w-7 h-7 rounded-xl hover:bg-secondary flex items-center justify-center transition-colors"><X className="h-3.5 w-3.5 text-muted-foreground" /></button>
                 </div>
                 <CardContent className="px-5 pb-5 pt-2">
                   {aiResult ? (
@@ -434,38 +315,23 @@ export default function Explore() {
         </AnimatePresence>
 
         {/* Places search */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-4"
-        >
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-4">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Filter places, cities..."
-              className="pl-10 rounded-2xl h-11 bg-card border-border/50"
-            />
+            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Filter places, cities..." className="pl-10 rounded-2xl h-11 bg-card/60 border-border/30" />
           </div>
         </motion.div>
 
         {/* Category pills */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.15 }}
-          className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4"
-        >
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} className="flex gap-2 overflow-x-auto pb-5 scrollbar-hide -mx-4 px-4">
           {CATEGORIES.map(cat => (
             <button
               key={cat.id}
               onClick={() => setCategory(cat.id)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-2xl text-sm font-medium whitespace-nowrap transition-all ${
+              className={`flex items-center gap-1.5 px-4 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 ${
                 category === cat.id
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                  ? 'bg-foreground text-background shadow-sm'
+                  : 'bg-secondary/50 text-muted-foreground hover:bg-secondary hover:text-secondary-foreground'
               }`}
             >
               <cat.icon className="h-3.5 w-3.5" />
@@ -474,57 +340,48 @@ export default function Explore() {
           ))}
         </motion.div>
 
-        {/* Places grid */}
+        {/* Places grid — 2 cols on larger screens */}
         <motion.div
           initial="hidden"
           animate="visible"
           variants={{ visible: { transition: { staggerChildren: 0.04 } } }}
-          className="grid gap-4 pt-2"
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2"
         >
           <AnimatePresence>
             {filtered.map(place => (
-              <motion.div
-                key={place.id}
-                variants={fadeUp}
-                transition={{ duration: 0.4 }}
-                layout
-              >
-                <Card className="rounded-3xl border-border/40 overflow-hidden hover:shadow-lg transition-all group">
-                  <div className="relative aspect-[16/9] overflow-hidden">
+              <motion.div key={place.id} variants={fadeUp} transition={{ duration: 0.4 }} layout>
+                <Card className="rounded-[1.5rem] border-border/30 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-500 group">
+                  <div className="relative aspect-[16/10] overflow-hidden">
                     <img
                       src={`https://images.unsplash.com/${place.image}?auto=format&fit=crop&w=800&q=80`}
                       alt={place.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                       loading="lazy"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-foreground/50 via-transparent to-transparent" />
                     <div className="absolute top-3 right-3">
                       <button
                         onClick={() => openAddDialog(place)}
-                        className="w-10 h-10 rounded-2xl bg-background/90 backdrop-blur-md flex items-center justify-center shadow-lg hover:bg-background transition-colors"
+                        className="w-9 h-9 rounded-2xl bg-background/80 backdrop-blur-md flex items-center justify-center shadow-lg hover:bg-background hover:scale-110 active:scale-95 transition-all"
                       >
-                        <Plus className="h-5 w-5 text-foreground" />
+                        <Plus className="h-4 w-4 text-foreground" />
                       </button>
                     </div>
                     <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
-                      <Badge variant="secondary" className="rounded-xl bg-background/80 backdrop-blur-md text-foreground text-xs">
-                        <MapPin className="h-3 w-3 mr-1" />
-                        {place.city}
+                      <Badge variant="secondary" className="rounded-full bg-background/80 backdrop-blur-md text-foreground text-xs border-0 shadow-sm">
+                        <MapPin className="h-3 w-3 mr-1" />{place.city}
                       </Badge>
-                      <Badge variant="secondary" className="rounded-xl bg-background/80 backdrop-blur-md text-foreground text-xs">
-                        <Star className="h-3 w-3 mr-1 fill-chart-1 text-chart-1" />
-                        {place.rating}
+                      <Badge variant="secondary" className="rounded-full bg-background/80 backdrop-blur-md text-foreground text-xs border-0 shadow-sm">
+                        <Star className="h-3 w-3 mr-1 fill-chart-1 text-chart-1" />{place.rating}
                       </Badge>
                     </div>
                   </div>
                   <CardContent className="p-4">
-                    <h3 className="font-semibold text-foreground">{place.name}</h3>
-                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{place.description}</p>
+                    <h3 className="font-semibold text-foreground text-sm">{place.name}</h3>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{place.description}</p>
                     <div className="flex gap-1.5 mt-3 flex-wrap">
                       {place.tags.map(tag => (
-                        <Badge key={tag} variant="outline" className="rounded-xl text-xs capitalize">
-                          {tag}
-                        </Badge>
+                        <span key={tag} className="px-2.5 py-1 rounded-full bg-secondary/50 text-[11px] text-muted-foreground font-medium capitalize">{tag}</span>
                       ))}
                     </div>
                   </CardContent>
@@ -534,7 +391,7 @@ export default function Explore() {
           </AnimatePresence>
 
           {filtered.length === 0 && (
-            <div className="text-center py-16 text-muted-foreground">
+            <div className="col-span-full text-center py-16 text-muted-foreground">
               <Search className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" />
               <p className="font-medium">No places found</p>
               <p className="text-sm mt-1">Try a different search or category.</p>
@@ -545,28 +402,23 @@ export default function Explore() {
 
       {/* Add to list dialog */}
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-        <DialogContent className="rounded-3xl max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="text-lg">Save to list</DialogTitle>
-          </DialogHeader>
+        <DialogContent className="rounded-[1.75rem] max-w-sm">
+          <DialogHeader><DialogTitle className="text-lg">Save to list</DialogTitle></DialogHeader>
           {selectedPlace && (
             <div className="space-y-3 pt-2">
-              <div className="flex items-center gap-3 p-3 rounded-2xl bg-secondary/50">
+              <div className="flex items-center gap-3 p-3 rounded-2xl bg-secondary/30">
                 <MapPin className="h-4 w-4 text-primary shrink-0" />
                 <div className="min-w-0">
                   <p className="font-medium text-sm truncate">{selectedPlace.name}</p>
                   <p className="text-xs text-muted-foreground">{selectedPlace.city}, {selectedPlace.country}</p>
                 </div>
               </div>
-
               {lists.length === 0 ? (
                 <div className="text-center py-6">
                   <BookmarkPlus className="h-10 w-10 mx-auto mb-2 text-muted-foreground/30" />
                   <p className="text-sm text-muted-foreground mb-3">No lists yet</p>
                   <Button asChild variant="outline" className="rounded-2xl" size="sm">
-                    <Link to="/lists" onClick={() => setAddDialogOpen(false)}>
-                      Create a list <ChevronRight className="h-3 w-3 ml-1" />
-                    </Link>
+                    <Link to="/lists" onClick={() => setAddDialogOpen(false)}>Create a list <ChevronRight className="h-3 w-3 ml-1" /></Link>
                   </Button>
                 </div>
               ) : (
@@ -578,11 +430,7 @@ export default function Explore() {
                         key={list.id}
                         onClick={() => !alreadyAdded && handleAddToList(list.id)}
                         disabled={alreadyAdded}
-                        className={`w-full flex items-center gap-3 p-3 rounded-2xl text-left transition-all ${
-                          alreadyAdded
-                            ? 'bg-primary/5 border border-primary/20'
-                            : 'bg-card border border-border/50 hover:border-primary/30 hover:bg-card/80'
-                        }`}
+                        className={`w-full flex items-center gap-3 p-3 rounded-2xl text-left transition-all ${alreadyAdded ? 'bg-primary/5 border border-primary/20' : 'bg-card border border-border/30 hover:border-primary/30 hover:bg-card/80'}`}
                       >
                         <span className="text-xl">{list.icon}</span>
                         <span className="flex-1 font-medium text-sm">{list.name}</span>
@@ -597,20 +445,20 @@ export default function Explore() {
         </DialogContent>
       </Dialog>
 
-      {/* Bottom nav */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-xl border-t border-border/40 md:hidden safe-area-pb">
-        <div className="flex items-center justify-around py-2 px-3">
-          <Button variant="ghost" size="sm" className="flex-1 flex flex-col items-center gap-0.5 h-auto py-2 rounded-2xl bg-primary/10">
+      {/* Floating bottom nav — pill style */}
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 md:hidden">
+        <div className="flex items-center gap-1 px-2 py-2 rounded-full bg-card/90 backdrop-blur-2xl border border-border/20 shadow-2xl shadow-foreground/10">
+          <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-5 rounded-full bg-primary/10">
             <Compass className="h-5 w-5 text-primary" />
             <span className="text-[10px] text-primary font-semibold">Explore</span>
           </Button>
-          <Button variant="ghost" size="sm" className="flex-1 flex flex-col items-center gap-0.5 h-auto py-2 rounded-2xl" asChild>
+          <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-5 rounded-full" asChild>
             <Link to="/destinations">
               <MapPin className="h-5 w-5 text-muted-foreground" />
-              <span className="text-[10px] text-muted-foreground">Destinations</span>
+              <span className="text-[10px] text-muted-foreground">Places</span>
             </Link>
           </Button>
-          <Button variant="ghost" size="sm" className="flex-1 flex flex-col items-center gap-0.5 h-auto py-2 rounded-2xl" asChild>
+          <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-5 rounded-full" asChild>
             <Link to="/lists">
               <BookmarkPlus className="h-5 w-5 text-muted-foreground" />
               <span className="text-[10px] text-muted-foreground">Lists</span>
