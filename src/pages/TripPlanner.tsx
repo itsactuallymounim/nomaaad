@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import {
   Compass, MapPin, Calendar, Clock, Check, ChevronRight, ChevronDown,
   Loader2, ArrowLeft, Plus, Coffee, Utensils, Camera, Wifi, Heart,
-  Train, CalendarPlus, ExternalLink, Sparkles
+  Train, CalendarPlus, ExternalLink, Sparkles, Star, Brain, ThumbsUp, ThumbsDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { toast } from '@/hooks/use-toast';
 import { useI18n } from '@/lib/i18n';
 import { LanguageToggle } from '@/components/LanguageToggle';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Activity {
   time: string;
@@ -24,6 +25,7 @@ interface Activity {
   category: string;
   location: string;
   done?: boolean;
+  rating?: number;
 }
 
 interface DaySchedule {
@@ -92,6 +94,28 @@ function formatDate(dateStr: string) {
   });
 }
 
+function StarRating({ rating, onRate }: { rating: number; onRate: (r: number) => void }) {
+  return (
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <button
+          key={star}
+          onClick={(e) => { e.stopPropagation(); onRate(star); }}
+          className="transition-transform hover:scale-125"
+        >
+          <Star
+            className={`h-4 w-4 transition-colors ${
+              star <= rating
+                ? 'fill-chart-1 text-chart-1'
+                : 'text-muted-foreground/30 hover:text-chart-1/50'
+            }`}
+          />
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function TripPlanner() {
   const { user } = useAuth();
   const { profile } = useProfile();
@@ -107,6 +131,7 @@ export default function TripPlanner() {
   const [schedule, setSchedule] = useState<DaySchedule[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [expandedDay, setExpandedDay] = useState<number>(0);
+  const [savingRating, setSavingRating] = useState<string | null>(null);
 
   const generateSchedule = useCallback(async () => {
     if (!city.trim()) {
@@ -123,7 +148,7 @@ export default function TripPlanner() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ city: city.trim(), days, startDate, profile }),
+        body: JSON.stringify({ city: city.trim(), days, startDate, profile, userId: user?.id }),
       });
 
       if (!resp.ok) {
@@ -143,7 +168,7 @@ export default function TripPlanner() {
     } finally {
       setLoading(false);
     }
-  }, [city, days, startDate, profile]);
+  }, [city, days, startDate, profile, user?.id]);
 
   const toggleActivity = (dayIdx: number, actIdx: number) => {
     setSchedule(prev => {
@@ -156,6 +181,47 @@ export default function TripPlanner() {
       updated[dayIdx] = day;
       return updated;
     });
+  };
+
+  const rateActivity = async (dayIdx: number, actIdx: number, rating: number) => {
+    if (!user || !schedule) return;
+    const activity = schedule[dayIdx].activities[actIdx];
+    const key = `${dayIdx}-${actIdx}`;
+    setSavingRating(key);
+
+    // Update local state
+    setSchedule(prev => {
+      if (!prev) return prev;
+      const updated = [...prev];
+      const day = { ...updated[dayIdx] };
+      const activities = [...day.activities];
+      activities[actIdx] = { ...activities[actIdx], rating };
+      day.activities = activities;
+      updated[dayIdx] = day;
+      return updated;
+    });
+
+    // Save to database
+    try {
+      const { error } = await supabase.from('preference_logs').insert({
+        user_id: user.id,
+        city,
+        activity_title: activity.title,
+        activity_category: activity.category,
+        rating,
+      });
+      if (error) throw error;
+      toast({
+        title: rating >= 4 ? '🧠 Preference saved!' : '📝 Noted!',
+        description: rating >= 4
+          ? "I'll suggest more activities like this next time."
+          : "I'll adjust future recommendations.",
+      });
+    } catch (e) {
+      console.error('Failed to save rating:', e);
+    } finally {
+      setSavingRating(null);
+    }
   };
 
   const addAllDayToCalendar = (dayIdx: number) => {
@@ -171,6 +237,10 @@ export default function TripPlanner() {
 
   const completedCount = (daySchedule: DaySchedule) =>
     daySchedule.activities.filter(a => a.done).length;
+
+  const ratedCount = schedule
+    ? schedule.flatMap(d => d.activities).filter(a => a.rating).length
+    : 0;
 
   return (
     <div className="min-h-screen bg-background pb-28">
@@ -195,7 +265,15 @@ export default function TripPlanner() {
             </div>
             <span className="font-bold text-lg tracking-tight">Trip Planner</span>
           </div>
-          <LanguageToggle />
+          <div className="flex items-center gap-2">
+            {ratedCount > 0 && (
+              <Badge variant="secondary" className="rounded-full gap-1">
+                <Brain className="h-3 w-3" />
+                {ratedCount} learned
+              </Badge>
+            )}
+            <LanguageToggle />
+          </div>
         </div>
       </motion.nav>
 
@@ -215,9 +293,24 @@ export default function TripPlanner() {
                 Plan your trip
               </h1>
               <p className="text-muted-foreground text-sm max-w-md mx-auto">
-                Tell us where you're going and how long you'll stay. We'll create a personalized daily schedule.
+                Tell us where you're going and how long you'll stay. We'll create a personalized daily schedule that learns from your preferences.
               </p>
             </div>
+
+            {/* Memory indicator */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="mb-6 p-4 rounded-2xl bg-primary/5 border border-primary/10 flex items-start gap-3"
+            >
+              <Brain className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-foreground">Learning Memory Active</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Rate activities after your trip and I'll personalize future recommendations. The more you rate, the better I get!
+                </p>
+              </div>
+            </motion.div>
 
             <Card className="rounded-[1.75rem] border-border/30 shadow-lg">
               <CardContent className="p-6 space-y-5">
@@ -430,6 +523,7 @@ export default function TripPlanner() {
                               {daySchedule.activities.map((activity, actIdx) => {
                                 const Icon = CATEGORY_ICONS[activity.category] || Camera;
                                 const colorClass = CATEGORY_COLORS[activity.category] || 'bg-secondary text-muted-foreground';
+                                const ratingKey = `${dayIdx}-${actIdx}`;
 
                                 return (
                                   <motion.div
@@ -488,6 +582,22 @@ export default function TripPlanner() {
                                           <span className="truncate">{activity.location}</span>
                                         </p>
                                       )}
+
+                                      {/* Rating */}
+                                      <div className="flex items-center gap-2 mt-2">
+                                        <StarRating
+                                          rating={activity.rating || 0}
+                                          onRate={(r) => rateActivity(dayIdx, actIdx, r)}
+                                        />
+                                        {savingRating === ratingKey && (
+                                          <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                                        )}
+                                        {activity.rating && !savingRating && (
+                                          <span className="text-[10px] text-muted-foreground">
+                                            {activity.rating >= 4 ? '❤️ Loved it' : activity.rating <= 2 ? '👎 Not for me' : '👍 OK'}
+                                          </span>
+                                        )}
+                                      </div>
                                     </div>
 
                                     {/* Google Calendar button */}
