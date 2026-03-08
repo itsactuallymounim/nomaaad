@@ -54,8 +54,8 @@ export default function Landing() {
               <Link to="/destinations">Destinations</Link>
             </Button>
             <Button asChild size="sm" className="rounded-xl">
-              <Link to="/planner">
-                Start Planning
+              <Link to="/explore">
+                Start Exploring
               </Link>
             </Button>
           </div>
