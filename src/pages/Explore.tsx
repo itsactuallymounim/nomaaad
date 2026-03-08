@@ -302,7 +302,7 @@ export default function Explore() {
                     <span className="text-sm font-semibold text-foreground">{t('explore.aiTitle')}</span>
                     {aiLoading && <span className="text-xs text-muted-foreground animate-pulse" role="status">{t('explore.generating')}</span>}
                   </div>
-                  <button onClick={() => { setShowAiPanel(false); setAiResult(''); setAiQuery(''); }} className="w-7 h-7 rounded-xl hover:bg-secondary flex items-center justify-center transition-colors"><X className="h-3.5 w-3.5 text-muted-foreground" /></button>
+                  <button onClick={() => { setShowAiPanel(false); setAiResult(''); setAiQuery(''); }} className="w-7 h-7 rounded-xl hover:bg-secondary flex items-center justify-center transition-colors" aria-label="Close AI panel"><X className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" /></button>
                 </div>
                 <CardContent className="px-5 pb-5 pt-2">
                   {aiResult ? (
