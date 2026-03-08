@@ -93,6 +93,9 @@ export default function Landing() {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (searchValue.trim()) {
+      sessionStorage.setItem('nomaaad_pending_query', searchValue.trim());
+    }
     navigate('/auth');
   };
 

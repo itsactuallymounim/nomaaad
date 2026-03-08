@@ -19,7 +19,10 @@ export default function Auth() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (loading) return null;
-  if (user) return <Navigate to="/explore" replace />;
+  if (user) {
+    const pendingQuery = sessionStorage.getItem('nomaaad_pending_query');
+    return <Navigate to={pendingQuery ? `/explore?q=${encodeURIComponent(pendingQuery)}` : '/explore'} replace />;
+  }
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
