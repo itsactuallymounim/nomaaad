@@ -246,10 +246,10 @@ export default function Landing() {
               <div className="px-5 pt-5 pb-3 border-b border-border/20">
                 <div className="flex items-center gap-2 mb-1">
                   <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                  <span className="text-xs font-mono text-primary font-semibold">Generated in 28s</span>
+                  <span className="text-xs font-mono text-primary font-semibold">{t('landing.sampleGenerated')}</span>
                 </div>
-                <h3 className="font-bold text-foreground text-lg">Lisbon — Day 1</h3>
-                <p className="text-xs text-muted-foreground">Budget · Digital Nomad · 7 Days</p>
+                <h3 className="font-bold text-foreground text-lg">{t('landing.sampleDay')}</h3>
+                <p className="text-xs text-muted-foreground">{t('landing.sampleMeta')}</p>
               </div>
 
               <div className="px-5 py-4 space-y-1">
