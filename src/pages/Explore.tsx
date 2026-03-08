@@ -408,9 +408,9 @@ export default function Explore() {
             >
               <div className="grid sm:grid-cols-3 gap-4 p-4 rounded-2xl bg-card/80 backdrop-blur-xl border border-border/30">
                 {([
-                  { key: 'budget' as const, icon: Wallet, label: 'Budget', left: 'Budget', right: 'Luxury' },
-                  { key: 'pace' as const, icon: Zap, label: 'Pace', left: 'Relaxed', right: 'Action' },
-                  { key: 'vibe' as const, icon: Globe, label: 'Vibe', left: 'Local', right: 'Global' },
+                  { key: 'budget' as const, icon: Wallet, label: t('explore.budget'), left: t('explore.budgetLeft'), right: t('explore.budgetRight') },
+                  { key: 'pace' as const, icon: Zap, label: t('explore.pace'), left: t('explore.paceLeft'), right: t('explore.paceRight') },
+                  { key: 'vibe' as const, icon: Globe, label: t('explore.vibe'), left: t('explore.vibeLeft'), right: t('explore.vibeRight') },
                 ]).map(s => (
                   <div key={s.key} className="space-y-2">
                     <div className="flex items-center gap-1.5">
