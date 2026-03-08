@@ -94,7 +94,7 @@ export default function Landing() {
     navigate('/auth');
   };
 
-  const filtered = activeCategory === 'cat.all' ? PLACES : PLACES.filter(p => p.category === activeCategory);
+  const filtered = activeCategory === 'cat.all' ? visiblePlaces : visiblePlaces.filter(p => p.category === activeCategory);
 
   const VALUE_PROPS = [
     { icon: Compass, titleKey: 'landing.valueProp1Title' as const, descKey: 'landing.valueProp1Desc' as const },
