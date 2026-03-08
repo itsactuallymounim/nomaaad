@@ -643,20 +643,123 @@ export default function Explore() {
           </motion.div>
         )}
 
-        {/* Empty state */}
+        {/* Infinite scroll location feed */}
         {!aiPlan && !aiLoading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex flex-col items-center justify-center py-20 text-center"
-          >
-            <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center mb-5">
-              <Sparkles className="h-9 w-9 text-primary" />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            {/* Category filter tabs */}
+            <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4">
+              {['All', ...FEED_CATEGORIES].map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setFeedCategory(cat)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                    feedCategory === cat
+                      ? 'bg-foreground text-background shadow-sm'
+                      : 'bg-secondary/50 text-muted-foreground hover:bg-secondary'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
-            <h2 className="text-xl font-bold text-foreground mb-2">Plan your perfect trip</h2>
-            <p className="text-sm text-muted-foreground max-w-md">
-              Type a destination above — like "7 days in Tokyo as a foodie" — and we'll generate a complete day-by-day itinerary in 30 seconds.
-            </p>
+
+            {/* Cards grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {feedItems.map((loc, idx) => {
+                const isSaved = savedFeedItems.has(loc.name);
+                return (
+                  <motion.div
+                    key={loc.name}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: (idx % ITEMS_PER_PAGE) * 0.04 }}
+                  >
+                    <Card className="rounded-[1.5rem] border-border/30 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-500 group">
+                      <div className="relative aspect-[4/3] overflow-hidden">
+                        <img
+                          src={`https://images.unsplash.com/${loc.image}?auto=format&fit=crop&w=800&q=80`}
+                          alt={loc.name}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-foreground/50 via-transparent to-transparent" />
+
+                        {/* Save button */}
+                        <div className="absolute top-3 right-3">
+                          <motion.button
+                            whileTap={{ scale: 0.85 }}
+                            onClick={async () => {
+                              if (!user || isSaved) return;
+                              try {
+                                let { data: lists } = await supabase
+                                  .from('saved_lists')
+                                  .select('id')
+                                  .eq('user_id', user.id)
+                                  .eq('name', 'Saved Places')
+                                  .limit(1);
+                                let listId: string;
+                                if (lists && lists.length > 0) {
+                                  listId = lists[0].id;
+                                } else {
+                                  const { data: newList, error } = await supabase
+                                    .from('saved_lists')
+                                    .insert({ user_id: user.id, name: 'Saved Places', icon: '📍' })
+                                    .select()
+                                    .single();
+                                  if (error) throw error;
+                                  listId = newList.id;
+                                }
+                                const { error } = await supabase
+                                  .from('saved_places')
+                                  .insert({ list_id: listId, user_id: user.id, name: loc.name, description: loc.description, category: loc.category });
+                                if (error) throw error;
+                                setSavedFeedItems(prev => new Set(prev).add(loc.name));
+                                toast({ title: '📍 Saved!', description: `${loc.name} added to Saved Places.` });
+                              } catch (e) {
+                                toast({ title: 'Error', description: e instanceof Error ? e.message : 'Unknown', variant: 'destructive' });
+                              }
+                            }}
+                            className={`w-9 h-9 rounded-2xl backdrop-blur-md flex items-center justify-center shadow-lg transition-all ${
+                              isSaved ? 'bg-primary text-primary-foreground' : 'bg-background/80 hover:bg-background hover:scale-110'
+                            }`}
+                          >
+                            {isSaved ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4 text-foreground" />}
+                          </motion.button>
+                        </div>
+
+                        {/* Bottom info */}
+                        <div className="absolute bottom-3 left-3 right-3">
+                          <p className="text-xs text-primary-foreground/70 font-medium">{loc.city}</p>
+                          <h3 className="text-sm font-bold text-primary-foreground leading-tight">{loc.name}</h3>
+                        </div>
+                      </div>
+
+                      <CardContent className="p-4">
+                        <p className="text-xs text-muted-foreground line-clamp-2">{loc.description}</p>
+                        <div className="flex items-center gap-2 mt-3">
+                          <Badge variant="secondary" className="rounded-full text-[11px]">{loc.category}</Badge>
+                          <span className="text-xs text-muted-foreground flex items-center gap-0.5">⭐ {loc.rating}</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* Infinite scroll sentinel */}
+            <div ref={feedSentinelRef} className="h-10" />
+            {hasMoreFeed && (
+              <div className="flex justify-center py-6">
+                <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+              </div>
+            )}
+            {!hasMoreFeed && feedItems.length > 0 && (
+              <p className="text-center text-xs text-muted-foreground py-6">You've seen all locations ✨</p>
+            )}
+            {feedItems.length === 0 && (
+              <p className="text-center text-muted-foreground py-16">No locations found in this category.</p>
+            )}
           </motion.div>
         )}
       </div>
