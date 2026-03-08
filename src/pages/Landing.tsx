@@ -128,8 +128,8 @@ export default function Landing() {
 
   useEffect(() => {
     const base = activeCategory === 'cat.all'
-      ? BASE_PLACES
-      : BASE_PLACES.filter(p => p.category === activeCategory);
+      ? ALL_PLACES.slice(0, BATCH_SIZE)
+      : ALL_PLACES.filter(p => p.category === activeCategory).slice(0, BATCH_SIZE);
     setVisiblePlaces(base);
     setBatchCount(1);
   }, [activeCategory]);
