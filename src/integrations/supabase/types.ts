@@ -111,6 +111,39 @@ export type Database = {
           },
         ]
       }
+      preference_logs: {
+        Row: {
+          activity_category: string
+          activity_title: string
+          city: string
+          created_at: string
+          feedback: string | null
+          id: string
+          rating: number | null
+          user_id: string
+        }
+        Insert: {
+          activity_category?: string
+          activity_title: string
+          city: string
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          rating?: number | null
+          user_id: string
+        }
+        Update: {
+          activity_category?: string
+          activity_title?: string
+          city?: string
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          rating?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           accommodation_style: string | null
