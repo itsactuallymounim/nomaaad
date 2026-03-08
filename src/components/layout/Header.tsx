@@ -37,21 +37,21 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-1.5">
-        <Button asChild variant="ghost" size="sm" className="rounded-xl hidden sm:flex">
+        <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
           <Link to="/lists">
             <BookmarkPlus className="h-4 w-4 mr-1.5" />
             Lists
           </Link>
         </Button>
 
-        <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-9 w-9 rounded-xl">
+        <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-9 w-9">
           {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </Button>
 
         {user && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl">
+              <Button variant="ghost" size="icon" className="h-9 w-9">
                 <User className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
