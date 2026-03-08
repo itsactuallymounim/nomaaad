@@ -28,9 +28,7 @@ export default function Auth() {
     e.preventDefault();
     setIsSubmitting(true);
     const { error } = await signIn(email, password);
-    if (error) {
-      toast({ title: 'Sign in failed', description: error.message, variant: 'destructive' });
-    }
+    if (error) toast({ title: 'Sign in failed', description: error.message, variant: 'destructive' });
     setIsSubmitting(false);
   };
 
@@ -38,29 +36,32 @@ export default function Auth() {
     e.preventDefault();
     setIsSubmitting(true);
     const { error } = await signUp(email, password);
-    if (error) {
-      toast({ title: 'Sign up failed', description: error.message, variant: 'destructive' });
-    } else {
-      toast({ title: 'Check your email', description: 'We sent you a confirmation link to verify your account.' });
-    }
+    if (error) toast({ title: 'Sign up failed', description: error.message, variant: 'destructive' });
+    else toast({ title: 'Check your email', description: 'We sent you a confirmation link to verify your account.' });
     setIsSubmitting(false);
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-[10%] left-[15%] w-[40vw] h-[40vw] rounded-full bg-primary/[0.04] blur-[100px]" />
+        <div className="absolute bottom-[10%] right-[10%] w-[30vw] h-[30vw] rounded-full bg-accent/[0.03] blur-[80px]" />
+      </div>
+
       <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.98 }}
+        initial={{ opacity: 0, y: 24, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
-        className="w-full max-w-sm"
+        transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+        className="w-full max-w-sm relative"
       >
-        <Card className="rounded-3xl border-border/50 shadow-xl backdrop-blur-sm">
+        <Card className="rounded-[1.75rem] border-border/30 shadow-2xl backdrop-blur-sm">
           <CardHeader className="text-center pb-4">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-              className="mx-auto w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mb-3 shadow-lg shadow-primary/20"
+              className="mx-auto w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mb-3 shadow-xl shadow-primary/25"
             >
               <Compass className="h-7 w-7 text-primary-foreground" />
             </motion.div>
@@ -70,14 +71,10 @@ export default function Auth() {
           <CardContent>
             <Button
               variant="outline"
-              className="w-full mb-5 h-11 rounded-2xl"
+              className="w-full mb-5 h-11 rounded-2xl border-border/40 hover:bg-secondary/50"
               onClick={async () => {
-                const { error } = await lovable.auth.signInWithOAuth('google', {
-                  redirect_uri: window.location.origin,
-                });
-                if (error) {
-                  toast({ title: 'Google sign-in failed', description: (error as Error).message, variant: 'destructive' });
-                }
+                const { error } = await lovable.auth.signInWithOAuth('google', { redirect_uri: window.location.origin });
+                if (error) toast({ title: 'Google sign-in failed', description: (error as Error).message, variant: 'destructive' });
               }}
             >
               <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
@@ -91,9 +88,7 @@ export default function Auth() {
 
             <div className="relative mb-5">
               <Separator />
-              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-3 text-xs text-muted-foreground">
-                or
-              </span>
+              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-3 text-xs text-muted-foreground">or</span>
             </div>
 
             <Tabs defaultValue="signin">
