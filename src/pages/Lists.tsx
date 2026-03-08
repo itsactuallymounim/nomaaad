@@ -5,7 +5,7 @@ import {
   Plus, Trash2, ArrowLeft, Search, MapPin, Star, Share2, Compass,
   BookmarkPlus, MoreHorizontal, Edit2, Check, X
 } from 'lucide-react';
-import catCharacter from '@/assets/characters/cat-banana.png';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
