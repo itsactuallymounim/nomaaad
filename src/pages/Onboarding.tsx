@@ -254,7 +254,9 @@ export default function Onboarding() {
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
           >
-            <img src={mascotImage} alt="" className="w-32 h-32 mx-auto rounded-3xl object-cover shadow-xl" />
+            <div className="w-24 h-24 mx-auto rounded-3xl bg-primary/10 flex items-center justify-center shadow-xl">
+              <MascotIcon className="h-12 w-12 text-primary" />
+            </div>
           </motion.div>
           <h1 className="text-3xl font-sans font-bold text-foreground">
             Your nomad profile is ready
