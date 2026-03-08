@@ -1,10 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowUpRight, Compass, Sparkles, MapPin, Globe, Clock, Wallet, Route, Brain, CheckCircle2, Zap, Shield, Plane, FileText, AlertTriangle, Timer } from 'lucide-react';
+import {
+  ArrowUpRight, Compass, Sparkles, MapPin, Globe, Clock, Wallet, Route,
+  Brain, Zap, Shield, Plane, FileText, AlertTriangle, Timer, Search
+} from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { LanguageToggle } from '@/components/LanguageToggle';
 import { Button } from '@/components/ui/button';
+
+/* ── Data ── */
 
 interface Place {
   id: string;
@@ -58,14 +63,13 @@ function generateBatch(batchIndex: number, category?: string): Place[] {
   return source.slice(start, start + BATCH_SIZE);
 }
 
-// Sample itinerary for the hero demo
 const SAMPLE_ITINERARY = [
-  { time: '09:00', title: 'Best local breakfast near hostel', icon: '🍳', category: 'food' },
-  { time: '10:30', title: 'Top attraction (low crowd time)', icon: '🏛️', category: 'explore' },
-  { time: '13:00', title: 'Cheap lunch spot nearby', icon: '🍜', category: 'food' },
-  { time: '15:00', title: 'Walkable hidden spot', icon: '🗺️', category: 'explore' },
-  { time: '18:30', title: 'Sunset viewpoint', icon: '🌅', category: 'explore' },
-  { time: '20:00', title: 'Local dinner', icon: '🍽️', category: 'food' },
+  { time: '09:00', title: 'Best local breakfast near hostel', icon: '🍳' },
+  { time: '10:30', title: 'Top attraction (low crowd time)', icon: '🏛️' },
+  { time: '13:00', title: 'Cheap lunch spot nearby', icon: '🍜' },
+  { time: '15:00', title: 'Walkable hidden spot', icon: '🗺️' },
+  { time: '18:30', title: 'Sunset viewpoint', icon: '🌅' },
+  { time: '20:00', title: 'Local dinner', icon: '🍽️' },
 ];
 
 const BENEFITS = [
@@ -75,6 +79,8 @@ const BENEFITS = [
   { icon: Clock, text: 'Realistic timing' },
 ];
 
+/* ── Component ── */
+
 export default function Landing() {
   const navigate = useNavigate();
   const { t } = useI18n();
@@ -83,8 +89,8 @@ export default function Landing() {
   const [batchCount, setBatchCount] = useState(1);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Animated counter for hero
   const [animatedStep, setAnimatedStep] = useState(0);
   useEffect(() => {
     const interval = setInterval(() => {
@@ -120,9 +126,15 @@ export default function Landing() {
     setBatchCount(1);
   }, [activeCategory]);
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    navigate(`/explore?q=${encodeURIComponent(searchQuery.trim())}`);
+  };
+
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
-      {/* ========== HERO ========== */}
+      {/* ═══════ HERO ═══════ */}
       <section className="relative min-h-[100vh] flex flex-col">
         {/* Background */}
         <div className="absolute inset-0 z-0">
@@ -131,7 +143,7 @@ export default function Landing() {
             alt=""
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-foreground/50 via-foreground/40 to-foreground/70" />
+          <div className="absolute inset-0 bg-gradient-to-b from-foreground/60 via-foreground/40 to-foreground/80" />
         </div>
 
         {/* Nav */}
@@ -143,24 +155,18 @@ export default function Landing() {
         >
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-2xl bg-background/20 backdrop-blur-md flex items-center justify-center">
-              <Compass className="h-5 w-5 text-background" />
+              <Compass className="h-4.5 w-4.5 text-background" />
             </div>
             <span className="font-bold text-lg tracking-tight text-background">nomaaad</span>
           </div>
           <div className="flex items-center gap-2">
             <LanguageToggle />
-            <Link
-              to="/destinations"
-              className="text-sm text-background/80 hover:text-background transition-colors hidden sm:block px-4 py-2 rounded-full bg-background/10 backdrop-blur-md border border-background/20"
-            >
-              {t('landing.destinations')}
-            </Link>
-            <Link
-              to="/auth"
-              className="text-sm font-semibold px-5 py-2.5 rounded-full bg-background text-foreground hover:bg-background/90 transition-all shadow-sm"
-            >
-              {t('landing.getStarted')}
-            </Link>
+            <Button variant="ghost" size="sm" className="text-background/80 hover:text-background hover:bg-background/10 hidden sm:inline-flex" asChild>
+              <Link to="/destinations">{t('landing.destinations')}</Link>
+            </Button>
+            <Button size="sm" className="bg-background text-foreground hover:bg-background/90 shadow-sm" asChild>
+              <Link to="/auth">{t('landing.getStarted')}</Link>
+            </Button>
           </div>
         </motion.nav>
 
@@ -187,22 +193,30 @@ export default function Landing() {
               Enter a city, pick your style. Get a complete day-by-day itinerary — geographically optimized, budget-aware, and realistically timed.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 items-center lg:items-start justify-center lg:justify-start">
-              <Link
-                to="/auth"
-                className="inline-flex items-center gap-2.5 px-8 py-4 rounded-full bg-accent text-accent-foreground font-semibold text-sm hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-accent/25"
+            {/* ── Dynamic search bar ── */}
+            <form onSubmit={handleSearch} className="relative max-w-md mx-auto lg:mx-0 mb-6">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                <Sparkles className="h-5 w-5 text-primary" />
+              </div>
+              <input
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="7 days in Bali as a digital nomad..."
+                className="w-full h-13 pl-12 pr-14 rounded-2xl bg-background/95 backdrop-blur-xl text-foreground text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/40 shadow-xl border-0 transition-all"
+              />
+              <button
+                type="submit"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-primary flex items-center justify-center hover:scale-110 active:scale-95 transition-transform shadow-md"
               >
-                <Sparkles className="h-4 w-4" />
-                Plan My Trip — Free
-              </Link>
-              <span className="text-xs text-background/50">No credit card needed</span>
-            </div>
+                <ArrowUpRight className="h-4 w-4 text-primary-foreground" />
+              </button>
+            </form>
 
             {/* Benefit pills */}
-            <div className="flex flex-wrap gap-2 mt-8 justify-center lg:justify-start">
+            <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
               {BENEFITS.map((b) => (
                 <div key={b.text} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-background/10 backdrop-blur-sm border border-background/15">
-                  <b.icon className="h-3.5 w-3.5 text-primary-foreground/80" />
+                  <b.icon className="h-3.5 w-3.5 text-background/70" />
                   <span className="text-xs text-background/80 font-medium">{b.text}</span>
                 </div>
               ))}
@@ -217,8 +231,7 @@ export default function Landing() {
             className="w-full max-w-sm"
           >
             <div className="bg-background/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-border/30 overflow-hidden">
-              {/* Card header */}
-              <div className="px-5 pt-5 pb-3 border-b border-border/30">
+              <div className="px-5 pt-5 pb-3 border-b border-border/20">
                 <div className="flex items-center gap-2 mb-1">
                   <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                   <span className="text-xs font-mono text-primary font-semibold">Generated in 28s</span>
@@ -227,7 +240,6 @@ export default function Landing() {
                 <p className="text-xs text-muted-foreground">Budget · Digital Nomad · 7 Days</p>
               </div>
 
-              {/* Itinerary items */}
               <div className="px-5 py-4 space-y-1">
                 {SAMPLE_ITINERARY.map((item, i) => (
                   <motion.div
@@ -241,15 +253,14 @@ export default function Landing() {
                   >
                     <span className="text-xs font-mono text-muted-foreground w-11 shrink-0">{item.time}</span>
                     <span className="text-base">{item.icon}</span>
-                    <span className={`text-sm font-medium ${animatedStep === i ? 'text-foreground' : 'text-muted-foreground'}`}>
+                    <span className={`text-sm font-medium transition-colors ${animatedStep === i ? 'text-foreground' : 'text-muted-foreground'}`}>
                       {item.title}
                     </span>
                   </motion.div>
                 ))}
               </div>
 
-              {/* Card footer */}
-              <div className="px-5 pb-5 pt-2 border-t border-border/30">
+              <div className="px-5 pb-5 pt-2 border-t border-border/20">
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>6 activities · ~€35 estimated</span>
                   <span className="text-primary font-medium">View full plan →</span>
@@ -276,7 +287,7 @@ export default function Landing() {
         </motion.div>
       </section>
 
-      {/* ========== HOW IT WORKS ========== */}
+      {/* ═══════ HOW IT WORKS ═══════ */}
       <section className="px-6 md:px-10 py-20 md:py-28" aria-label="How it works">
         <div className="max-w-[1100px] mx-auto">
           <motion.div
@@ -287,48 +298,33 @@ export default function Landing() {
             className="text-center mb-16"
           >
             <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary mb-3 block">How it works</span>
-            <h2 className="text-3xl md:text-5xl font-sans font-bold text-foreground mb-4">
+            <h2 className="text-3xl md:text-4xl font-sans font-bold text-foreground mb-4">
               Three inputs. One perfect plan.
             </h2>
-            <p className="text-muted-foreground max-w-lg mx-auto">
+            <p className="text-muted-foreground max-w-lg mx-auto text-sm">
               No more hours of research, no decision fatigue. Just tell us where and how — we handle the rest.
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-5">
             {[
-              {
-                step: '01',
-                icon: MapPin,
-                title: 'Pick your city',
-                desc: 'Type any destination — Tokyo, Rome, Lisbon, Medellín... anywhere in the world.',
-              },
-              {
-                step: '02',
-                icon: Sparkles,
-                title: 'Set your style',
-                desc: 'Budget or luxury? Relaxed or action-packed? Local secrets or global highlights? Slide to match your vibe.',
-              },
-              {
-                step: '03',
-                icon: Zap,
-                title: 'Get your plan',
-                desc: 'In 30 seconds: a complete day-by-day itinerary with time blocks, places, costs, and walking routes.',
-              },
+              { step: '01', icon: MapPin, title: 'Pick your city', desc: 'Type any destination — Tokyo, Rome, Lisbon, Medellín... anywhere in the world.' },
+              { step: '02', icon: Sparkles, title: 'Set your style', desc: 'Budget or luxury? Relaxed or action-packed? Local secrets or global highlights?' },
+              { step: '03', icon: Zap, title: 'Get your plan', desc: 'In 30 seconds: a complete day-by-day itinerary with time blocks, places, costs, and routes.' },
             ].map((item, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.12 }}
-                className="relative p-7 rounded-[1.75rem] bg-card border border-border/40 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/[0.04] transition-all duration-500"
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="relative p-6 rounded-3xl bg-card border border-border/30 hover:border-primary/20 hover:shadow-lg transition-all duration-500"
               >
-                <span className="text-5xl font-bold text-primary/10 absolute top-4 right-6 font-mono">{item.step}</span>
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-5">
+                <span className="text-5xl font-bold text-primary/10 absolute top-4 right-5 font-mono">{item.step}</span>
+                <div className="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
                   <item.icon className="h-5 w-5 text-primary" />
                 </div>
-                <h3 className="font-semibold text-foreground text-lg mb-2">{item.title}</h3>
+                <h3 className="font-semibold text-foreground mb-2">{item.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
               </motion.div>
             ))}
@@ -336,7 +332,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ========== WHY NOMAAAD ========== */}
+      {/* ═══════ WHY NOMAAAD ═══════ */}
       <section className="px-6 md:px-10 py-16 md:py-24 bg-muted/30" aria-label="Why Nomaaad">
         <div className="max-w-[1100px] mx-auto">
           <motion.div
@@ -349,7 +345,7 @@ export default function Landing() {
             <h2 className="text-3xl md:text-4xl font-sans font-bold text-foreground mb-4">
               Not just another AI chatbot.
             </h2>
-            <p className="text-muted-foreground max-w-lg mx-auto">
+            <p className="text-muted-foreground max-w-lg mx-auto text-sm">
               ChatGPT gives ideas. Nomaaad gives you a <strong className="text-foreground">complete, optimized travel plan</strong> you can follow step by step.
             </p>
           </motion.div>
@@ -367,9 +363,9 @@ export default function Landing() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.08 }}
-                className="flex flex-col items-center text-center p-6 rounded-2xl bg-card border border-border/30"
+                className="flex flex-col items-center text-center p-6 rounded-3xl bg-card border border-border/30"
               >
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
                   <item.icon className="h-5 w-5 text-primary" />
                 </div>
                 <h3 className="font-semibold text-foreground text-sm mb-1">{item.title}</h3>
@@ -378,7 +374,6 @@ export default function Landing() {
             ))}
           </div>
 
-          {/* Social proof / positioning */}
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -393,9 +388,8 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ========== NOMAD ANXIETY SECTION ========== */}
+      {/* ═══════ NOMAD ANXIETY ═══════ */}
       <section className="px-6 md:px-10 py-20 md:py-28 relative overflow-hidden" aria-label="Nomad Compliance">
-        {/* Subtle background accent */}
         <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-destructive/[0.03] blur-[120px]" />
         </div>
@@ -413,42 +407,20 @@ export default function Landing() {
               <span className="text-xs font-semibold text-destructive tracking-wide uppercase">The real nomad problem</span>
             </div>
 
-            <h2 className="text-3xl md:text-5xl font-sans font-bold text-foreground mb-5 leading-tight">
+            <h2 className="text-3xl md:text-4xl font-sans font-bold text-foreground mb-5 leading-tight">
               Planning is easy.<br />
               <span className="text-destructive">Staying legal isn't.</span>
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-sm md:text-base leading-relaxed">
+            <p className="text-muted-foreground max-w-2xl mx-auto text-sm leading-relaxed">
               Every digital nomad knows the anxiety: <strong className="text-foreground">How many days do I have left on my visa?</strong> Am I accidentally becoming a tax resident? When's my next border run? One mistake can mean fines, deportation, or a surprise tax bill.
             </p>
           </motion.div>
 
-          {/* Pain point cards */}
           <div className="grid sm:grid-cols-3 gap-5 mb-12">
             {[
-              {
-                icon: Timer,
-                title: 'Visa day tracker',
-                pain: '"Am I overstaying?"',
-                desc: 'Automatically counts your days in each country. Get alerts before your visa expires — never overstay again.',
-                color: 'text-chart-1',
-                bgColor: 'bg-chart-1/10',
-              },
-              {
-                icon: FileText,
-                title: 'Tax threshold alerts',
-                pain: '"Am I a tax resident now?"',
-                desc: 'Track the 183-day rule and country-specific thresholds. Know exactly when to leave before triggering tax obligations.',
-                color: 'text-chart-4',
-                bgColor: 'bg-chart-4/10',
-              },
-              {
-                icon: Plane,
-                title: 'Border run planner',
-                pain: '"Where do I go to reset?"',
-                desc: 'Smart suggestions for the cheapest, fastest border runs. Optimized routes to reset your visa clock stress-free.',
-                color: 'text-primary',
-                bgColor: 'bg-primary/10',
-              },
+              { icon: Timer, title: 'Visa day tracker', pain: '"Am I overstaying?"', desc: 'Automatically counts your days in each country. Get alerts before your visa expires — never overstay again.', color: 'text-chart-1', bgColor: 'bg-chart-1/10' },
+              { icon: FileText, title: 'Tax threshold alerts', pain: '"Am I a tax resident now?"', desc: 'Track the 183-day rule and country-specific thresholds. Know exactly when to leave before triggering tax obligations.', color: 'text-chart-4', bgColor: 'bg-chart-4/10' },
+              { icon: Plane, title: 'Border run planner', pain: '"Where do I go to reset?"', desc: 'Smart suggestions for the cheapest, fastest border runs. Optimized routes to reset your visa clock stress-free.', color: 'text-primary', bgColor: 'bg-primary/10' },
             ].map((item, i) => (
               <motion.div
                 key={i}
@@ -456,19 +428,18 @@ export default function Landing() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="relative p-6 rounded-[1.5rem] bg-card border border-border/40 hover:border-destructive/20 hover:shadow-xl transition-all duration-500 group"
+                className="relative p-6 rounded-3xl bg-card border border-border/30 hover:border-destructive/20 hover:shadow-lg transition-all duration-500"
               >
                 <div className={`w-11 h-11 rounded-2xl ${item.bgColor} flex items-center justify-center mb-4`}>
                   <item.icon className={`h-5 w-5 ${item.color}`} />
                 </div>
                 <p className="text-xs font-medium text-destructive/70 italic mb-2">{item.pain}</p>
-                <h3 className="font-semibold text-foreground text-lg mb-2">{item.title}</h3>
+                <h3 className="font-semibold text-foreground mb-2">{item.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
               </motion.div>
             ))}
           </div>
 
-          {/* Emotional hook + CTA */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -476,7 +447,7 @@ export default function Landing() {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="max-w-2xl mx-auto text-center"
           >
-            <div className="p-6 rounded-2xl bg-card/80 border border-border/30 mb-8">
+            <div className="p-5 rounded-2xl bg-card/80 border border-border/30 mb-8">
               <div className="flex items-start gap-3 text-left">
                 <Shield className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div>
@@ -484,25 +455,24 @@ export default function Landing() {
                     This isn't just trip planning — it's peace of mind.
                   </p>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Other apps plan your restaurants. Nomaaad protects your freedom. We track the invisible rules that keep you legal, compliant, and stress-free — so you can focus on living, not worrying.
+                    Other apps plan your restaurants. Nomaaad protects your freedom. We track the invisible rules that keep you legal, compliant, and stress-free.
                   </p>
                 </div>
               </div>
             </div>
 
-            <Link
-              to="/auth"
-              className="inline-flex items-center gap-2.5 px-8 py-4 rounded-full bg-foreground text-background font-semibold text-sm hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-foreground/10"
-            >
-              <Shield className="h-4 w-4" />
-              Stay legal, travel free
-            </Link>
+            <Button size="lg" className="gap-2" asChild>
+              <Link to="/auth">
+                <Shield className="h-4 w-4" />
+                Stay legal, travel free
+              </Link>
+            </Button>
             <p className="text-xs text-muted-foreground mt-3">Coming soon for Pro members</p>
           </motion.div>
         </div>
       </section>
 
-      {/* ========== GALLERY ========== */}
+      {/* ═══════ GALLERY ═══════ */}
       <section className="px-6 md:px-10 py-20 md:py-28" aria-label="Destinations">
         <div className="max-w-[1400px] mx-auto">
           <motion.div
@@ -528,7 +498,7 @@ export default function Landing() {
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                     activeCategory === catKey
                       ? 'bg-foreground text-background shadow-sm'
-                      : 'bg-secondary/60 text-muted-foreground hover:bg-secondary hover:text-foreground'
+                      : 'bg-secondary/60 text-muted-foreground hover:bg-secondary hover:text-secondary-foreground'
                   }`}
                 >
                   {t(catKey)}
@@ -551,7 +521,7 @@ export default function Landing() {
                 >
                   <Link
                     to="/auth"
-                    className="group relative block rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-shadow duration-500 h-full"
+                    className="group relative block rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-500 h-full"
                   >
                     <img
                       src={`https://images.unsplash.com/photo-${place.image}?auto=format&fit=crop&w=800&q=80`}
@@ -561,14 +531,14 @@ export default function Landing() {
                       }`}
                       loading="lazy"
                     />
-                    <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center opacity-80 group-hover:opacity-100 group-hover:bg-background transition-all duration-300 shadow-lg">
+                    <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center opacity-80 group-hover:opacity-100 group-hover:bg-background transition-all duration-300 shadow-md">
                       <ArrowUpRight className="h-4 w-4 text-foreground" />
                     </div>
-                    <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
-                      <h3 className="text-white font-bold text-lg md:text-xl leading-tight mb-1 drop-shadow-lg">
+                    <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6 bg-gradient-to-t from-foreground/80 via-foreground/40 to-transparent">
+                      <h3 className="text-background font-bold text-lg md:text-xl leading-tight mb-1">
                         {place.city}, {place.country}
                       </h3>
-                      <p className="text-white/80 text-xs md:text-sm leading-relaxed line-clamp-2 drop-shadow-md">
+                      <p className="text-background/80 text-xs md:text-sm leading-relaxed line-clamp-2">
                         {place.description}
                       </p>
                     </div>
@@ -587,7 +557,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ========== BOTTOM CTA ========== */}
+      {/* ═══════ BOTTOM CTA ═══════ */}
       <section className="px-6 md:px-10 py-20 md:py-32 relative" aria-label="Call to action">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.02] to-transparent pointer-events-none" />
         <motion.div
@@ -597,22 +567,21 @@ export default function Landing() {
           transition={{ duration: 0.7 }}
           className="max-w-lg mx-auto text-center relative"
         >
-          <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-primary/10 flex items-center justify-center shadow-xl">
-            <Globe className="h-10 w-10 text-primary" />
+          <div className="w-16 h-16 mx-auto mb-6 rounded-3xl bg-primary/10 flex items-center justify-center">
+            <Globe className="h-8 w-8 text-primary" />
           </div>
-          <h2 className="text-3xl md:text-5xl font-sans font-bold text-foreground mb-4">
+          <h2 className="text-3xl md:text-4xl font-sans font-bold text-foreground mb-4">
             Stop planning. Start exploring.
           </h2>
-          <p className="text-muted-foreground text-sm md:text-base mb-10">
+          <p className="text-muted-foreground text-sm mb-8">
             Your entire travel itinerary — generated instantly. Join thousands of travelers who plan smarter.
           </p>
-          <Link
-            to="/auth"
-            className="inline-flex items-center gap-2.5 px-9 py-4.5 rounded-full bg-foreground text-background font-semibold text-sm hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-foreground/10"
-          >
-            Get started — it's free
-            <ArrowUpRight className="h-4 w-4" />
-          </Link>
+          <Button size="lg" className="gap-2" asChild>
+            <Link to="/auth">
+              Get started — it's free
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </Button>
         </motion.div>
       </section>
 
