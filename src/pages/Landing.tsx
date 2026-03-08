@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowUpRight, Compass, Sparkles, MapPin, Globe } from 'lucide-react';
+import { ArrowUpRight, Compass, Sparkles, MapPin, Globe, Clock, Wallet, Route, Brain, CheckCircle2, Zap } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { LanguageToggle } from '@/components/LanguageToggle';
+import { Button } from '@/components/ui/button';
 
 interface Place {
   id: string;
@@ -19,7 +20,6 @@ interface Place {
 const CATEGORIES_KEYS = ['cat.all', 'cat.coworking', 'cat.cafes', 'cat.food', 'cat.explore', 'cat.coliving'] as const;
 
 const ALL_PLACES: Place[] = [
-  // Batch 1
   { id: '1', name: 'Canggu, Indonesia', city: 'Canggu', country: 'Indonesia', category: 'cat.coworking', image: '1537996194471-e657df975ab4', description: 'Surf, cowork and chill in Bali\'s digital nomad capital.', span: 'normal' },
   { id: '2', name: 'Paris, France', city: 'Paris', country: 'France', category: 'cat.cafes', image: '1502602898657-3e91760cbb34', description: 'Lose yourself in the charm of Paris, from iconic landmarks to world-class art and cuisine.', span: 'tall' },
   { id: '3', name: 'Barcelona, Spain', city: 'Barcelona', country: 'Spain', category: 'cat.food', image: '1539037116277-4db20889f2d4', description: 'Vibrant food markets, stunning architecture and Mediterranean vibes.', span: 'normal' },
@@ -32,7 +32,6 @@ const ALL_PLACES: Place[] = [
   { id: '10', name: 'Marrakech, Morocco', city: 'Marrakech', country: 'Morocco', category: 'cat.coliving', image: '1539020140153-e479b8c22e70', description: 'A magical city full of colour, spice markets and hidden riads.', span: 'normal' },
   { id: '11', name: 'Ho Chi Minh, Vietnam', city: 'Ho Chi Minh', country: 'Vietnam', category: 'cat.cafes', image: '1528127269322-539801943592', description: 'Incredible street food, cheap coffee, and buzzing energy.', span: 'normal' },
   { id: '12', name: 'Mexico City, Mexico', city: 'Mexico City', country: 'Mexico', category: 'cat.food', image: '1504544750208-dc0358e63f7f', description: 'Rich culture, world-class tacos and a growing remote work scene.', span: 'tall' },
-  // Batch 2
   { id: '13', name: 'Tokyo, Japan', city: 'Tokyo', country: 'Japan', category: 'cat.explore', image: '1540959733332-eab4deabeeaf', description: 'Neon-lit streets, ancient shrines and the best ramen on earth.', span: 'normal' },
   { id: '14', name: 'Berlin, Germany', city: 'Berlin', country: 'Germany', category: 'cat.coworking', image: '1560969184-10fe8719e047', description: 'Creative capital of Europe with affordable coworking and nightlife.', span: 'tall' },
   { id: '15', name: 'Buenos Aires, Argentina', city: 'Buenos Aires', country: 'Argentina', category: 'cat.food', image: '1589909202802-8f4aadce1849', description: 'Tango, steak and a bohemian vibe that never gets old.', span: 'normal' },
@@ -45,117 +44,59 @@ const ALL_PLACES: Place[] = [
   { id: '22', name: 'Prague, Czech Republic', city: 'Prague', country: 'Czech Republic', category: 'cat.cafes', image: '1519677100203-a0e668c92439', description: 'Fairytale architecture, great beer and a thriving café scene.', span: 'tall' },
   { id: '23', name: 'Taipei, Taiwan', city: 'Taipei', country: 'Taiwan', category: 'cat.food', image: '1470004914212-05527e49370b', description: 'Night markets, bubble tea and a tech-savvy nomad paradise.', span: 'normal' },
   { id: '24', name: 'Santorini, Greece', city: 'Santorini', country: 'Greece', category: 'cat.explore', image: '1570077188670-e3a8d69ac5ff', description: 'Breathtaking sunsets over white-washed cliffs and blue domes.', span: 'normal' },
-  // Batch 3
-  { id: '25', name: 'Dubai, UAE', city: 'Dubai', country: 'UAE', category: 'cat.explore', image: '1512453979798-5ea266f8880c', description: 'Futuristic skyline, desert adventures and world-class luxury.', span: 'tall' },
-  { id: '26', name: 'Reykjavik, Iceland', city: 'Reykjavik', country: 'Iceland', category: 'cat.explore', image: '1504829857797-ddff29c27927', description: 'Northern lights, geothermal pools and raw natural beauty.', span: 'normal' },
-  { id: '27', name: 'Da Nang, Vietnam', city: 'Da Nang', country: 'Vietnam', category: 'cat.coworking', image: '1559592413-7cec4d0cae2b', description: 'Beachfront coworking with incredible Vietnamese cuisine.', span: 'normal' },
-  { id: '28', name: 'Split, Croatia', city: 'Split', country: 'Croatia', category: 'cat.coliving', image: '1580137189272-c9379f8864fd', description: 'Roman ruins, island hopping and Mediterranean slow living.', span: 'normal' },
-  { id: '29', name: 'Bangkok, Thailand', city: 'Bangkok', country: 'Thailand', category: 'cat.food', image: '1508009603885-50cf7c579365', description: 'Street food heaven with temples, markets and rooftop bars.', span: 'tall' },
-  { id: '30', name: 'Edinburgh, Scotland', city: 'Edinburgh', country: 'Scotland', category: 'cat.cafes', image: '1506377585622-bedcbb027afc', description: 'Historic charm, cozy pubs and stunning hilltop views.', span: 'normal' },
-  { id: '31', name: 'Lima, Peru', city: 'Lima', country: 'Peru', category: 'cat.food', image: '1531968455001-5c5272a67c71', description: 'The gastronomic capital of South America awaits.', span: 'normal' },
-  { id: '32', name: 'Singapore', city: 'Singapore', country: 'Singapore', category: 'cat.coworking', image: '1525625293386-3f8f99389edd', description: 'Ultra-modern city-state with world-class infrastructure.', span: 'normal' },
-  { id: '33', name: 'Oaxaca, Mexico', city: 'Oaxaca', country: 'Mexico', category: 'cat.food', image: '1547995886-6dc09384c6e6', description: 'Mole, mezcal and the heart of Mexican folk culture.', span: 'tall' },
-  { id: '34', name: 'Tallinn, Estonia', city: 'Tallinn', country: 'Estonia', category: 'cat.coworking', image: '1560448204-603e6b2a0a04', description: 'Digital nomad visa pioneer with a charming old town.', span: 'normal' },
-  { id: '35', name: 'Cusco, Peru', city: 'Cusco', country: 'Peru', category: 'cat.explore', image: '1526392060635-9d6019884377', description: 'Gateway to Machu Picchu and Andean adventures.', span: 'normal' },
-  { id: '36', name: 'Porto, Portugal', city: 'Porto', country: 'Portugal', category: 'cat.cafes', image: '1555881400-74d7acaacd8b', description: 'Port wine, azulejo tiles and riverside charm.', span: 'normal' },
-  // Batch 4
-  { id: '37', name: 'Hanoi, Vietnam', city: 'Hanoi', country: 'Vietnam', category: 'cat.food', image: '1509030450996-dd1a26dda07a', description: 'Vibrant chaos, pho on every corner and French colonial charm.', span: 'tall' },
-  { id: '38', name: 'Copenhagen, Denmark', city: 'Copenhagen', country: 'Denmark', category: 'cat.cafes', image: '1513622470248-c8549fb7869e', description: 'Hygge culture, cycling paradise and New Nordic cuisine.', span: 'normal' },
-  { id: '39', name: 'Valletta, Malta', city: 'Valletta', country: 'Malta', category: 'cat.coliving', image: '1558618666-fcd25c85f82e', description: 'Sun-soaked island with a growing digital nomad community.', span: 'normal' },
-  { id: '40', name: 'Kuala Lumpur, Malaysia', city: 'Kuala Lumpur', country: 'Malaysia', category: 'cat.coworking', image: '1508062878650-88b52897f298', description: 'Petronas Towers, hawker stalls and ultra-fast internet.', span: 'normal' },
-  { id: '41', name: 'Siem Reap, Cambodia', city: 'Siem Reap', country: 'Cambodia', category: 'cat.explore', image: '1569839333583-f09e73631040', description: 'Ancient Angkor temples amid lush tropical jungle.', span: 'tall' },
-  { id: '42', name: 'Vilnius, Lithuania', city: 'Vilnius', country: 'Lithuania', category: 'cat.coliving', image: '1542315192-1f61a1792f33', description: 'Europe\'s best-kept secret with baroque beauty and tech talent.', span: 'normal' },
-  { id: '43', name: 'Cartagena, Colombia', city: 'Cartagena', country: 'Colombia', category: 'cat.explore', image: '1533104816931-20fa691ff6ca', description: 'Colorful colonial streets and Caribbean sea breezes.', span: 'normal' },
-  { id: '44', name: 'Florence, Italy', city: 'Florence', country: 'Italy', category: 'cat.food', image: '1541370976299-4d24ebbc9077', description: 'Renaissance art, Tuscan wine and the birthplace of gelato.', span: 'normal' },
-  { id: '45', name: 'Kathmandu, Nepal', city: 'Kathmandu', country: 'Nepal', category: 'cat.explore', image: '1544735716-392fe2489ffa', description: 'Gateway to the Himalayas with spiritual energy everywhere.', span: 'tall' },
-  { id: '46', name: 'Budapest, Hungary', city: 'Budapest', country: 'Hungary', category: 'cat.cafes', image: '1541343672885-9be56236302a', description: 'Ruin bars, thermal baths and stunning Danube views.', span: 'normal' },
-  { id: '47', name: 'Zanzibar, Tanzania', city: 'Zanzibar', country: 'Tanzania', category: 'cat.explore', image: '1547471080-7cc2caa01a7e', description: 'Spice island paradise with turquoise waters and ancient Stone Town.', span: 'normal' },
-  { id: '48', name: 'Bogotá, Colombia', city: 'Bogotá', country: 'Colombia', category: 'cat.coworking', image: '1568967068165-a45860c3137e', description: 'High-altitude creativity hub with amazing street art scene.', span: 'normal' },
-  // Batch 5
-  { id: '49', name: 'Vienna, Austria', city: 'Vienna', country: 'Austria', category: 'cat.cafes', image: '1516550893923-42d28e5677af', description: 'Coffee house culture, classical music and imperial grandeur.', span: 'tall' },
-  { id: '50', name: 'Hoi An, Vietnam', city: 'Hoi An', country: 'Vietnam', category: 'cat.food', image: '1528181304800-259b08848526', description: 'Lantern-lit streets, tailored suits and the freshest bánh mì.', span: 'normal' },
-  { id: '51', name: 'Nairobi, Kenya', city: 'Nairobi', country: 'Kenya', category: 'cat.coworking', image: '1547553426-58b5e4750d21', description: 'Africa\'s silicon savannah with a booming tech scene.', span: 'normal' },
-  { id: '52', name: 'Tulum, Mexico', city: 'Tulum', country: 'Mexico', category: 'cat.coliving', image: '1518509562904-e7ef99cdcc86', description: 'Jungle-meets-beach bohemian paradise on the Riviera Maya.', span: 'normal' },
-  { id: '53', name: 'Athens, Greece', city: 'Athens', country: 'Greece', category: 'cat.explore', image: '1555993539-1732b0258235', description: 'Ancient ruins, rooftop bars and Mediterranean sunshine.', span: 'tall' },
-  { id: '54', name: 'Penang, Malaysia', city: 'Penang', country: 'Malaysia', category: 'cat.food', image: '1559628233-100c798642d4', description: 'George Town\'s legendary hawker food and colonial heritage.', span: 'normal' },
-  { id: '55', name: 'Riga, Latvia', city: 'Riga', country: 'Latvia', category: 'cat.coliving', image: '1513622470248-c8549fb7869e', description: 'Art Nouveau architecture and a blossoming startup scene.', span: 'normal' },
-  { id: '56', name: 'Jaipur, India', city: 'Jaipur', country: 'India', category: 'cat.explore', image: '1524492412937-b28074a5d7da', description: 'The Pink City — vibrant palaces, bazaars and royal heritage.', span: 'normal' },
-  { id: '57', name: 'Santiago, Chile', city: 'Santiago', country: 'Chile', category: 'cat.coworking', image: '1551801691-f0bce83d4f21', description: 'Wine country capital surrounded by the Andes mountains.', span: 'tall' },
-  { id: '58', name: 'Luang Prabang, Laos', city: 'Luang Prabang', country: 'Laos', category: 'cat.explore', image: '1540611025311-01df3cde54b5', description: 'UNESCO gem with golden temples and Mekong River serenity.', span: 'normal' },
-  { id: '59', name: 'Palermo, Italy', city: 'Palermo', country: 'Italy', category: 'cat.food', image: '1523531294919-4bcd7c65e216', description: 'Sicilian street food, Arab-Norman splendor and raw energy.', span: 'normal' },
-  { id: '60', name: 'Málaga, Spain', city: 'Málaga', country: 'Spain', category: 'cat.coliving', image: '1509840841025-9088ba78a826', description: 'Sun-drenched Costa del Sol with Picasso and tapas culture.', span: 'normal' },
-  // Batch 6
-  { id: '61', name: 'Osaka, Japan', city: 'Osaka', country: 'Japan', category: 'cat.food', image: '1590559899731-a382839e5549', description: 'Japan\'s kitchen — takoyaki, okonomiyaki and pure energy.', span: 'tall' },
-  { id: '62', name: 'Lagos, Nigeria', city: 'Lagos', country: 'Nigeria', category: 'cat.coworking', image: '1572883454114-efb4855ee1fd', description: 'Africa\'s largest city, bursting with creative entrepreneurship.', span: 'normal' },
-  { id: '63', name: 'Seville, Spain', city: 'Seville', country: 'Spain', category: 'cat.explore', image: '1515443961218-a51367888e4b', description: 'Flamenco, tapas and the warmest welcome in Andalusia.', span: 'normal' },
-  { id: '64', name: 'Queenstown, New Zealand', city: 'Queenstown', country: 'New Zealand', category: 'cat.explore', image: '1507699622108-4be3abd695ad', description: 'Adventure capital of the world with jaw-dropping landscapes.', span: 'normal' },
-  { id: '65', name: 'Accra, Ghana', city: 'Accra', country: 'Ghana', category: 'cat.coliving', image: '1568731089284-56e07e4e086c', description: 'West Africa\'s cultural hub with beaches and buzzing nightlife.', span: 'tall' },
-  { id: '66', name: 'Bruges, Belgium', city: 'Bruges', country: 'Belgium', category: 'cat.cafes', image: '1491557345352-5929e343eb89', description: 'Medieval canals, Belgian chocolate and cozy market squares.', span: 'normal' },
-  { id: '67', name: 'Havana, Cuba', city: 'Havana', country: 'Cuba', category: 'cat.explore', image: '1500759285222-a95626b934cb', description: 'Classic cars, salsa rhythms and faded colonial grandeur.', span: 'normal' },
-  { id: '68', name: 'Colombo, Sri Lanka', city: 'Colombo', country: 'Sri Lanka', category: 'cat.food', image: '1552055569-bc4d5e9ab58c', description: 'Tropical curries, colonial charm and Indian Ocean breezes.', span: 'normal' },
-  { id: '69', name: 'Tromsø, Norway', city: 'Tromsø', country: 'Norway', category: 'cat.explore', image: '1531366936337-7c912a4589a7', description: 'Arctic gateway for Northern Lights and midnight sun adventures.', span: 'tall' },
-  { id: '70', name: 'Antigua, Guatemala', city: 'Antigua', country: 'Guatemala', category: 'cat.coliving', image: '1520250497591-112f2f40a3f4', description: 'Cobblestone streets beneath volcanoes and world-class coffee.', span: 'normal' },
-  { id: '71', name: 'Helsinki, Finland', city: 'Helsinki', country: 'Finland', category: 'cat.cafes', image: '1538332576228-eb5b4c4de6f5', description: 'Design capital with sauna culture and waterfront beauty.', span: 'normal' },
-  { id: '72', name: 'Essaouira, Morocco', city: 'Essaouira', country: 'Morocco', category: 'cat.explore', image: '1548018560-b6ebb8a5d6ea', description: 'Windy surf town with blue-and-white medina charm.', span: 'normal' },
 ];
 
 const BATCH_SIZE = 12;
 
-// Load unique places in sequential batches — no repetition until all 72 are shown
 function generateBatch(batchIndex: number, category?: string): Place[] {
   const source = category && category !== 'cat.all'
     ? ALL_PLACES.filter(p => p.category === category)
     : ALL_PLACES;
   if (source.length === 0) return [];
-
   const start = batchIndex * BATCH_SIZE;
-  // If we've shown everything, return empty (finite but large set)
   if (start >= source.length) return [];
-
   return source.slice(start, start + BATCH_SIZE);
 }
+
+// Sample itinerary for the hero demo
+const SAMPLE_ITINERARY = [
+  { time: '09:00', title: 'Best local breakfast near hostel', icon: '🍳', category: 'food' },
+  { time: '10:30', title: 'Top attraction (low crowd time)', icon: '🏛️', category: 'explore' },
+  { time: '13:00', title: 'Cheap lunch spot nearby', icon: '🍜', category: 'food' },
+  { time: '15:00', title: 'Walkable hidden spot', icon: '🗺️', category: 'explore' },
+  { time: '18:30', title: 'Sunset viewpoint', icon: '🌅', category: 'explore' },
+  { time: '20:00', title: 'Local dinner', icon: '🍽️', category: 'food' },
+];
+
+const BENEFITS = [
+  { icon: Route, text: 'Geographically optimized' },
+  { icon: Wallet, text: 'Budget-aware' },
+  { icon: MapPin, text: 'Walkability optimized' },
+  { icon: Clock, text: 'Realistic timing' },
+];
 
 export default function Landing() {
   const navigate = useNavigate();
   const { t } = useI18n();
   const [activeCategory, setActiveCategory] = useState('cat.all');
-  const [searchValue, setSearchValue] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
   const [visiblePlaces, setVisiblePlaces] = useState<Place[]>(() => generateBatch(0));
   const [batchCount, setBatchCount] = useState(1);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const EXAMPLE_QUERY = 'Plan 7 days in Lisbon for a digital nomad — Budget: €900';
-
-  // Typewriter effect
+  // Animated counter for hero
+  const [animatedStep, setAnimatedStep] = useState(0);
   useEffect(() => {
-    if (isTyping) return;
-    let i = 0;
-    let direction: 'forward' | 'pause' | 'backward' = 'forward';
-    let pauseTimer = 0;
     const interval = setInterval(() => {
-      if (direction === 'forward') {
-        i++;
-        setSearchValue(EXAMPLE_QUERY.slice(0, i));
-        if (i === EXAMPLE_QUERY.length) { direction = 'pause'; pauseTimer = 0; }
-      } else if (direction === 'pause') {
-        pauseTimer++;
-        if (pauseTimer > 30) direction = 'backward';
-      } else {
-        i--;
-        setSearchValue(EXAMPLE_QUERY.slice(0, i));
-        if (i === 0) direction = 'forward';
-      }
-    }, 60);
+      setAnimatedStep(prev => (prev + 1) % SAMPLE_ITINERARY.length);
+    }, 2000);
     return () => clearInterval(interval);
-  }, [isTyping]);
+  }, []);
 
-  // Infinite scroll — load next batch of unique places
   const loadMore = useCallback(() => {
     setBatchCount(prev => {
       const newBatch = generateBatch(prev, activeCategory);
-      if (newBatch.length === 0) return prev; // no more unique places
+      if (newBatch.length === 0) return prev;
       setIsLoadingMore(true);
       setVisiblePlaces(curr => [...curr, ...newBatch]);
       setTimeout(() => setIsLoadingMore(false), 300);
@@ -179,28 +120,18 @@ export default function Landing() {
     setBatchCount(1);
   }, [activeCategory]);
 
-  const handleSearchFocus = () => { setIsTyping(true); setSearchValue(''); };
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchValue.trim()) sessionStorage.setItem('nomaaad_pending_query', searchValue.trim());
-    navigate('/auth');
-  };
-
-  const filtered = visiblePlaces;
-
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
-      {/* Hero — Full-screen with background image */}
+      {/* ========== HERO ========== */}
       <section className="relative min-h-[100vh] flex flex-col">
-        {/* Background image */}
+        {/* Background */}
         <div className="absolute inset-0 z-0">
           <img
             src="https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&w=2000&q=80"
             alt=""
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-foreground/30 via-foreground/20 to-foreground/60" />
+          <div className="absolute inset-0 bg-gradient-to-b from-foreground/50 via-foreground/40 to-foreground/70" />
         </div>
 
         {/* Nav */}
@@ -209,11 +140,10 @@ export default function Landing() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="relative z-10 flex items-center justify-between px-6 md:px-10 pt-6 md:pt-8"
-          aria-label="Main navigation"
         >
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-2xl bg-background/20 backdrop-blur-md flex items-center justify-center">
-              <Compass className="h-5 w-5 text-background" aria-hidden="true" />
+              <Compass className="h-5 w-5 text-background" />
             </div>
             <span className="font-bold text-lg tracking-tight text-background">nomaaad</span>
           </div>
@@ -235,69 +165,97 @@ export default function Landing() {
         </motion.nav>
 
         {/* Hero content */}
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 text-center">
+        <div className="relative z-10 flex-1 flex flex-col lg:flex-row items-center justify-center px-6 gap-10 lg:gap-16 py-12">
+          {/* Left — Messaging */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="mb-4"
-          >
-            <span className="text-background/70 text-sm md:text-base font-medium tracking-[0.2em] uppercase">
-              {t('landing.badge')}
-            </span>
-          </motion.div>
-
-          <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="text-6xl sm:text-7xl md:text-8xl lg:text-[10rem] font-sans font-bold text-background tracking-tight leading-[0.9] mb-6"
+            transition={{ duration: 0.7, delay: 0.1 }}
+            className="max-w-xl text-center lg:text-left"
           >
-            {t('landing.headline2').toUpperCase()}
-          </motion.h1>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-background/15 backdrop-blur-md border border-background/20 mb-6">
+              <Zap className="h-3.5 w-3.5 text-accent" />
+              <span className="text-xs font-semibold text-background/90 tracking-wide uppercase">AI-Powered</span>
+            </div>
 
-          <motion.p
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.35 }}
-            className="text-background/70 text-sm md:text-base max-w-lg mx-auto leading-relaxed mb-10"
-          >
-            {t('landing.subtitle')}
-          </motion.p>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-sans font-bold text-background tracking-tight leading-[1.05] mb-5">
+              Your entire trip.<br />
+              <span className="text-accent">Planned in 30 seconds.</span>
+            </h1>
 
-          {/* Search bar */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45, duration: 0.6 }}
-            className="w-full max-w-2xl mx-auto"
-          >
-            <form onSubmit={handleSearchSubmit} className="relative" role="search" aria-label="AI travel search">
-              <div className="flex items-center bg-background/95 backdrop-blur-xl rounded-full shadow-2xl border border-background/20 overflow-hidden">
-                <div className="flex items-center gap-2 pl-5">
-                  <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
-                </div>
-                <input
-                  value={searchValue}
-                  onChange={e => { setIsTyping(true); setSearchValue(e.target.value); }}
-                  onFocus={handleSearchFocus}
-                  onBlur={() => { if (!searchValue) setIsTyping(false); }}
-                  className="flex-1 h-14 md:h-16 px-3 bg-transparent text-foreground text-sm placeholder:text-muted-foreground focus:outline-none"
-                  placeholder={t('landing.searchPlaceholder')}
-                  aria-label={t('landing.searchPlaceholder')}
-                />
-                <button
-                  type="submit"
-                  className="mr-2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-primary/25"
-                  aria-label="Search"
-                >
-                  <ArrowUpRight className="h-4 w-4 text-primary-foreground" aria-hidden="true" />
-                </button>
-              </div>
-            </form>
-            <p className="text-center text-xs text-background/40 mt-4">
-              {t('landing.searchHints')}
+            <p className="text-background/70 text-base md:text-lg leading-relaxed mb-8 max-w-md mx-auto lg:mx-0">
+              Enter a city, pick your style. Get a complete day-by-day itinerary — geographically optimized, budget-aware, and realistically timed.
             </p>
+
+            <div className="flex flex-col sm:flex-row gap-3 items-center lg:items-start justify-center lg:justify-start">
+              <Link
+                to="/auth"
+                className="inline-flex items-center gap-2.5 px-8 py-4 rounded-full bg-accent text-accent-foreground font-semibold text-sm hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-accent/25"
+              >
+                <Sparkles className="h-4 w-4" />
+                Plan My Trip — Free
+              </Link>
+              <span className="text-xs text-background/50">No credit card needed</span>
+            </div>
+
+            {/* Benefit pills */}
+            <div className="flex flex-wrap gap-2 mt-8 justify-center lg:justify-start">
+              {BENEFITS.map((b) => (
+                <div key={b.text} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-background/10 backdrop-blur-sm border border-background/15">
+                  <b.icon className="h-3.5 w-3.5 text-primary-foreground/80" />
+                  <span className="text-xs text-background/80 font-medium">{b.text}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Right — Sample itinerary card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20, rotateY: -5 }}
+            animate={{ opacity: 1, y: 0, rotateY: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="w-full max-w-sm"
+          >
+            <div className="bg-background/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-border/30 overflow-hidden">
+              {/* Card header */}
+              <div className="px-5 pt-5 pb-3 border-b border-border/30">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  <span className="text-xs font-mono text-primary font-semibold">Generated in 28s</span>
+                </div>
+                <h3 className="font-bold text-foreground text-lg">Lisbon — Day 1</h3>
+                <p className="text-xs text-muted-foreground">Budget · Digital Nomad · 7 Days</p>
+              </div>
+
+              {/* Itinerary items */}
+              <div className="px-5 py-4 space-y-1">
+                {SAMPLE_ITINERARY.map((item, i) => (
+                  <motion.div
+                    key={i}
+                    animate={{
+                      backgroundColor: animatedStep === i ? 'hsl(var(--primary) / 0.08)' : 'transparent',
+                      scale: animatedStep === i ? 1.02 : 1,
+                    }}
+                    transition={{ duration: 0.3 }}
+                    className="flex items-center gap-3 py-2.5 px-3 rounded-xl"
+                  >
+                    <span className="text-xs font-mono text-muted-foreground w-11 shrink-0">{item.time}</span>
+                    <span className="text-base">{item.icon}</span>
+                    <span className={`text-sm font-medium ${animatedStep === i ? 'text-foreground' : 'text-muted-foreground'}`}>
+                      {item.title}
+                    </span>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Card footer */}
+              <div className="px-5 pb-5 pt-2 border-t border-border/30">
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>6 activities · ~€35 estimated</span>
+                  <span className="text-primary font-medium">View full plan →</span>
+                </div>
+              </div>
+            </div>
           </motion.div>
         </div>
 
@@ -305,7 +263,7 @@ export default function Landing() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1, duration: 0.5 }}
+          transition={{ delay: 1.2, duration: 0.5 }}
           className="relative z-10 flex justify-center pb-8"
         >
           <div className="w-6 h-10 rounded-full border-2 border-background/30 flex items-start justify-center p-1.5">
@@ -318,38 +276,126 @@ export default function Landing() {
         </motion.div>
       </section>
 
-      {/* Value Props with characters */}
-      <section className="px-6 md:px-10 py-20 md:py-28" aria-label="Features">
-        <div className="max-w-[1400px] mx-auto">
+      {/* ========== HOW IT WORKS ========== */}
+      <section className="px-6 md:px-10 py-20 md:py-28" aria-label="How it works">
+        <div className="max-w-[1100px] mx-auto">
           <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-            variants={{ visible: { transition: { staggerChildren: 0.12 } } }}
-            className="grid md:grid-cols-3 gap-5 md:gap-6 mb-20 md:mb-28"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="text-center mb-16"
           >
-            {[
-              { icon: Compass, titleKey: 'landing.valueProp1Title' as const, descKey: 'landing.valueProp1Desc' as const },
-              { icon: MapPin, titleKey: 'landing.valueProp2Title' as const, descKey: 'landing.valueProp2Desc' as const },
-              { icon: Sparkles, titleKey: 'landing.valueProp3Title' as const, descKey: 'landing.valueProp3Desc' as const },
-            ].map((prop, i) => (
-              <motion.div
-                key={i}
-                variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0 } }}
-                transition={{ duration: 0.5 }}
-                className="group relative text-center md:text-left p-7 rounded-[1.75rem] bg-card/60 backdrop-blur-sm border border-border/30 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/[0.04] transition-all duration-500 overflow-hidden"
-              >
-                <prop.icon className="absolute -bottom-4 -right-4 w-28 h-28 text-primary/[0.04] group-hover:text-primary/[0.08] transition-colors duration-500" aria-hidden="true" />
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center mb-5 mx-auto md:mx-0 group-hover:scale-110 transition-transform duration-500" aria-hidden="true">
-                  <prop.icon className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="font-semibold text-foreground text-base mb-2 relative">{t(prop.titleKey)}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed relative">{t(prop.descKey)}</p>
-              </motion.div>
-            ))}
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary mb-3 block">How it works</span>
+            <h2 className="text-3xl md:text-5xl font-sans font-bold text-foreground mb-4">
+              Three inputs. One perfect plan.
+            </h2>
+            <p className="text-muted-foreground max-w-lg mx-auto">
+              No more hours of research, no decision fatigue. Just tell us where and how — we handle the rest.
+            </p>
           </motion.div>
 
-          {/* Gallery header */}
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                step: '01',
+                icon: MapPin,
+                title: 'Pick your city',
+                desc: 'Type any destination — Tokyo, Rome, Lisbon, Medellín... anywhere in the world.',
+              },
+              {
+                step: '02',
+                icon: Sparkles,
+                title: 'Set your style',
+                desc: 'Budget or luxury? Relaxed or action-packed? Local secrets or global highlights? Slide to match your vibe.',
+              },
+              {
+                step: '03',
+                icon: Zap,
+                title: 'Get your plan',
+                desc: 'In 30 seconds: a complete day-by-day itinerary with time blocks, places, costs, and walking routes.',
+              },
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.12 }}
+                className="relative p-7 rounded-[1.75rem] bg-card border border-border/40 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/[0.04] transition-all duration-500"
+              >
+                <span className="text-5xl font-bold text-primary/10 absolute top-4 right-6 font-mono">{item.step}</span>
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-5">
+                  <item.icon className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="font-semibold text-foreground text-lg mb-2">{item.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ========== WHY NOMAAAD ========== */}
+      <section className="px-6 md:px-10 py-16 md:py-24 bg-muted/30" aria-label="Why Nomaaad">
+        <div className="max-w-[1100px] mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="text-center mb-14"
+          >
+            <h2 className="text-3xl md:text-4xl font-sans font-bold text-foreground mb-4">
+              Not just another AI chatbot.
+            </h2>
+            <p className="text-muted-foreground max-w-lg mx-auto">
+              ChatGPT gives ideas. Nomaaad gives you a <strong className="text-foreground">complete, optimized travel plan</strong> you can follow step by step.
+            </p>
+          </motion.div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { icon: Clock, title: 'Structured day plans', desc: 'Time-blocked activities from morning to evening.' },
+              { icon: Route, title: 'Distance optimized', desc: 'Activities ordered to minimize walking and transit.' },
+              { icon: Wallet, title: 'Budget estimation', desc: 'Know your daily costs before you leave.' },
+              { icon: Brain, title: 'Zero decision fatigue', desc: 'Everything planned — just show up and enjoy.' },
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.08 }}
+                className="flex flex-col items-center text-center p-6 rounded-2xl bg-card border border-border/30"
+              >
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                  <item.icon className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="font-semibold text-foreground text-sm mb-1">{item.title}</h3>
+                <p className="text-xs text-muted-foreground">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Social proof / positioning */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="mt-12 text-center"
+          >
+            <p className="text-lg md:text-xl font-serif italic text-foreground/80">
+              "The fastest way to get a complete travel plan."
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ========== GALLERY ========== */}
+      <section className="px-6 md:px-10 py-20 md:py-28" aria-label="Destinations">
+        <div className="max-w-[1400px] mx-auto">
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -363,7 +409,7 @@ export default function Landing() {
               </h2>
               <p className="text-sm text-muted-foreground mt-1.5">{t('landing.exploreSubtitle')}</p>
             </div>
-            <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Place categories">
+            <div className="flex flex-wrap gap-1.5" role="tablist">
               {CATEGORIES_KEYS.map(catKey => (
                 <button
                   key={catKey}
@@ -382,10 +428,9 @@ export default function Landing() {
             </div>
           </motion.div>
 
-          {/* Destination cards — reference-style grid */}
           <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5" role="tabpanel">
             <AnimatePresence mode="popLayout">
-              {filtered.map((place, i) => (
+              {visiblePlaces.map((place, i) => (
                 <motion.div
                   key={place.id}
                   layout
@@ -398,23 +443,18 @@ export default function Landing() {
                   <Link
                     to="/auth"
                     className="group relative block rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-shadow duration-500 h-full"
-                    aria-label={`${place.name}`}
                   >
                     <img
                       src={`https://images.unsplash.com/photo-${place.image}?auto=format&fit=crop&w=800&q=80`}
-                      alt={`${place.name}`}
+                      alt={place.name}
                       className={`w-full object-cover transition-transform duration-700 group-hover:scale-105 ${
                         place.span === 'tall' ? 'h-full min-h-[420px] sm:min-h-full' : 'aspect-[4/3]'
                       }`}
                       loading="lazy"
                     />
-
-                    {/* Arrow button top-right */}
                     <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center opacity-80 group-hover:opacity-100 group-hover:bg-background transition-all duration-300 shadow-lg">
-                      <ArrowUpRight className="h-4 w-4 text-foreground" aria-hidden="true" />
+                      <ArrowUpRight className="h-4 w-4 text-foreground" />
                     </div>
-
-                    {/* Text overlay at bottom — strong contrast */}
                     <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
                       <h3 className="text-white font-bold text-lg md:text-xl leading-tight mb-1 drop-shadow-lg">
                         {place.city}, {place.country}
@@ -429,21 +469,18 @@ export default function Landing() {
             </AnimatePresence>
           </motion.div>
 
-          {/* Loading indicator */}
           {isLoadingMore && (
             <div className="flex justify-center py-8">
               <div className="w-6 h-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
             </div>
           )}
-
-          {/* Infinite scroll sentinel */}
           <div ref={sentinelRef} className="h-px w-full" aria-hidden="true" />
         </div>
       </section>
 
-      {/* Bottom CTA */}
+      {/* ========== BOTTOM CTA ========== */}
       <section className="px-6 md:px-10 py-20 md:py-32 relative" aria-label="Call to action">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.02] to-transparent pointer-events-none" aria-hidden="true" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.02] to-transparent pointer-events-none" />
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -455,17 +492,17 @@ export default function Landing() {
             <Globe className="h-10 w-10 text-primary" />
           </div>
           <h2 className="text-3xl md:text-5xl font-sans font-bold text-foreground mb-4">
-            {t('landing.ctaTitle')}
+            Stop planning. Start exploring.
           </h2>
           <p className="text-muted-foreground text-sm md:text-base mb-10">
-            {t('landing.ctaSubtitle')}
+            Your entire travel itinerary — generated instantly. Join thousands of travelers who plan smarter.
           </p>
           <Link
             to="/auth"
             className="inline-flex items-center gap-2.5 px-9 py-4.5 rounded-full bg-foreground text-background font-semibold text-sm hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-foreground/10"
           >
-            {t('landing.ctaButton')}
-            <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+            Get started — it's free
+            <ArrowUpRight className="h-4 w-4" />
           </Link>
         </motion.div>
       </section>
