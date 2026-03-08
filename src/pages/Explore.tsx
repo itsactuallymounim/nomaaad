@@ -262,7 +262,7 @@ export default function Explore() {
       <div className="max-w-2xl mx-auto px-4">
         {/* Greeting */}
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="pt-8 pb-5">
-          <h1 className="text-2xl font-serif font-bold text-foreground">{mascotEmoji} {t('explore.greeting')}</h1>
+          <h1 className="text-2xl font-sans font-bold text-foreground">{mascotEmoji} {t('explore.greeting')}</h1>
           <p className="text-sm text-muted-foreground mt-1">{t('explore.greetingSub')}</p>
         </motion.div>
 
