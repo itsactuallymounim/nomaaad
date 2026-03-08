@@ -253,7 +253,7 @@ export default function Onboarding() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
           >
-            <Button size="lg" onClick={() => navigate('/planner')} className="mt-4">
+            <Button size="lg" onClick={() => navigate('/explore')} className="mt-4">
               Start Exploring
               <ArrowRight className="ml-1 h-4 w-4" />
             </Button>

@@ -54,8 +54,8 @@ export default function Landing() {
               <Link to="/destinations">Destinations</Link>
             </Button>
             <Button asChild size="sm" className="rounded-xl">
-              <Link to="/planner">
-                Start Planning
+              <Link to="/explore">
+                Start Exploring
               </Link>
             </Button>
           </div>
@@ -94,7 +94,7 @@ export default function Landing() {
           </motion.p>
           <motion.div variants={fadeUp} transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }} className="flex gap-3 mt-3">
             <Button asChild size="lg" className="rounded-2xl h-12 px-8 text-base shadow-lg shadow-primary/20">
-              <Link to="/planner">
+              <Link to="/explore">
                 Get Started
                 <ArrowRight className="ml-1.5 h-4 w-4" />
               </Link>
@@ -178,8 +178,8 @@ export default function Landing() {
             Sign up for free and start planning your dream trip.
           </p>
           <Button asChild size="lg" className="rounded-2xl h-12 px-8 text-base shadow-lg shadow-primary/20">
-            <Link to="/planner">
-              Start Planning
+            <Link to="/explore">
+              Start Exploring
               <ArrowRight className="ml-1.5 h-4 w-4" />
             </Link>
           </Button>

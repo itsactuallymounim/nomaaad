@@ -40,7 +40,7 @@ export default function Destinations() {
   );
 
   const handleCityClick = (city: string) => {
-    navigate(`/planner?city=${encodeURIComponent(city)}`);
+    navigate(`/explore`);
   };
 
   return (
@@ -60,7 +60,7 @@ export default function Destinations() {
             <span className="font-bold text-lg tracking-tight">nomaaad</span>
           </Link>
           <Button asChild size="sm" className="rounded-xl">
-            <Link to="/planner">Start Planning</Link>
+            <Link to="/explore">Explore</Link>
           </Button>
         </div>
       </motion.nav>
