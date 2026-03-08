@@ -156,7 +156,12 @@ export default function Explore() {
     e.preventDefault();
     if (!aiQuery.trim()) return;
     hasTriggeredRef.current = true;
-    generatePlan(aiQuery.trim());
+    // Enrich query with slider context
+    const budgetLabel = sliders.budget < 33 ? 'budget-friendly' : sliders.budget < 66 ? 'mid-range' : 'luxury';
+    const paceLabel = sliders.pace < 33 ? 'relaxed' : sliders.pace < 66 ? 'moderate' : 'action-packed';
+    const vibeLabel = sliders.vibe < 33 ? 'local hidden gems' : sliders.vibe < 66 ? 'mix of local and popular' : 'must-see global highlights';
+    const enriched = `${aiQuery.trim()}. Style: ${budgetLabel} budget, ${paceLabel} pace, focusing on ${vibeLabel}.`;
+    generatePlan(enriched);
   };
 
   const toggleTheme = () => {
