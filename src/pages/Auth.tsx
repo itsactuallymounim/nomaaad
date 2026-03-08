@@ -70,9 +70,9 @@ export default function Auth() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-              className="mx-auto w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mb-3 shadow-xl shadow-primary/25"
+              className="mx-auto w-20 h-20 rounded-2xl overflow-hidden mb-3 shadow-xl"
             >
-              <Compass className="h-7 w-7 text-primary-foreground" aria-hidden="true" />
+              <img src={dogCharacter} alt="" className="w-full h-full object-cover" />
             </motion.div>
             <CardTitle className="text-2xl font-sans">{t('auth.welcome')}</CardTitle>
             <CardDescription>{t('auth.subtitle')}</CardDescription>

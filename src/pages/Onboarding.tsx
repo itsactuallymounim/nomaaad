@@ -372,7 +372,11 @@ export default function Onboarding() {
                             : 'border-border bg-card hover:border-primary/30 hover:bg-card/80'
                         }`}
                       >
-                        <span className="text-2xl flex-shrink-0">{opt.emoji}</span>
+                        {(opt as any).image ? (
+                          <img src={(opt as any).image} alt="" className="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
+                        ) : (
+                          <span className="text-2xl flex-shrink-0">{opt.emoji}</span>
+                        )}
                         <div className="flex-1 min-w-0">
                           <span className="font-medium text-foreground text-sm">{opt.label}</span>
                           {opt.desc && (

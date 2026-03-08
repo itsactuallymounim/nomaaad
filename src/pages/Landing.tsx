@@ -389,6 +389,7 @@ export default function Landing() {
           transition={{ duration: 0.7 }}
           className="max-w-lg mx-auto text-center relative"
         >
+          <img src={penguinCharacter} alt="" className="w-32 h-32 mx-auto mb-6 rounded-3xl object-cover shadow-xl" />
           <h2 className="text-3xl md:text-5xl font-sans font-bold text-foreground mb-4">
             {t('landing.ctaTitle')}
           </h2>
