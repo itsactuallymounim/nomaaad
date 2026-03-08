@@ -37,7 +37,7 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-1.5">
-        <Button asChild variant="ghost" size="sm" className="rounded-xl hidden sm:flex">
+        <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
           <Link to="/lists">
             <BookmarkPlus className="h-4 w-4 mr-1.5" />
             Lists
