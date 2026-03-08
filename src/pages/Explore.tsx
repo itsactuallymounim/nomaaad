@@ -6,7 +6,7 @@ import {
   Search, MapPin, Plus, Check, Compass, Moon, Sun, LogOut, User,
   BookmarkPlus, Star, Coffee, Utensils, Camera, Wifi, Home, TreePine,
   ChevronRight, X, Sparkles, Loader2, ArrowUpRight, Calendar,
-  CalendarPlus, Clock, DollarSign, Heart, Train, ChevronDown
+  CalendarPlus, Clock, DollarSign, Heart, Train, ChevronDown, Bell
 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { LanguageToggle } from '@/components/LanguageToggle';
@@ -24,6 +24,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
+import { useNotifications } from '@/hooks/useNotifications';
 import { toast } from '@/hooks/use-toast';
 
 interface CuratedPlace {
@@ -138,6 +139,8 @@ export default function Explore() {
   const { user, signOut } = useAuth();
   const { profile } = useProfile();
   const { t } = useI18n();
+  const { permission: notifPermission, requestPermission, scheduleRatingReminder } = useNotifications();
+  const [showNotifBanner, setShowNotifBanner] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
@@ -209,6 +212,10 @@ export default function Explore() {
     setTimeline(prev => [...prev, activity].sort((a, b) => a.day === b.day ? a.time.localeCompare(b.time) : a.day - b.day));
     setShowTimeline(true);
     toast({ title: '✅ Added to timeline', description: activity.title });
+    // Show notification permission banner if not yet granted
+    if (notifPermission === 'default') {
+      setShowNotifBanner(true);
+    }
   };
 
   const removeFromTimeline = (idx: number) => {
@@ -225,6 +232,21 @@ export default function Explore() {
         window.open(buildGoogleCalendarUrl(activity, timelineStartDate, city), '_blank');
       }, i * 400);
     });
+    // Schedule rating reminders for each activity
+    if (notifPermission === 'granted') {
+      timeline.forEach(activity => {
+        const [hours, minutes] = activity.time.split(':').map(Number);
+        const d = new Date(timelineStartDate);
+        d.setDate(d.getDate() + activity.day - 1);
+        d.setHours(hours, minutes, 0, 0);
+        const endTime = d.getTime() + activity.duration * 60 * 1000;
+        const delayMs = endTime - Date.now();
+        if (delayMs > 0) {
+          scheduleRatingReminder(activity.title, delayMs);
+        }
+      });
+      toast({ title: '🔔 Reminders set', description: 'We\'ll remind you to rate each activity when it ends' });
+    }
   };
 
   const fetchLists = useCallback(async () => {
@@ -360,6 +382,54 @@ export default function Explore() {
             </button>
           </form>
         </motion.div>
+
+        {/* Notification permission banner */}
+        <AnimatePresence>
+          {showNotifBanner && notifPermission === 'default' && (
+            <motion.div
+              initial={{ opacity: 0, y: -8, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: 'auto' }}
+              exit={{ opacity: 0, y: -8, height: 0 }}
+              className="mb-5 overflow-hidden"
+            >
+              <Card className="rounded-2xl border-primary/20 bg-primary/[0.04]">
+                <CardContent className="p-4 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <Bell className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground">Enable reminders</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Get notified to rate activities after you complete them — helps us personalize your trips!</p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setShowNotifBanner(false)}
+                      className="rounded-xl text-xs"
+                    >
+                      Later
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={async () => {
+                        const granted = await requestPermission();
+                        setShowNotifBanner(false);
+                        if (granted) {
+                          toast({ title: '🔔 Notifications enabled', description: 'We\'ll remind you to rate activities when they end' });
+                        }
+                      }}
+                      className="rounded-xl text-xs gap-1.5"
+                    >
+                      <Bell className="h-3.5 w-3.5" />
+                      Allow
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* AI Travel Plan — Activity Cards */}
         <AnimatePresence>
