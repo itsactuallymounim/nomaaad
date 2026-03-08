@@ -224,7 +224,7 @@ export default function Explore() {
         className="sticky top-0 z-50 backdrop-blur-2xl bg-background/60 border-b border-border/20"
         aria-label="Main navigation"
       >
-        <div className="flex items-center justify-between px-4 py-3 max-w-2xl mx-auto">
+        <div className="flex items-center justify-between px-4 md:px-8 py-3 max-w-7xl mx-auto">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-2xl bg-primary flex items-center justify-center shadow-md shadow-primary/20">
               <Compass className="h-4 w-4 text-primary-foreground" aria-hidden="true" />
@@ -259,7 +259,7 @@ export default function Explore() {
         </div>
       </motion.nav>
 
-      <div className="max-w-2xl mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-4 md:px-8">
         {/* Greeting */}
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="pt-8 pb-5 flex items-center gap-4">
           <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center shadow-md">
@@ -272,7 +272,7 @@ export default function Explore() {
         </motion.div>
 
         {/* AI Search bar */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="mb-6 relative">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="mb-6 relative max-w-2xl">
           <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-primary/8 via-primary/4 to-transparent blur-xl pointer-events-none" aria-hidden="true" />
           <form onSubmit={handleAiSearch} className="relative" role="search" aria-label="AI travel planner">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"><Sparkles className="h-4 w-4 text-primary" aria-hidden="true" /></div>
@@ -326,13 +326,6 @@ export default function Explore() {
           )}
         </AnimatePresence>
 
-        {/* Places search */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-4">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('explore.filterPlaceholder')} className="pl-10 rounded-2xl h-11 bg-card/60 border-border/30" aria-label={t('explore.filterPlaceholder')} />
-          </div>
-        </motion.div>
 
         {/* Category pills */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} className="flex gap-2 overflow-x-auto pb-5 scrollbar-hide -mx-4 px-4">
@@ -357,7 +350,7 @@ export default function Explore() {
           initial="hidden"
           animate="visible"
           variants={{ visible: { transition: { staggerChildren: 0.04 } } }}
-          className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 pt-2"
         >
           <AnimatePresence>
             {filtered.map(place => (
