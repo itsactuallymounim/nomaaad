@@ -138,7 +138,7 @@ Answer helpfully and concisely with markdown. Reference the user's saved places 
       { role: "user", content: question },
     ];
 
-    const response = await callLLM(messages, OPENROUTER_API_KEY, LOVABLE_API_KEY);
+    const response = await callLLM(messages, LOVABLE_API_KEY);
 
     if (!response.ok) {
       const errorText = await response.text();

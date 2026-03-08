@@ -83,11 +83,7 @@ Be specific with real place names and practical details.`;
       { role: "user", content: query },
     ];
 
-    const response = await callLLM(
-      messages,
-      OPENROUTER_API_KEY || LOVABLE_API_KEY!,
-      LOVABLE_API_KEY
-    );
+    const response = await callLLM(messages, LOVABLE_API_KEY);
 
     if (!response.ok) {
       const errorText = await response.text();
