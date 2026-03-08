@@ -399,9 +399,9 @@ export default function Explore() {
 
           {filtered.length === 0 && (
             <div className="col-span-full text-center py-16 text-muted-foreground">
-              <Search className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" />
-              <p className="font-medium">No places found</p>
-              <p className="text-sm mt-1">Try a different search or category.</p>
+              <Search className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" aria-hidden="true" />
+              <p className="font-medium">{t('explore.noPlaces')}</p>
+              <p className="text-sm mt-1">{t('explore.noPlacesSub')}</p>
             </div>
           )}
         </motion.div>
