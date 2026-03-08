@@ -60,7 +60,7 @@ export default function Destinations() {
             <span className="font-bold text-lg tracking-tight">nomaaad</span>
           </Link>
           <Button asChild size="sm" className="rounded-xl">
-            <Link to="/explore">Explore</Link>
+            <Link to="/auth">Explore</Link>
           </Button>
         </div>
       </motion.nav>
