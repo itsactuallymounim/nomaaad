@@ -664,7 +664,7 @@ export default function Explore() {
             </div>
 
             {/* Cards grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 flex-1">
               {feedItems.map((loc, idx) => {
                 const isSaved = savedFeedItems.has(loc.name);
                 return (
