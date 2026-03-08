@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
-import { ArrowUpRight, MapPin, BookmarkPlus, Share2, Compass, Sparkles, Globe, Layers } from 'lucide-react';
+import { ArrowUpRight, MapPin, Compass, Sparkles, Globe, Layers } from 'lucide-react';
+import { useI18n } from '@/lib/i18n';
+import { LanguageToggle } from '@/components/LanguageToggle';
 
-const CATEGORIES = ['All', 'Coworking', 'Cafés', 'Food', 'Explore', 'Coliving'];
+const CATEGORIES_KEYS = ['cat.all', 'cat.coworking', 'cat.cafes', 'cat.food', 'cat.explore', 'cat.coliving'] as const;
 
 interface Place {
   id: string;
@@ -16,39 +18,22 @@ interface Place {
 }
 
 const PLACES: Place[] = [
-  { id: '1', name: 'Dojo Bali', city: 'Canggu', country: 'Indonesia', category: 'Coworking', image: 'photo-1537996194471-e657df975ab4', span: 'tall' },
-  { id: '2', name: 'Café de Flore', city: 'Paris', country: 'France', category: 'Cafés', image: 'photo-1502602898657-3e91760cbb34', span: 'normal' },
-  { id: '3', name: 'La Boqueria', city: 'Barcelona', country: 'Spain', category: 'Food', image: 'photo-1539037116277-4db20889f2d4', span: 'normal' },
-  { id: '4', name: 'Fushimi Inari', city: 'Kyoto', country: 'Japan', category: 'Explore', image: 'photo-1493976040374-85c8e12f0c0e', span: 'wide' },
-  { id: '5', name: 'Selina Lisbon', city: 'Lisbon', country: 'Portugal', category: 'Coliving', image: 'photo-1536663815808-535e2280d2c2', span: 'normal' },
-  { id: '6', name: 'Ubud Rice Terraces', city: 'Ubud', country: 'Indonesia', category: 'Explore', image: 'photo-1555400038-63f5ba517a47', span: 'tall' },
-  { id: '7', name: 'Punspace', city: 'Chiang Mai', country: 'Thailand', category: 'Coworking', image: 'photo-1506665531195-3566af2b4dfa', span: 'normal' },
-  { id: '8', name: 'Table Mountain', city: 'Cape Town', country: 'South Africa', category: 'Explore', image: 'photo-1580060839134-75a5edca2e99', span: 'wide' },
-  { id: '9', name: 'Cinta Cafe', city: 'Canggu', country: 'Indonesia', category: 'Cafés', image: 'photo-1544551763-46a013bb70d5', span: 'normal' },
-  { id: '10', name: 'Riad Yasmine', city: 'Marrakech', country: 'Morocco', category: 'Coliving', image: 'photo-1539020140153-e479b8c22e70', span: 'normal' },
-];
-
-const VALUE_PROPS = [
-  {
-    icon: Compass,
-    title: 'Discover curated spots',
-    description: 'Hand-picked coworking spaces, cafés, and hidden gems — vetted by real nomads.',
-  },
-  {
-    icon: Layers,
-    title: 'Save & organize',
-    description: 'Create custom lists by city or vibe. Works offline, always in your pocket.',
-  },
-  {
-    icon: Globe,
-    title: 'Share with your crew',
-    description: 'Send your favorite spots to friends in one tap. Plan together, travel better.',
-  },
+  { id: '1', name: 'Dojo Bali', city: 'Canggu', country: 'Indonesia', category: 'cat.coworking', image: 'photo-1537996194471-e657df975ab4', span: 'tall' },
+  { id: '2', name: 'Café de Flore', city: 'Paris', country: 'France', category: 'cat.cafes', image: 'photo-1502602898657-3e91760cbb34', span: 'normal' },
+  { id: '3', name: 'La Boqueria', city: 'Barcelona', country: 'Spain', category: 'cat.food', image: 'photo-1539037116277-4db20889f2d4', span: 'normal' },
+  { id: '4', name: 'Fushimi Inari', city: 'Kyoto', country: 'Japan', category: 'cat.explore', image: 'photo-1493976040374-85c8e12f0c0e', span: 'wide' },
+  { id: '5', name: 'Selina Lisbon', city: 'Lisbon', country: 'Portugal', category: 'cat.coliving', image: 'photo-1536663815808-535e2280d2c2', span: 'normal' },
+  { id: '6', name: 'Ubud Rice Terraces', city: 'Ubud', country: 'Indonesia', category: 'cat.explore', image: 'photo-1555400038-63f5ba517a47', span: 'tall' },
+  { id: '7', name: 'Punspace', city: 'Chiang Mai', country: 'Thailand', category: 'cat.coworking', image: 'photo-1506665531195-3566af2b4dfa', span: 'normal' },
+  { id: '8', name: 'Table Mountain', city: 'Cape Town', country: 'South Africa', category: 'cat.explore', image: 'photo-1580060839134-75a5edca2e99', span: 'wide' },
+  { id: '9', name: 'Cinta Cafe', city: 'Canggu', country: 'Indonesia', category: 'cat.cafes', image: 'photo-1544551763-46a013bb70d5', span: 'normal' },
+  { id: '10', name: 'Riad Yasmine', city: 'Marrakech', country: 'Morocco', category: 'cat.coliving', image: 'photo-1539020140153-e479b8c22e70', span: 'normal' },
 ];
 
 export default function Landing() {
   const navigate = useNavigate();
-  const [activeCategory, setActiveCategory] = useState('All');
+  const { t } = useI18n();
+  const [activeCategory, setActiveCategory] = useState('cat.all');
   const [hoveredPlace, setHoveredPlace] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -94,47 +79,60 @@ export default function Landing() {
     navigate('/auth');
   };
 
-  const filtered = activeCategory === 'All' ? PLACES : PLACES.filter(p => p.category === activeCategory);
+  const filtered = activeCategory === 'cat.all' ? PLACES : PLACES.filter(p => p.category === activeCategory);
+
+  const VALUE_PROPS = [
+    { icon: Compass, titleKey: 'landing.valueProp1Title' as const, descKey: 'landing.valueProp1Desc' as const },
+    { icon: Layers, titleKey: 'landing.valueProp2Title' as const, descKey: 'landing.valueProp2Desc' as const },
+    { icon: Globe, titleKey: 'landing.valueProp3Title' as const, descKey: 'landing.valueProp3Desc' as const },
+  ];
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
+      {/* Skip to content link for accessibility */}
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-2xl focus:bg-primary focus:text-primary-foreground focus:text-sm">
+        Skip to content
+      </a>
+
       {/* Ambient gradient blobs */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10" aria-hidden="true">
         <div className="absolute -top-[40%] -right-[20%] w-[80vw] h-[80vw] rounded-full bg-primary/[0.04] blur-[120px]" />
         <div className="absolute -bottom-[30%] -left-[20%] w-[60vw] h-[60vw] rounded-full bg-accent/[0.03] blur-[100px]" />
       </div>
 
       {/* Hero */}
-      <motion.section ref={heroRef} style={{ opacity: heroOpacity, scale: heroScale }} className="relative px-6 md:px-10 pt-8 md:pt-12">
+      <motion.section ref={heroRef} style={{ opacity: heroOpacity, scale: heroScale }} className="relative px-6 md:px-10 pt-8 md:pt-12" id="main-content">
         <div className="max-w-[1400px] mx-auto">
           {/* Nav */}
-          <motion.div
+          <motion.nav
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className="flex items-center justify-between mb-16 md:mb-20"
+            aria-label="Main navigation"
           >
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-2xl bg-primary flex items-center justify-center shadow-md shadow-primary/20">
-                <Compass className="h-5 w-5 text-primary-foreground" />
+                <Compass className="h-5 w-5 text-primary-foreground" aria-hidden="true" />
               </div>
               <span className="font-bold text-lg tracking-tight text-foreground">nomaaad</span>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <LanguageToggle />
               <Link
                 to="/destinations"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:block"
               >
-                Destinations
+                {t('landing.destinations')}
               </Link>
               <Link
                 to="/auth"
-                className="text-sm font-semibold px-5 py-2.5 rounded-2xl bg-foreground text-background hover:bg-foreground/90 transition-all shadow-sm"
+                className="text-sm font-semibold px-5 py-2.5 rounded-full bg-foreground text-background hover:bg-foreground/90 transition-all shadow-sm"
               >
-                Get started
+                {t('landing.getStarted')}
               </Link>
             </div>
-          </motion.div>
+          </motion.nav>
 
           {/* Headline */}
           <motion.div
@@ -143,19 +141,19 @@ export default function Landing() {
             transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="text-center max-w-3xl mx-auto mb-10"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold tracking-wide mb-6">
-              <Sparkles className="h-3.5 w-3.5" />
-              AI-powered travel planning
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold tracking-wide mb-6" role="status">
+              <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+              {t('landing.badge')}
             </div>
             <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-serif font-bold text-foreground tracking-tight leading-[1.05]">
-              You discover
+              {t('landing.headline1')}
               <br />
               <span className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
-                the world.
+                {t('landing.headline2')}
               </span>
             </h1>
             <p className="text-muted-foreground text-base md:text-lg mt-6 max-w-md mx-auto leading-relaxed">
-              Curated places for digital nomads — save them, list them, share them.
+              {t('landing.subtitle')}
             </p>
           </motion.div>
 
@@ -166,11 +164,11 @@ export default function Landing() {
             transition={{ delay: 0.2, duration: 0.6 }}
             className="max-w-xl mx-auto mb-5 relative"
           >
-            <div className="absolute -inset-4 md:-inset-6 rounded-[2rem] bg-gradient-to-br from-primary/10 via-primary/5 to-accent/5 blur-2xl pointer-events-none" />
-            <div className="absolute -inset-px rounded-2xl bg-gradient-to-r from-primary/20 via-transparent to-accent/20 pointer-events-none" />
-            <form onSubmit={handleSearchSubmit} className="relative">
+            <div className="absolute -inset-4 md:-inset-6 rounded-[2rem] bg-gradient-to-br from-primary/10 via-primary/5 to-accent/5 blur-2xl pointer-events-none" aria-hidden="true" />
+            <div className="absolute -inset-px rounded-2xl bg-gradient-to-r from-primary/20 via-transparent to-accent/20 pointer-events-none" aria-hidden="true" />
+            <form onSubmit={handleSearchSubmit} className="relative" role="search" aria-label="AI travel search">
               <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
-                <Sparkles className="h-4 w-4 text-primary" />
+                <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
               </div>
               <input
                 ref={inputRef}
@@ -179,13 +177,15 @@ export default function Landing() {
                 onFocus={handleSearchFocus}
                 onBlur={() => { if (!searchValue) setIsTyping(false); }}
                 className="relative w-full h-14 pl-11 pr-14 rounded-2xl bg-card/90 backdrop-blur-xl border border-border/30 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/30 transition-all shadow-xl shadow-primary/[0.06]"
-                placeholder="Where do you want to go?"
+                placeholder={t('landing.searchPlaceholder')}
+                aria-label={t('landing.searchPlaceholder')}
               />
               <button
                 type="submit"
                 className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-primary flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-primary/25"
+                aria-label="Search"
               >
-                <ArrowUpRight className="h-4 w-4 text-primary-foreground" />
+                <ArrowUpRight className="h-4 w-4 text-primary-foreground" aria-hidden="true" />
               </button>
             </form>
           </motion.div>
@@ -195,14 +195,15 @@ export default function Landing() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.5 }}
             className="text-center text-xs text-muted-foreground/50 mb-20 md:mb-24"
+            aria-hidden="true"
           >
-            Try: "7 days in Bali" · "Coworking in Medellín" · "Budget trip to Bangkok"
+            {t('landing.searchHints')}
           </motion.p>
         </div>
       </motion.section>
 
       {/* Value Props */}
-      <section className="px-6 md:px-10 pb-20 md:pb-28">
+      <section className="px-6 md:px-10 pb-20 md:pb-28" aria-label="Features">
         <div className="max-w-[1400px] mx-auto">
           <motion.div
             initial="hidden"
@@ -218,11 +219,11 @@ export default function Landing() {
                 transition={{ duration: 0.5 }}
                 className="group relative text-center md:text-left p-7 rounded-[1.75rem] bg-card/60 backdrop-blur-sm border border-border/30 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/[0.04] transition-all duration-500"
               >
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center mb-5 mx-auto md:mx-0 group-hover:scale-110 transition-transform duration-500">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center mb-5 mx-auto md:mx-0 group-hover:scale-110 transition-transform duration-500" aria-hidden="true">
                   <prop.icon className="h-5 w-5 text-primary" />
                 </div>
-                <h3 className="font-semibold text-foreground text-base mb-2">{prop.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{prop.description}</p>
+                <h3 className="font-semibold text-foreground text-base mb-2">{t(prop.titleKey)}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{t(prop.descKey)}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -237,29 +238,31 @@ export default function Landing() {
           >
             <div>
               <h2 className="text-3xl md:text-4xl font-serif font-bold text-foreground">
-                Explore places
+                {t('landing.explorePlaces')}
               </h2>
-              <p className="text-sm text-muted-foreground mt-1.5">Click any spot to get started</p>
+              <p className="text-sm text-muted-foreground mt-1.5">{t('landing.exploreSubtitle')}</p>
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              {CATEGORIES.map(cat => (
+            <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Place categories">
+              {CATEGORIES_KEYS.map(catKey => (
                 <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
+                  key={catKey}
+                  onClick={() => setActiveCategory(catKey)}
+                  role="tab"
+                  aria-selected={activeCategory === catKey}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                    activeCategory === cat
+                    activeCategory === catKey
                       ? 'bg-foreground text-background shadow-sm'
                       : 'bg-secondary/60 text-muted-foreground hover:bg-secondary hover:text-foreground'
                   }`}
                 >
-                  {cat}
+                  {t(catKey)}
                 </button>
               ))}
             </div>
           </motion.div>
 
           {/* Gallery grid */}
-          <motion.div layout className="columns-2 md:columns-3 lg:columns-4 gap-3 md:gap-4">
+          <motion.div layout className="columns-2 md:columns-3 lg:columns-4 gap-3 md:gap-4" role="tabpanel">
             <AnimatePresence mode="popLayout">
               {filtered.map((place, i) => (
                 <motion.div
@@ -276,10 +279,11 @@ export default function Landing() {
                     className="group relative block rounded-[1.25rem] overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-500"
                     onMouseEnter={() => setHoveredPlace(place.id)}
                     onMouseLeave={() => setHoveredPlace(null)}
+                    aria-label={`${place.name} — ${place.city}, ${place.country}`}
                   >
                     <img
                       src={`https://images.unsplash.com/${place.image}?auto=format&fit=crop&w=800&q=80`}
-                      alt={place.name}
+                      alt={`${place.name}, ${place.city}`}
                       className={`w-full object-cover transition-transform duration-700 group-hover:scale-110 ${
                         place.span === 'tall' ? 'aspect-[3/4]' :
                         place.span === 'wide' ? 'aspect-[4/3]' :
@@ -295,12 +299,12 @@ export default function Landing() {
                           <div>
                             <p className="text-background font-semibold text-sm">{place.name}</p>
                             <p className="text-background/70 text-xs flex items-center gap-1 mt-0.5">
-                              <MapPin className="h-3 w-3" />
+                              <MapPin className="h-3 w-3" aria-hidden="true" />
                               {place.city}, {place.country}
                             </p>
                           </div>
                           <div className="w-9 h-9 rounded-full bg-background/20 backdrop-blur-md flex items-center justify-center group-hover:bg-primary group-hover:shadow-lg transition-all duration-300">
-                            <ArrowUpRight className="h-4 w-4 text-background" />
+                            <ArrowUpRight className="h-4 w-4 text-background" aria-hidden="true" />
                           </div>
                         </div>
                       </div>
@@ -320,8 +324,8 @@ export default function Landing() {
       </section>
 
       {/* Bottom CTA */}
-      <section className="px-6 md:px-10 py-20 md:py-32 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.02] to-transparent pointer-events-none" />
+      <section className="px-6 md:px-10 py-20 md:py-32 relative" aria-label="Call to action">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.02] to-transparent pointer-events-none" aria-hidden="true" />
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -330,17 +334,17 @@ export default function Landing() {
           className="max-w-lg mx-auto text-center relative"
         >
           <h2 className="text-3xl md:text-5xl font-serif font-bold text-foreground mb-4">
-            Ready to explore?
+            {t('landing.ctaTitle')}
           </h2>
           <p className="text-muted-foreground text-sm md:text-base mb-10">
-            Join thousands of nomads discovering the world's best places.
+            {t('landing.ctaSubtitle')}
           </p>
           <Link
             to="/auth"
-            className="inline-flex items-center gap-2.5 px-9 py-4.5 rounded-2xl bg-foreground text-background font-semibold text-sm hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-foreground/10"
+            className="inline-flex items-center gap-2.5 px-9 py-4.5 rounded-full bg-foreground text-background font-semibold text-sm hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-foreground/10"
           >
-            Get started — it's free
-            <ArrowUpRight className="h-4 w-4" />
+            {t('landing.ctaButton')}
+            <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         </motion.div>
       </section>
@@ -350,8 +354,8 @@ export default function Landing() {
         <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground/60">
           <span>© 2026 nomaaad</span>
           <div className="flex gap-6">
-            <Link to="/destinations" className="hover:text-foreground transition-colors">Destinations</Link>
-            <Link to="/auth" className="hover:text-foreground transition-colors">Sign Up</Link>
+            <Link to="/destinations" className="hover:text-foreground transition-colors">{t('landing.destinations')}</Link>
+            <Link to="/auth" className="hover:text-foreground transition-colors">{t('landing.signUp')}</Link>
           </div>
         </div>
       </footer>
