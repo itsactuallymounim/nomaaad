@@ -336,8 +336,8 @@ export default function Landing() {
                 <div className="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
                   <item.icon className="h-5 w-5 text-primary" />
                 </div>
-                <h3 className="font-semibold text-foreground mb-2">{item.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                <h3 className="font-semibold text-foreground mb-2">{t(item.titleKey)}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{t(item.descKey)}</p>
               </motion.div>
             )}
           </div>
