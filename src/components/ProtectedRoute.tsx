@@ -19,6 +19,15 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (!user) return <Navigate to="/auth" replace />;
 
+  // Wait for profile to load before checking onboarding
+  if (user && profileLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-background">
+        <Skeleton className="w-32 h-8" />
+      </div>
+    );
+  }
+
   // Redirect to onboarding if not completed
   if (profile && !profile.onboarding_completed && location.pathname !== '/onboarding') {
     return <Navigate to="/onboarding" replace />;
