@@ -13,87 +13,94 @@ serve(async (req) => {
 
   try {
     const { query, profile } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const OPENROUTER_API_KEY = Deno.env.get("OPENROUTER_API_KEY");
+    if (!OPENROUTER_API_KEY) throw new Error("OPENROUTER_API_KEY is not configured");
 
     const profileContext = profile
       ? `
-User profile:
+User's digital nomad profile:
 - Traveler type: ${profile.traveler_type || "not specified"}
 - Monthly budget: ${profile.monthly_budget || "not specified"}
 - Accommodation style: ${profile.accommodation_style || "not specified"}
 - Work setup: ${profile.work_setup || "not specified"}
 - Travel vibe: ${(profile.travel_vibe || []).join(", ") || "not specified"}
 - Search priorities: ${(profile.search_priorities || []).join(", ") || "not specified"}
+- App goals: ${(profile.app_goals || []).join(", ") || "not specified"}
 `
       : "";
 
-    const systemPrompt = `You are an expert digital nomad travel planner. Generate detailed, actionable travel plans for digital nomads.
+    const systemPrompt = `You are an expert digital nomad travel planner powered by real local knowledge. Generate detailed, actionable travel plans personalized to the user.
 
 ${profileContext}
 
-When given a travel query, respond with a well-structured travel plan using markdown formatting:
+When given a travel query, respond with a well-structured travel plan using markdown:
 
 ## 🗺️ [City] — [Duration] Digital Nomad Guide
 
 ### 💰 Budget Overview
-A brief budget breakdown.
+Detailed budget breakdown with specific prices in local currency + EUR/USD.
 
 ### 🏠 Where to Stay
-Top 2-3 accommodation recommendations with prices.
+Top 3 accommodation recommendations matching the user's style, with:
+- Name, neighborhood, price per night
+- Wi-Fi speed rating, nomad-friendliness
+- Booking tip
 
 ### 💻 Where to Work
-Top 2-3 coworking spaces or cafés with Wi-Fi ratings.
+Top 3 coworking spaces or work-friendly cafés with:
+- Name, address, daily/weekly pass price
+- Wi-Fi speed, power outlets, vibe
+- Best for: (focus work / calls / casual)
 
 ### 📅 Day-by-Day Itinerary
-For each day, include:
-- **Morning**: Work or explore activity
-- **Afternoon**: Activity
-- **Evening**: Activity
-Include specific place names, neighborhoods, and estimated costs.
+For each day include a structured table:
+| Time | Activity | Location | Est. Cost |
+Morning work spot, lunch recommendation, afternoon activity, evening social/cultural activity.
+Include specific place names, neighborhoods.
 
 ### 🍽️ Food & Drink
-Top local food recommendations with price ranges.
+- Budget meals (under €5-10)
+- Mid-range favorites
+- Must-try local dishes with where to find them
 
 ### 💡 Nomad Tips
-3-5 practical tips for digital nomads in this city.
+5 practical tips: SIM cards, transport, safety, community meetups, visa info.
 
-Keep it practical, specific, and budget-conscious. Use real place names and current pricing estimates.`;
+Be specific with real place names, current pricing, and practical details. Tailor everything to the user's profile.`;
 
-    const response = await fetch(
-      "https://ai.gateway.lovable.dev/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: query },
-          ],
-          stream: true,
-        }),
-      }
-    );
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://nomaaad.lovable.app",
+        "X-Title": "nomaaad",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: query },
+        ],
+        stream: true,
+      }),
+    });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error("OpenRouter error:", response.status, errorText);
       if (response.status === 429) {
         return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
+          JSON.stringify({ error: "Rate limit exceeded. Please try again shortly." }),
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
       if (response.status === 402) {
         return new Response(
-          JSON.stringify({ error: "AI credits exhausted. Please add credits to continue." }),
+          JSON.stringify({ error: "API credits exhausted." }),
           { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
       return new Response(
         JSON.stringify({ error: "Failed to generate travel plan" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
