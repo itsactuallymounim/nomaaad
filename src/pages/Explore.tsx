@@ -505,6 +505,18 @@ export default function Explore() {
               <p className="text-[10px] text-muted-foreground text-center mt-2">
                 Find your saved schedule in <Link to="/lists" className="text-primary underline">Lists</Link> — export to Google Calendar from there
               </p>
+
+              {/* Shareable trip summary card */}
+              <ShareableTripCard
+                destination={aiPlan.title}
+                totalDays={days.length}
+                totalActivities={aiPlan.activities.length}
+                budgetSummary={aiPlan.budget_summary}
+                categories={aiPlan.activities.reduce((acc, a) => {
+                  acc[a.category] = (acc[a.category] || 0) + 1;
+                  return acc;
+                }, {} as Record<string, number>)}
+              />
             </div>
           </motion.div>
         )}
