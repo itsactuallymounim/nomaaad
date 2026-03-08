@@ -212,6 +212,10 @@ export default function Explore() {
     setTimeline(prev => [...prev, activity].sort((a, b) => a.day === b.day ? a.time.localeCompare(b.time) : a.day - b.day));
     setShowTimeline(true);
     toast({ title: '✅ Added to timeline', description: activity.title });
+    // Show notification permission banner if not yet granted
+    if (notifPermission === 'default') {
+      setShowNotifBanner(true);
+    }
   };
 
   const removeFromTimeline = (idx: number) => {
