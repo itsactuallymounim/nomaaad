@@ -102,14 +102,14 @@ export default function Landing() {
     return () => clearInterval(interval);
   }, [isTyping]);
 
-  // Infinite scroll
+  // Infinite scroll — load next unique batch of cities
   const loadMore = useCallback(() => {
     setBatchCount(prev => {
       const next = prev + 1;
-      const newBatch = BASE_PLACES.map((p, i) => ({
-        ...p,
-        id: `${p.id}-batch${next}-${i}`,
-      }));
+      const start = next * BATCH_SIZE;
+      const end = start + BATCH_SIZE;
+      if (start >= ALL_PLACES.length) return prev; // no more unique cities
+      const newBatch = ALL_PLACES.slice(start, end);
       setVisiblePlaces(curr => [...curr, ...newBatch]);
       return next;
     });
