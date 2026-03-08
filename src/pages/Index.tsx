@@ -1,7 +1,5 @@
-import { TravelPlanner } from "@/components/TravelPlanner";
+import { Navigate } from 'react-router-dom';
 
-const Index = () => {
-  return <TravelPlanner />;
-};
-
-export default Index;
+export default function Index() {
+  return <Navigate to="/" replace />;
+}
