@@ -178,8 +178,8 @@ export default function Landing() {
             Sign up for free and start planning your dream trip.
           </p>
           <Button asChild size="lg" className="rounded-2xl h-12 px-8 text-base shadow-lg shadow-primary/20">
-            <Link to="/planner">
-              Start Planning
+            <Link to="/explore">
+              Start Exploring
               <ArrowRight className="ml-1.5 h-4 w-4" />
             </Link>
           </Button>

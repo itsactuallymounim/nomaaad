@@ -40,7 +40,7 @@ export default function Destinations() {
   );
 
   const handleCityClick = (city: string) => {
-    navigate(`/planner?city=${encodeURIComponent(city)}`);
+    navigate(`/explore`);
   };
 
   return (

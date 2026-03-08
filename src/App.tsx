@@ -8,7 +8,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
-import Planner from "./pages/Planner";
+import Explore from "./pages/Explore";
 import Destinations from "./pages/Destinations";
 import Lists from "./pages/Lists";
 import NotFound from "./pages/NotFound";
@@ -31,9 +31,9 @@ const App = () => (
                 <Onboarding />
               </ProtectedRoute>
             } />
-            <Route path="/planner" element={
+            <Route path="/explore" element={
               <ProtectedRoute>
-                <Planner />
+                <Explore />
               </ProtectedRoute>
             } />
             <Route path="/lists" element={

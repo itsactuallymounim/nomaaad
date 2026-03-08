@@ -314,7 +314,7 @@ export default function Lists() {
       {/* Nav */}
       <nav className="sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border/40">
         <div className="flex items-center justify-between px-4 py-3 max-w-2xl mx-auto">
-          <Link to="/planner" className="flex items-center gap-2">
+          <Link to="/explore" className="flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" />
             <span className="font-bold text-lg tracking-tight">My Lists</span>
           </Link>
