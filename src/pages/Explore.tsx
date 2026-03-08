@@ -275,24 +275,38 @@ export default function Explore() {
         </motion.div>
 
         {/* AI Search bar */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="mb-6 relative max-w-2xl">
-          <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-primary/8 via-primary/4 to-transparent blur-xl pointer-events-none" aria-hidden="true" />
+        <motion.div
+          initial={{ opacity: 0, y: 16, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ delay: 0.05, type: 'spring', stiffness: 200, damping: 20 }}
+          className="mb-8 relative max-w-3xl"
+        >
+          <motion.div
+            className="absolute -inset-4 rounded-[2.5rem] bg-gradient-to-br from-primary/10 via-primary/5 to-transparent blur-2xl pointer-events-none"
+            animate={{ opacity: [0.5, 0.8, 0.5] }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+            aria-hidden="true"
+          />
           <form onSubmit={handleAiSearch} className="relative" role="search" aria-label="AI travel planner">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"><Sparkles className="h-4 w-4 text-primary" aria-hidden="true" /></div>
+            <div className="absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none">
+              <motion.div animate={{ rotate: [0, 15, -15, 0] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}>
+                <Sparkles className="h-5 w-5 text-primary" aria-hidden="true" />
+              </motion.div>
+            </div>
             <input
               value={aiQuery}
               onChange={e => setAiQuery(e.target.value)}
               placeholder={t('explore.aiPlaceholder')}
-              className="relative w-full h-13 pl-11 pr-14 rounded-2xl bg-card/80 backdrop-blur-xl border border-border/30 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/30 transition-all shadow-lg shadow-primary/[0.04]"
+              className="relative w-full h-16 pl-14 pr-16 rounded-[1.25rem] bg-card/80 backdrop-blur-xl border border-border/30 text-foreground text-base placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all shadow-xl shadow-primary/[0.06]"
               aria-label={t('explore.aiPlaceholder')}
             />
             <button
               type="submit"
               disabled={aiLoading || !aiQuery.trim()}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-primary flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-primary/25 disabled:opacity-50"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 w-11 h-11 rounded-xl bg-primary flex items-center justify-center hover:scale-110 active:scale-95 transition-transform shadow-lg shadow-primary/25 disabled:opacity-50"
               aria-label="Generate travel plan"
             >
-              {aiLoading ? <Loader2 className="h-4 w-4 text-primary-foreground animate-spin" aria-hidden="true" /> : <ArrowUpRight className="h-4 w-4 text-primary-foreground" aria-hidden="true" />}
+              {aiLoading ? <Loader2 className="h-4.5 w-4.5 text-primary-foreground animate-spin" aria-hidden="true" /> : <ArrowUpRight className="h-4.5 w-4.5 text-primary-foreground" aria-hidden="true" />}
             </button>
           </form>
         </motion.div>
