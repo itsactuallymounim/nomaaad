@@ -28,9 +28,8 @@ serve(async (req) => {
 
   try {
     const { query, profile } = await req.json();
-    const OPENROUTER_API_KEY = Deno.env.get("OPENROUTER_API_KEY");
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!OPENROUTER_API_KEY && !LOVABLE_API_KEY) throw new Error("No LLM API key configured");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const profileContext = profile
       ? `
