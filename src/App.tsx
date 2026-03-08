@@ -44,6 +44,11 @@ const App = () => (
                   <Lists />
                 </ProtectedRoute>
               } />
+              <Route path="/plan" element={
+                <ProtectedRoute>
+                  <TripPlanner />
+                </ProtectedRoute>
+              } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
