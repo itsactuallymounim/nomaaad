@@ -17,7 +17,7 @@ interface Place {
   span: 'tall' | 'wide' | 'normal';
 }
 
-const PLACES: Place[] = [
+const BASE_PLACES: Place[] = [
   { id: '1', name: 'Dojo Bali', city: 'Canggu', country: 'Indonesia', category: 'cat.coworking', image: 'photo-1537996194471-e657df975ab4', span: 'tall' },
   { id: '2', name: 'Café de Flore', city: 'Paris', country: 'France', category: 'cat.cafes', image: 'photo-1502602898657-3e91760cbb34', span: 'normal' },
   { id: '3', name: 'La Boqueria', city: 'Barcelona', country: 'Spain', category: 'cat.food', image: 'photo-1539037116277-4db20889f2d4', span: 'normal' },
@@ -28,7 +28,19 @@ const PLACES: Place[] = [
   { id: '8', name: 'Table Mountain', city: 'Cape Town', country: 'South Africa', category: 'cat.explore', image: 'photo-1580060839134-75a5edca2e99', span: 'wide' },
   { id: '9', name: 'Cinta Cafe', city: 'Canggu', country: 'Indonesia', category: 'cat.cafes', image: 'photo-1544551763-46a013bb70d5', span: 'normal' },
   { id: '10', name: 'Riad Yasmine', city: 'Marrakech', country: 'Morocco', category: 'cat.coliving', image: 'photo-1539020140153-e479b8c22e70', span: 'normal' },
+  { id: '11', name: 'Hubud', city: 'Ubud', country: 'Indonesia', category: 'cat.coworking', image: 'photo-1555400038-63f5ba517a47', span: 'normal' },
+  { id: '12', name: 'Outsite Lisbon', city: 'Lisbon', country: 'Portugal', category: 'cat.coliving', image: 'photo-1536663815808-535e2280d2c2', span: 'tall' },
+  { id: '13', name: 'Taco Stand CDMX', city: 'Mexico City', country: 'Mexico', category: 'cat.food', image: 'photo-1504544750208-dc0358e63f7f', span: 'normal' },
+  { id: '14', name: 'KoHub', city: 'Koh Lanta', country: 'Thailand', category: 'cat.coworking', image: 'photo-1519451241324-20b4ea2c4220', span: 'wide' },
+  { id: '15', name: 'Café Saigon', city: 'Ho Chi Minh', country: 'Vietnam', category: 'cat.cafes', image: 'photo-1528127269322-539801943592', span: 'normal' },
+  { id: '16', name: 'Medellín Hub', city: 'Medellín', country: 'Colombia', category: 'cat.coworking', image: 'photo-1526392060635-9d6019884377', span: 'normal' },
 ];
+
+// Shuffle helper for variety on each batch
+function shuffleSpans(places: Place[]): Place[] {
+  const spans: Place['span'][] = ['tall', 'wide', 'normal', 'normal', 'normal'];
+  return places.map((p, i) => ({ ...p, span: spans[i % spans.length] }));
+}
 
 export default function Landing() {
   const navigate = useNavigate();
