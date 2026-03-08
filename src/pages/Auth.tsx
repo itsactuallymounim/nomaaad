@@ -24,7 +24,11 @@ export default function Auth() {
   if (loading) return null;
   if (user) {
     const pendingQuery = sessionStorage.getItem('nomaaad_pending_query');
-    return <Navigate to={pendingQuery ? `/explore?q=${encodeURIComponent(pendingQuery)}` : '/explore'} replace />;
+    if (pendingQuery) {
+      return <Navigate to={`/explore?q=${encodeURIComponent(pendingQuery)}`} replace />;
+    }
+    // New signups go to onboarding via ProtectedRoute; existing users go to explore
+    return <Navigate to="/explore" replace />;
   }
 
   const handleSignIn = async (e: React.FormEvent) => {
