@@ -8,7 +8,8 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { profile, isLoading: profileLoading } = useProfile();
   const location = useLocation();
 
-  if (loading || (user && profileLoading)) {
+  // Only wait for auth loading, not profile — profile loads in background
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-background">
         <Skeleton className="w-32 h-8" />
@@ -17,6 +18,15 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (!user) return <Navigate to="/auth" replace />;
+
+  // Wait for profile to load before checking onboarding
+  if (user && profileLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-background">
+        <Skeleton className="w-32 h-8" />
+      </div>
+    );
+  }
 
   // Redirect to onboarding if not completed
   if (profile && !profile.onboarding_completed && location.pathname !== '/onboarding') {
