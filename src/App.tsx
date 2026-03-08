@@ -14,6 +14,7 @@ import Destinations from "./pages/Destinations";
 import Lists from "./pages/Lists";
 import TripPlanner from "./pages/TripPlanner";
 import NotFound from "./pages/NotFound";
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,11 @@ const App = () => (
               <Route path="/plan" element={
                 <ProtectedRoute>
                   <TripPlanner />
+                </ProtectedRoute>
+              } />
+              <Route path="/payment-success" element={
+                <ProtectedRoute>
+                  <PaymentSuccess />
                 </ProtectedRoute>
               } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
