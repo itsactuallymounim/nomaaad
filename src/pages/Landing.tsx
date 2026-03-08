@@ -355,10 +355,10 @@ export default function Landing() {
             className="text-center mb-14">
             
             <h2 className="text-3xl md:text-4xl font-sans font-bold text-foreground mb-4">
-              Not just another AI chatbot.
+              {t('landing.whyTitle')}
             </h2>
             <p className="text-muted-foreground max-w-lg mx-auto text-sm">
-              ChatGPT gives ideas. Nomaaad gives you a <strong className="text-foreground">complete, optimized travel plan</strong> you can follow step by step.
+              {t('landing.whyDesc')}
             </p>
           </motion.div>
 
