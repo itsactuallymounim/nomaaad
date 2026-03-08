@@ -29,13 +29,12 @@ serve(async (req) => {
 
   try {
     const { question } = await req.json();
-    const OPENROUTER_API_KEY = Deno.env.get("OPENROUTER_API_KEY")!;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const VOYAGE_API_KEY = Deno.env.get("VOYAGE_AI_API_KEY");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    if (!OPENROUTER_API_KEY && !LOVABLE_API_KEY) throw new Error("No LLM API key configured");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
     if (!VOYAGE_API_KEY) throw new Error("VOYAGE_AI_API_KEY is not configured");
 
     const authHeader = req.headers.get("Authorization");
