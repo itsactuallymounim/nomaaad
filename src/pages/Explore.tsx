@@ -70,6 +70,37 @@ const CATEGORY_IMAGES: Record<string, string> = {
   wellness: 'photo-1544161515-4ab6ce6db874',
 };
 
+const FEED_CATEGORIES = ['Coworking', 'Café', 'Hostel', 'Restaurant', 'Temple', 'Market', 'Beach', 'Park'] as const;
+
+const FEED_LOCATIONS = [
+  { name: 'Hubud Coworking', city: 'Bali', category: 'Coworking', rating: 4.6, image: 'photo-1497366216548-37526070297c', description: 'Iconic bamboo coworking in Ubud with fast wifi and rice paddy views.' },
+  { name: 'Café de Flore', city: 'Paris', category: 'Café', rating: 4.4, image: 'photo-1509042239860-f550ce710b93', description: 'Historic Parisian café on Boulevard Saint-Germain.' },
+  { name: 'Selina Lisbon', city: 'Lisbon', category: 'Hostel', rating: 4.3, image: 'photo-1555854877-bab0e564b8d5', description: 'Trendy co-living & hostel with rooftop terrace and events.' },
+  { name: 'Punspace', city: 'Chiang Mai', category: 'Coworking', rating: 4.7, image: 'photo-1527192491265-7e15c55b1ed2', description: 'One of Chiang Mai's best coworking spaces in Nimman area.' },
+  { name: 'Tsukiji Outer Market', city: 'Tokyo', category: 'Market', rating: 4.8, image: 'photo-1553621042-f6e147245754', description: 'Fresh sushi and street food paradise near Ginza.' },
+  { name: 'Fushimi Inari Shrine', city: 'Kyoto', category: 'Temple', rating: 4.9, image: 'photo-1478436127897-769e1b3f0f36', description: 'Thousands of vermilion torii gates winding through the mountain.' },
+  { name: 'Outsite Bali', city: 'Bali', category: 'Hostel', rating: 4.5, image: 'photo-1537996194471-e657df975ab4', description: 'Coliving space for remote workers in Canggu with pool.' },
+  { name: 'Café Lempicka', city: 'Prague', category: 'Café', rating: 4.3, image: 'photo-1501339847302-ac426a4a7cbb', description: 'Art deco café with great pastries near Old Town.' },
+  { name: 'El Born Market', city: 'Barcelona', category: 'Market', rating: 4.5, image: 'photo-1534531173927-aeb928d54385', description: 'Historic cast-iron market turned cultural center.' },
+  { name: 'Echo Beach', city: 'Bali', category: 'Beach', rating: 4.4, image: 'photo-1507525428034-b723cf961d3e', description: 'Surfer beach with sunset bars in Canggu.' },
+  { name: 'Dojo Bali', city: 'Bali', category: 'Coworking', rating: 4.5, image: 'photo-1517502884422-41eaead166d4', description: 'Open-air coworking with pool, right in Canggu.' },
+  { name: 'Hoi An Market', city: 'Hoi An', category: 'Market', rating: 4.6, image: 'photo-1555992336-fb0d29498b13', description: 'Vibrant morning market with fresh produce and Banh Mi.' },
+  { name: 'Nusa Dua Beach', city: 'Bali', category: 'Beach', rating: 4.7, image: 'photo-1544551763-46a013bb70d5', description: 'Calm turquoise waters perfect for swimming.' },
+  { name: 'KOI Café', city: 'Seoul', category: 'Café', rating: 4.2, image: 'photo-1495474472287-4d71bcdd2085', description: 'Minimalist Korean café with specialty pour-over.' },
+  { name: 'Senso-ji Temple', city: 'Tokyo', category: 'Temple', rating: 4.8, image: 'photo-1540959733332-eab4deabeeaf', description: 'Tokyo's oldest and most significant temple in Asakusa.' },
+  { name: 'Botanischer Garten', city: 'Berlin', category: 'Park', rating: 4.5, image: 'photo-1560969184-10fe8719e047', description: 'One of the largest botanical gardens in the world.' },
+  { name: 'Pad Thai Thip Samai', city: 'Bangkok', category: 'Restaurant', rating: 4.7, image: 'photo-1508009603885-50cf7c579365', description: 'Legendary pad thai wrapped in egg, since 1966.' },
+  { name: 'A-Work Café', city: 'Amsterdam', category: 'Café', rating: 4.3, image: 'photo-1534351590666-13e3e96b5017', description: 'Laptop-friendly café with strong wifi and flat whites.' },
+  { name: 'Lumpini Park', city: 'Bangkok', category: 'Park', rating: 4.4, image: 'photo-1506665531195-3566af2b4dfa', description: 'Green oasis in downtown Bangkok with monitor lizards.' },
+  { name: 'La Boqueria', city: 'Barcelona', category: 'Market', rating: 4.6, image: 'photo-1539020140153-e479b8c22e70', description: 'Famous La Rambla market with tapas and fresh juices.' },
+  { name: 'Kata Beach', city: 'Phuket', category: 'Beach', rating: 4.5, image: 'photo-1519046904884-53103b34b206', description: 'Beautiful crescent bay popular with swimmers.' },
+  { name: 'Fabrika Tbilisi', city: 'Tbilisi', category: 'Hostel', rating: 4.6, image: 'photo-1565008576549-57569a49371d', description: 'Soviet-era factory turned creative hostel and hub.' },
+  { name: 'Warung Babi Guling', city: 'Bali', category: 'Restaurant', rating: 4.7, image: 'photo-1537996194471-e657df975ab4', description: 'Famous Balinese suckling pig in Ubud.' },
+  { name: 'Retiro Park', city: 'Madrid', category: 'Park', rating: 4.8, image: 'photo-1543783207-ec64e4d95325', description: 'Grand park with crystal palace and rowing boats.' },
+];
+
+const ITEMS_PER_PAGE = 8;
+
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/travel-chat`;
 
 export default function Explore() {
