@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { ArrowUpRight, MapPin, Compass, Sparkles, Globe, Layers } from 'lucide-react';
@@ -17,7 +17,7 @@ interface Place {
   span: 'tall' | 'wide' | 'normal';
 }
 
-const PLACES: Place[] = [
+const BASE_PLACES: Place[] = [
   { id: '1', name: 'Dojo Bali', city: 'Canggu', country: 'Indonesia', category: 'cat.coworking', image: 'photo-1537996194471-e657df975ab4', span: 'tall' },
   { id: '2', name: 'Café de Flore', city: 'Paris', country: 'France', category: 'cat.cafes', image: 'photo-1502602898657-3e91760cbb34', span: 'normal' },
   { id: '3', name: 'La Boqueria', city: 'Barcelona', country: 'Spain', category: 'cat.food', image: 'photo-1539037116277-4db20889f2d4', span: 'normal' },
@@ -28,7 +28,19 @@ const PLACES: Place[] = [
   { id: '8', name: 'Table Mountain', city: 'Cape Town', country: 'South Africa', category: 'cat.explore', image: 'photo-1580060839134-75a5edca2e99', span: 'wide' },
   { id: '9', name: 'Cinta Cafe', city: 'Canggu', country: 'Indonesia', category: 'cat.cafes', image: 'photo-1544551763-46a013bb70d5', span: 'normal' },
   { id: '10', name: 'Riad Yasmine', city: 'Marrakech', country: 'Morocco', category: 'cat.coliving', image: 'photo-1539020140153-e479b8c22e70', span: 'normal' },
+  { id: '11', name: 'Hubud', city: 'Ubud', country: 'Indonesia', category: 'cat.coworking', image: 'photo-1555400038-63f5ba517a47', span: 'normal' },
+  { id: '12', name: 'Outsite Lisbon', city: 'Lisbon', country: 'Portugal', category: 'cat.coliving', image: 'photo-1536663815808-535e2280d2c2', span: 'tall' },
+  { id: '13', name: 'Taco Stand CDMX', city: 'Mexico City', country: 'Mexico', category: 'cat.food', image: 'photo-1504544750208-dc0358e63f7f', span: 'normal' },
+  { id: '14', name: 'KoHub', city: 'Koh Lanta', country: 'Thailand', category: 'cat.coworking', image: 'photo-1519451241324-20b4ea2c4220', span: 'wide' },
+  { id: '15', name: 'Café Saigon', city: 'Ho Chi Minh', country: 'Vietnam', category: 'cat.cafes', image: 'photo-1528127269322-539801943592', span: 'normal' },
+  { id: '16', name: 'Medellín Hub', city: 'Medellín', country: 'Colombia', category: 'cat.coworking', image: 'photo-1526392060635-9d6019884377', span: 'normal' },
 ];
+
+// Shuffle helper for variety on each batch
+function shuffleSpans(places: Place[]): Place[] {
+  const spans: Place['span'][] = ['tall', 'wide', 'normal', 'normal', 'normal'];
+  return places.map((p, i) => ({ ...p, span: spans[i % spans.length] }));
+}
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -37,8 +49,11 @@ export default function Landing() {
   const [hoveredPlace, setHoveredPlace] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [visiblePlaces, setVisiblePlaces] = useState<Place[]>(() => BASE_PLACES);
+  const [batchCount, setBatchCount] = useState(1);
   const inputRef = useRef<HTMLInputElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -46,6 +61,39 @@ export default function Landing() {
   });
   const heroOpacity = useTransform(scrollYProgress, [0, 1], [1, 0]);
   const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.95]);
+
+  // Infinite scroll — load more places when sentinel is visible
+  const loadMore = useCallback(() => {
+    setBatchCount(prev => {
+      const next = prev + 1;
+      const newBatch = shuffleSpans(BASE_PLACES.map((p, i) => ({
+        ...p,
+        id: `${p.id}-batch${next}-${i}`,
+      })));
+      setVisiblePlaces(curr => [...curr, ...newBatch]);
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      (entries) => { if (entries[0].isIntersecting) loadMore(); },
+      { rootMargin: '600px' }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [loadMore]);
+
+  // Reset infinite scroll when category changes
+  useEffect(() => {
+    const base = activeCategory === 'cat.all'
+      ? BASE_PLACES
+      : BASE_PLACES.filter(p => p.category === activeCategory);
+    setVisiblePlaces(base);
+    setBatchCount(1);
+  }, [activeCategory]);
 
   const EXAMPLE_QUERY = 'Plan 7 days in Lisbon for a digital nomad — Budget: €900';
 
@@ -79,7 +127,7 @@ export default function Landing() {
     navigate('/auth');
   };
 
-  const filtered = activeCategory === 'cat.all' ? PLACES : PLACES.filter(p => p.category === activeCategory);
+  const filtered = activeCategory === 'cat.all' ? visiblePlaces : visiblePlaces.filter(p => p.category === activeCategory);
 
   const VALUE_PROPS = [
     { icon: Compass, titleKey: 'landing.valueProp1Title' as const, descKey: 'landing.valueProp1Desc' as const },
@@ -271,7 +319,7 @@ export default function Landing() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.45, delay: i * 0.04 }}
+                  transition={{ duration: 0.45, delay: Math.min(i * 0.04, 0.4) }}
                   className="break-inside-avoid mb-3 md:mb-4"
                 >
                   <Link
@@ -320,6 +368,9 @@ export default function Landing() {
               ))}
             </AnimatePresence>
           </motion.div>
+
+          {/* Infinite scroll sentinel */}
+          <div ref={sentinelRef} className="h-px w-full" aria-hidden="true" />
         </div>
       </section>
 
