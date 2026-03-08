@@ -234,6 +234,9 @@ export default function Explore() {
           <div className="flex items-center gap-1">
             <LanguageToggle />
             <Button asChild variant="ghost" size="icon" className="h-9 w-9 rounded-xl">
+              <Link to="/plan"><Calendar className="h-4 w-4" /></Link>
+            </Button>
+            <Button asChild variant="ghost" size="icon" className="h-9 w-9 rounded-xl">
               <Link to="/lists"><BookmarkPlus className="h-4 w-4" /></Link>
             </Button>
             <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-9 w-9 rounded-xl">
