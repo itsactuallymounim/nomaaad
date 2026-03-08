@@ -1,13 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowUpRight, Compass, Sparkles, MapPin } from 'lucide-react';
+import { ArrowUpRight, Compass, Sparkles, MapPin, Globe } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { LanguageToggle } from '@/components/LanguageToggle';
-import penguinCharacter from '@/assets/characters/penguin-icecream.png';
-import dogCharacter from '@/assets/characters/dog-icecream.png';
-import catCharacter from '@/assets/characters/cat-banana.png';
-import gorillaCharacter from '@/assets/characters/gorilla-pizza.png';
 
 interface Place {
   id: string;
