@@ -645,7 +645,7 @@ export default function Explore() {
 
         {/* Infinite scroll location feed */}
         {!aiPlan && !aiLoading && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col">
             {/* Category filter tabs */}
             <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4">
               {['All', ...FEED_CATEGORIES].map(cat => (
