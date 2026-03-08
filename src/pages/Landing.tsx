@@ -320,9 +320,9 @@ export default function Landing() {
 
           <div className="grid md:grid-cols-3 gap-5">
             {[
-            { step: '01', icon: MapPin, title: 'Pick your city', desc: 'Type any destination — Tokyo, Rome, Lisbon, Medellín... anywhere in the world.' },
-            { step: '02', icon: Sparkles, title: 'Set your style', desc: 'Budget or luxury? Relaxed or action-packed? Local secrets or global highlights?' },
-            { step: '03', icon: Zap, title: 'Get your plan', desc: 'In 30 seconds: a complete day-by-day itinerary with time blocks, places, costs, and routes.' }].
+            { step: '01', icon: MapPin, titleKey: 'landing.step1Title' as const, descKey: 'landing.step1Desc' as const },
+            { step: '02', icon: Sparkles, titleKey: 'landing.step2Title' as const, descKey: 'landing.step2Desc' as const },
+            { step: '03', icon: Zap, titleKey: 'landing.step3Title' as const, descKey: 'landing.step3Desc' as const }].
             map((item, i) =>
             <motion.div
               key={i}
