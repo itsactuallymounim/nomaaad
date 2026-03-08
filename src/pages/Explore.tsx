@@ -232,6 +232,7 @@ export default function Explore() {
             <span className="font-bold text-lg tracking-tight">nomaaad</span>
           </div>
           <div className="flex items-center gap-1">
+            <LanguageToggle />
             <Button asChild variant="ghost" size="icon" className="h-9 w-9 rounded-xl">
               <Link to="/lists"><BookmarkPlus className="h-4 w-4" /></Link>
             </Button>
