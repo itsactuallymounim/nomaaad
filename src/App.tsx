@@ -14,6 +14,7 @@ import Destinations from "./pages/Destinations";
 import Lists from "./pages/Lists";
 import TripPlanner from "./pages/TripPlanner";
 import NotFound from "./pages/NotFound";
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 const queryClient = new QueryClient();
 
