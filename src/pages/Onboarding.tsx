@@ -371,8 +371,10 @@ export default function Onboarding() {
                             : 'border-border bg-card hover:border-primary/30 hover:bg-card/80'
                         }`}
                       >
-                        {(opt as any).image ? (
-                          <img src={(opt as any).image} alt="" className="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
+                        {(opt as any).lucideIcon ? (
+                          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            {(() => { const Icon = (opt as any).lucideIcon; return <Icon className="h-5 w-5 text-primary" />; })()}
+                          </div>
                         ) : (
                           <span className="text-2xl flex-shrink-0">{opt.emoji}</span>
                         )}

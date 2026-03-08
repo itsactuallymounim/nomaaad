@@ -69,7 +69,7 @@ export default function Auth() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-              className="mx-auto w-20 h-20 rounded-2xl overflow-hidden mb-3 shadow-xl"
+              className="mx-auto w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-3 shadow-xl"
             >
               <Compass className="h-10 w-10 text-primary" />
             </motion.div>
