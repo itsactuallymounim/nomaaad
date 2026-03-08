@@ -157,7 +157,7 @@ export default function Landing() {
     navigate('/auth');
   };
 
-  const filtered = activeCategory === 'cat.all' ? visiblePlaces : visiblePlaces.filter(p => p.category === activeCategory);
+  const filtered = visiblePlaces;
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
