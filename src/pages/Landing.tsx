@@ -146,21 +146,44 @@ export default function Landing() {
             </p>
           </motion.div>
 
-          {/* CTA */}
+          {/* Search bar */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="flex justify-center gap-3 mb-16 md:mb-20"
+            className="max-w-xl mx-auto mb-4"
           >
-            <Link
-              to="/auth"
-              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-primary/20"
-            >
-              Start exploring — free
-              <ArrowUpRight className="h-4 w-4" />
-            </Link>
+            <form onSubmit={handleSearchSubmit} className="relative group">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
+                <Sparkles className="h-4 w-4 text-primary" />
+              </div>
+              <input
+                ref={inputRef}
+                value={searchValue}
+                onChange={e => { setIsTyping(true); setSearchValue(e.target.value); }}
+                onFocus={handleSearchFocus}
+                onBlur={() => { if (!searchValue) setIsTyping(false); }}
+                className="w-full h-14 pl-11 pr-14 rounded-2xl bg-card border border-border/60 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all shadow-sm"
+                placeholder="Where do you want to go?"
+              />
+              <button
+                type="submit"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-primary flex items-center justify-center hover:opacity-90 transition-opacity shadow-sm"
+              >
+                <ArrowUpRight className="h-4 w-4 text-primary-foreground" />
+              </button>
+            </form>
           </motion.div>
+
+          {/* Subtle hint */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+            className="text-center text-xs text-muted-foreground/60 mb-16 md:mb-20"
+          >
+            Try: "7 days in Bali" · "Coworking in Medellín" · "Budget trip to Bangkok"
+          </motion.p>
         </div>
       </section>
 
