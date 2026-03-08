@@ -2,11 +2,11 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { embedSavedPlace } from '@/lib/embeddings';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useSearchParams } from 'react-router-dom';
-import ReactMarkdown from 'react-markdown';
 import {
   Search, MapPin, Plus, Check, Compass, Moon, Sun, LogOut, User,
   BookmarkPlus, Star, Coffee, Utensils, Camera, Wifi, Home, TreePine,
-  ChevronRight, X, Sparkles, Loader2, ArrowUpRight, Calendar
+  ChevronRight, X, Sparkles, Loader2, ArrowUpRight, Calendar,
+  CalendarPlus, Clock, DollarSign, Heart, Train, ChevronDown
 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { LanguageToggle } from '@/components/LanguageToggle';
@@ -37,6 +37,43 @@ interface CuratedPlace {
   rating: number;
   tags: string[];
 }
+
+interface AiActivity {
+  day: number;
+  time: string;
+  duration: number;
+  title: string;
+  description: string;
+  category: string;
+  location: string;
+  cost: string;
+}
+
+interface AiPlan {
+  title: string;
+  summary: string;
+  budget_summary: string;
+  activities: AiActivity[];
+  tips: string[];
+}
+
+const AI_CATEGORY_ICONS: Record<string, typeof Coffee> = {
+  food: Utensils,
+  work: Wifi,
+  explore: Camera,
+  transport: Train,
+  social: Heart,
+  wellness: Heart,
+};
+
+const AI_CATEGORY_COLORS: Record<string, string> = {
+  food: 'bg-chart-1/10 text-chart-1',
+  work: 'bg-primary/10 text-primary',
+  explore: 'bg-chart-2/10 text-chart-2',
+  transport: 'bg-chart-3/10 text-chart-3',
+  social: 'bg-chart-4/10 text-chart-4',
+  wellness: 'bg-chart-5/10 text-chart-5',
+};
 
 const CURATED_PLACES: CuratedPlace[] = [
   { id: '1', name: 'Dojo Bali', city: 'Canggu', country: 'Indonesia', description: 'Iconic coworking space with pool and tropical vibes', category: 'coworking', image: 'photo-1537996194471-e657df975ab4', rating: 4.7, tags: ['wifi', 'pool', 'community'] },
@@ -80,55 +117,21 @@ const fadeUp = {
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/travel-chat`;
 
-async function streamTravelPlan({
-  query, profile, onDelta, onDone, onError,
-}: {
-  query: string; profile: any;
-  onDelta: (text: string) => void; onDone: () => void; onError: (error: string) => void;
-}) {
-  try {
-    const resp = await fetch(CHAT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
-      body: JSON.stringify({ query, profile }),
-    });
-    if (!resp.ok) { const err = await resp.json().catch(() => ({ error: 'Failed to generate plan' })); onError(err.error || `Error ${resp.status}`); return; }
-    if (!resp.body) { onError('No response body'); return; }
-    const reader = resp.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      let newlineIdx: number;
-      while ((newlineIdx = buffer.indexOf('\n')) !== -1) {
-        let line = buffer.slice(0, newlineIdx);
-        buffer = buffer.slice(newlineIdx + 1);
-        if (line.endsWith('\r')) line = line.slice(0, -1);
-        if (line.startsWith(':') || line.trim() === '') continue;
-        if (!line.startsWith('data: ')) continue;
-        const jsonStr = line.slice(6).trim();
-        if (jsonStr === '[DONE]') { onDone(); return; }
-        try {
-          const parsed = JSON.parse(jsonStr);
-          const content = parsed.choices?.[0]?.delta?.content;
-          if (content) onDelta(content);
-        } catch { buffer = line + '\n' + buffer; break; }
-      }
-    }
-    if (buffer.trim()) {
-      for (let raw of buffer.split('\n')) {
-        if (!raw) continue;
-        if (raw.endsWith('\r')) raw = raw.slice(0, -1);
-        if (!raw.startsWith('data: ')) continue;
-        const jsonStr = raw.slice(6).trim();
-        if (jsonStr === '[DONE]') continue;
-        try { const parsed = JSON.parse(jsonStr); const content = parsed.choices?.[0]?.delta?.content; if (content) onDelta(content); } catch { /* ignore */ }
-      }
-    }
-    onDone();
-  } catch (e) { onError(e instanceof Error ? e.message : 'Network error'); }
+function buildGoogleCalendarUrl(activity: AiActivity, startDate: string, city: string) {
+  const [hours, minutes] = activity.time.split(':').map(Number);
+  const d = new Date(startDate);
+  d.setDate(d.getDate() + activity.day - 1);
+  d.setHours(hours, minutes, 0, 0);
+  const end = new Date(d.getTime() + activity.duration * 60 * 1000);
+  const fmt = (dt: Date) => dt.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: activity.title,
+    details: `${activity.description}\n💰 ${activity.cost}\n📍 ${activity.location}`,
+    location: `${activity.location}, ${city}`,
+    dates: `${fmt(d)}/${fmt(end)}`,
+  });
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
 export default function Explore() {
@@ -145,11 +148,20 @@ export default function Explore() {
   const [addedToList, setAddedToList] = useState<Record<string, string[]>>({});
 
   const [aiQuery, setAiQuery] = useState('');
-  const [aiResult, setAiResult] = useState('');
+  const [aiPlan, setAiPlan] = useState<AiPlan | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [showAiPanel, setShowAiPanel] = useState(false);
   const aiPanelRef = useRef<HTMLDivElement>(null);
   const hasTriggeredRef = useRef(false);
+
+  // Timeline state
+  const [timeline, setTimeline] = useState<AiActivity[]>([]);
+  const [showTimeline, setShowTimeline] = useState(false);
+  const [timelineStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return d.toISOString().split('T')[0];
+  });
 
   useEffect(() => { setIsDark(document.documentElement.classList.contains('dark')); }, []);
 
@@ -163,19 +175,57 @@ export default function Explore() {
     }
   }, [searchParams]);
 
-  const generatePlan = (query: string) => {
-    setAiLoading(true); setAiResult(''); setShowAiPanel(true);
-    let accumulated = '';
-    streamTravelPlan({
-      query, profile,
-      onDelta: (chunk) => { accumulated += chunk; setAiResult(accumulated); },
-      onDone: () => setAiLoading(false),
-      onError: (error) => { setAiLoading(false); toast({ title: 'AI Error', description: error, variant: 'destructive' }); },
-    });
+  const generatePlan = async (query: string) => {
+    setAiLoading(true); setAiPlan(null); setShowAiPanel(true);
+    try {
+      const resp = await fetch(CHAT_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ query, profile }),
+      });
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({ error: 'Failed' }));
+        throw new Error(err.error || 'Failed to generate plan');
+      }
+      const data = await resp.json();
+      setAiPlan(data.plan);
+    } catch (e) {
+      toast({ title: 'AI Error', description: e instanceof Error ? e.message : 'Unknown error', variant: 'destructive' });
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   const handleAiSearch = (e: React.FormEvent) => { e.preventDefault(); if (!aiQuery.trim()) return; generatePlan(aiQuery.trim()); };
   const toggleTheme = () => { document.documentElement.classList.toggle('dark'); setIsDark(!isDark); };
+
+  const addToTimeline = (activity: AiActivity) => {
+    if (timeline.find(a => a.title === activity.title && a.day === activity.day && a.time === activity.time)) {
+      toast({ title: 'Already in timeline' }); return;
+    }
+    setTimeline(prev => [...prev, activity].sort((a, b) => a.day === b.day ? a.time.localeCompare(b.time) : a.day - b.day));
+    setShowTimeline(true);
+    toast({ title: '✅ Added to timeline', description: activity.title });
+  };
+
+  const removeFromTimeline = (idx: number) => {
+    setTimeline(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const isInTimeline = (activity: AiActivity) =>
+    timeline.some(a => a.title === activity.title && a.day === activity.day && a.time === activity.time);
+
+  const addAllToGoogleCalendar = () => {
+    const city = aiPlan?.title?.split('—')?.[0]?.trim() || 'Trip';
+    timeline.forEach((activity, i) => {
+      setTimeout(() => {
+        window.open(buildGoogleCalendarUrl(activity, timelineStartDate, city), '_blank');
+      }, i * 400);
+    });
+  };
 
   const fetchLists = useCallback(async () => {
     if (!user) return;
@@ -311,37 +361,197 @@ export default function Explore() {
           </form>
         </motion.div>
 
-        {/* AI Travel Plan result */}
+        {/* AI Travel Plan — Activity Cards */}
         <AnimatePresence>
           {showAiPanel && (
-            <motion.div ref={aiPanelRef} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.4 }} className="mb-6 overflow-hidden" role="region" aria-label="AI Travel Plan" aria-live="polite">
+            <motion.div ref={aiPanelRef} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.4 }} className="mb-6 overflow-hidden" role="region" aria-label="AI Travel Plan">
               <Card className="rounded-[1.75rem] border-border/30 overflow-hidden shadow-lg">
                 <div className="flex items-center justify-between px-5 pt-4 pb-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center" aria-hidden="true">
-                      <Sparkles className="h-3.5 w-3.5 text-primary" />
-                    </div>
+                    <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center"><Sparkles className="h-3.5 w-3.5 text-primary" /></div>
                     <span className="text-sm font-semibold text-foreground">{t('explore.aiTitle')}</span>
-                    {aiLoading && <span className="text-xs text-muted-foreground animate-pulse" role="status">{t('explore.generating')}</span>}
+                    {aiLoading && <span className="text-xs text-muted-foreground animate-pulse">{t('explore.generating')}</span>}
                   </div>
-                  <button onClick={() => { setShowAiPanel(false); setAiResult(''); setAiQuery(''); }} className="w-7 h-7 rounded-xl hover:bg-secondary flex items-center justify-center transition-colors" aria-label="Close AI panel"><X className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" /></button>
+                  <button onClick={() => { setShowAiPanel(false); setAiPlan(null); setAiQuery(''); }} className="w-7 h-7 rounded-xl hover:bg-secondary flex items-center justify-center transition-colors"><X className="h-3.5 w-3.5 text-muted-foreground" /></button>
                 </div>
                 <CardContent className="px-5 pb-5 pt-2">
-                  {aiResult ? (
-                    <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:font-sans prose-headings:text-foreground prose-p:text-muted-foreground prose-li:text-muted-foreground prose-strong:text-foreground prose-h2:text-xl prose-h2:mt-6 prose-h2:mb-3 prose-h3:text-base prose-h3:mt-4 prose-h3:mb-2">
-                      <ReactMarkdown>{aiResult}</ReactMarkdown>
-                    </div>
-                  ) : aiLoading ? (
-                    <div className="flex items-center gap-3 py-8 justify-center" role="status">
-                      <Loader2 className="h-5 w-5 text-primary animate-spin" aria-hidden="true" />
+                  {aiLoading && !aiPlan && (
+                    <div className="flex items-center gap-3 py-8 justify-center">
+                      <Loader2 className="h-5 w-5 text-primary animate-spin" />
                       <span className="text-sm text-muted-foreground">{t('explore.building')}</span>
                     </div>
-                  ) : null}
+                  )}
+                  {aiPlan && (
+                    <div className="space-y-4">
+                      {/* Plan header */}
+                      <div>
+                        <h2 className="text-lg font-bold text-foreground">{aiPlan.title}</h2>
+                        <p className="text-sm text-muted-foreground mt-1">{aiPlan.summary}</p>
+                        <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1"><DollarSign className="h-3 w-3" />{aiPlan.budget_summary}</p>
+                      </div>
+
+                      {/* Activity cards grouped by day */}
+                      {Array.from(new Set(aiPlan.activities.map(a => a.day))).sort((a, b) => a - b).map(day => (
+                        <div key={day}>
+                          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Day {day}</h3>
+                          <div className="space-y-2">
+                            {aiPlan.activities.filter(a => a.day === day).sort((a, b) => a.time.localeCompare(b.time)).map((activity, idx) => {
+                              const Icon = AI_CATEGORY_ICONS[activity.category] || Camera;
+                              const colorClass = AI_CATEGORY_COLORS[activity.category] || 'bg-secondary text-muted-foreground';
+                              const added = isInTimeline(activity);
+
+                              return (
+                                <motion.div
+                                  key={`${day}-${idx}`}
+                                  initial={{ opacity: 0, y: 8 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: idx * 0.03 }}
+                                  className={`flex items-start gap-3 p-3 rounded-2xl border transition-all ${
+                                    added ? 'bg-primary/[0.04] border-primary/20' : 'bg-card border-border/30 hover:border-border/50'
+                                  }`}
+                                >
+                                  {/* Add button */}
+                                  <button
+                                    onClick={() => added ? undefined : addToTimeline(activity)}
+                                    disabled={added}
+                                    className={`mt-0.5 w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all ${
+                                      added
+                                        ? 'bg-primary border-2 border-primary'
+                                        : 'border-2 border-dashed border-border hover:border-primary/50 hover:bg-primary/5'
+                                    }`}
+                                  >
+                                    {added ? <Check className="h-3.5 w-3.5 text-primary-foreground" /> : <Plus className="h-3.5 w-3.5 text-muted-foreground" />}
+                                  </button>
+
+                                  {/* Content */}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                      <span className="text-xs font-mono text-muted-foreground">{activity.time}</span>
+                                      <Badge variant="secondary" className={`rounded-full text-[10px] px-2 py-0 h-5 capitalize ${colorClass}`}>
+                                        <Icon className="h-2.5 w-2.5 mr-1" />{activity.category}
+                                      </Badge>
+                                      <span className="text-[10px] text-muted-foreground">{activity.duration}min</span>
+                                      <span className="text-[10px] text-muted-foreground font-medium">{activity.cost}</span>
+                                    </div>
+                                    <h4 className="text-sm font-medium text-foreground">{activity.title}</h4>
+                                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{activity.description}</p>
+                                    {activity.location && (
+                                      <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                                        <MapPin className="h-3 w-3 shrink-0" /><span className="truncate">{activity.location}</span>
+                                      </p>
+                                    )}
+                                  </div>
+                                </motion.div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Tips */}
+                      {aiPlan.tips && aiPlan.tips.length > 0 && (
+                        <div className="pt-2">
+                          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">💡 Nomad Tips</h3>
+                          <ul className="space-y-1">
+                            {aiPlan.tips.map((tip, i) => (
+                              <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
+                                <span className="text-primary mt-0.5">•</span>{tip}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Timeline Review Panel */}
+        <AnimatePresence>
+          {showTimeline && timeline.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 12 }}
+              className="mb-6"
+            >
+              <Card className="rounded-[1.75rem] border-primary/20 overflow-hidden shadow-lg bg-primary/[0.02]">
+                <div className="flex items-center justify-between px-5 pt-4 pb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center"><Calendar className="h-3.5 w-3.5 text-primary" /></div>
+                    <span className="text-sm font-semibold text-foreground">My Timeline</span>
+                    <Badge variant="secondary" className="rounded-full text-[10px]">{timeline.length} activities</Badge>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => setShowTimeline(false)} className="w-7 h-7 rounded-xl hover:bg-secondary flex items-center justify-center transition-colors">
+                      <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                    </button>
+                  </div>
+                </div>
+                <CardContent className="px-5 pb-5 pt-2">
+                  <div className="space-y-2 mb-4">
+                    {timeline.map((activity, idx) => {
+                      const Icon = AI_CATEGORY_ICONS[activity.category] || Camera;
+                      const colorClass = AI_CATEGORY_COLORS[activity.category] || 'bg-secondary text-muted-foreground';
+                      return (
+                        <motion.div
+                          key={`tl-${idx}`}
+                          initial={{ opacity: 0, x: -8 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className="flex items-center gap-3 p-2.5 rounded-xl bg-card border border-border/30"
+                        >
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <span className="text-[10px] font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded">D{activity.day}</span>
+                            <span className="text-xs font-mono text-muted-foreground">{activity.time}</span>
+                          </div>
+                          <Badge variant="secondary" className={`rounded-full text-[10px] px-1.5 py-0 h-5 capitalize shrink-0 ${colorClass}`}>
+                            <Icon className="h-2.5 w-2.5" />
+                          </Badge>
+                          <span className="text-sm font-medium text-foreground truncate flex-1">{activity.title}</span>
+                          <button
+                            onClick={() => removeFromTimeline(idx)}
+                            className="w-6 h-6 rounded-lg hover:bg-destructive/10 flex items-center justify-center shrink-0 transition-colors"
+                          >
+                            <X className="h-3 w-3 text-muted-foreground hover:text-destructive" />
+                          </button>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Export to Google Calendar */}
+                  <Button
+                    onClick={addAllToGoogleCalendar}
+                    className="w-full rounded-xl h-11 gap-2"
+                    size="lg"
+                  >
+                    <CalendarPlus className="h-4 w-4" />
+                    Add {timeline.length} activities to Google Calendar
+                  </Button>
+                  <p className="text-[10px] text-muted-foreground text-center mt-2">
+                    Each activity will open in a new tab for you to confirm
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Timeline floating badge when collapsed */}
+        {!showTimeline && timeline.length > 0 && (
+          <motion.button
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            onClick={() => setShowTimeline(true)}
+            className="fixed bottom-24 right-4 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary text-primary-foreground shadow-xl shadow-primary/25 hover:scale-105 active:scale-95 transition-transform"
+          >
+            <Calendar className="h-4 w-4" />
+            <span className="text-sm font-semibold">{timeline.length}</span>
+          </motion.button>
+        )}
 
 
         {/* Category pills */}

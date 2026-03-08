@@ -6,21 +6,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-async function callLLM(messages: any[], apiKey: string) {
-  return await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      messages,
-      stream: true,
-    }),
-  });
-}
-
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -44,58 +29,117 @@ User's digital nomad profile:
 `
       : "";
 
-    const systemPrompt = `You are an expert digital nomad travel planner powered by real local knowledge. Generate detailed, actionable travel plans personalized to the user.
+    const systemPrompt = `You are an expert digital nomad travel planner. Given a travel query, generate a structured travel plan with activity cards.
 
 ${profileContext}
 
-When given a travel query, respond with a well-structured travel plan using markdown:
-
-## 🗺️ [City] — [Duration] Digital Nomad Guide
-
-### 💰 Budget Overview
-Detailed budget breakdown with specific prices in local currency + EUR/USD.
-
-### 🏠 Where to Stay
-Top 3 accommodation recommendations matching the user's style, with:
-- Name, neighborhood, price per night
-- Wi-Fi speed rating, nomad-friendliness
-
-### 💻 Where to Work
-Top 3 coworking spaces or work-friendly cafés with:
-- Name, address, daily/weekly pass price
-- Wi-Fi speed, power outlets, vibe
-
-### 📅 Day-by-Day Itinerary
-For each day include:
-| Time | Activity | Location | Est. Cost |
-Morning work spot, lunch, afternoon activity, evening social/cultural activity.
-
-### 🍽️ Food & Drink
-Budget meals, mid-range favorites, must-try local dishes.
-
-### 💡 Nomad Tips
-5 practical tips: SIM cards, transport, safety, community meetups, visa info.
-
-Be specific with real place names and practical details.`;
+Return a JSON object with this structure using the travel_plan tool. Generate 8-15 activity cards covering work spots, food, exploration, and social activities across the trip duration. Each activity should have a specific time, real place name, and practical details. Distribute activities across days evenly.`;
 
     const messages = [
       { role: "system", content: systemPrompt },
       { role: "user", content: query },
     ];
 
-    const response = await callLLM(messages, LOVABLE_API_KEY);
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages,
+        stream: false,
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "travel_plan",
+              description: "Return a structured travel plan with activity cards",
+              parameters: {
+                type: "object",
+                properties: {
+                  title: { type: "string", description: "Plan title e.g. 'Lisbon — 7 Day Nomad Guide'" },
+                  summary: { type: "string", description: "2-3 sentence overview of the plan" },
+                  budget_summary: { type: "string", description: "Brief budget overview with key costs" },
+                  activities: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        day: { type: "number", description: "Day number (1-based)" },
+                        time: { type: "string", description: "Time in HH:MM 24h format" },
+                        duration: { type: "number", description: "Duration in minutes" },
+                        title: { type: "string", description: "Activity name" },
+                        description: { type: "string", description: "Brief description (1-2 sentences)" },
+                        category: { type: "string", enum: ["food", "work", "explore", "transport", "social", "wellness"] },
+                        location: { type: "string", description: "Specific place name and address" },
+                        cost: { type: "string", description: "Estimated cost e.g. '€5' or 'Free'" },
+                      },
+                      required: ["day", "time", "duration", "title", "description", "category", "location", "cost"],
+                      additionalProperties: false,
+                    },
+                  },
+                  tips: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "3-5 practical nomad tips",
+                  },
+                },
+                required: ["title", "summary", "budget_summary", "activities", "tips"],
+                additionalProperties: false,
+              },
+            },
+          },
+        ],
+        tool_choice: { type: "function", function: { name: "travel_plan" } },
+      }),
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error("LLM error:", response.status, errorText);
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: "Payment required. Please add credits." }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       return new Response(
-        JSON.stringify({ error: response.status === 429 ? "Rate limit exceeded" : "Failed to generate travel plan" }),
-        { status: response.status >= 400 ? response.status : 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Failed to generate travel plan" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    return new Response(response.body, {
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+    const data = await response.json();
+    
+    // Extract tool call result
+    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+    if (!toolCall) {
+      console.error("No tool call in response:", JSON.stringify(data));
+      return new Response(
+        JSON.stringify({ error: "Failed to parse travel plan" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    let plan;
+    try {
+      plan = JSON.parse(toolCall.function.arguments);
+    } catch {
+      console.error("Failed to parse tool call args:", toolCall.function.arguments);
+      return new Response(
+        JSON.stringify({ error: "Failed to parse travel plan" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    return new Response(JSON.stringify({ plan }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
     console.error("travel-chat error:", e);
