@@ -5,8 +5,10 @@ import {
   MapPin, Plus, Check, Compass, Moon, Sun, LogOut, User,
   BookmarkPlus, Coffee, Utensils, Camera, Wifi, Heart, Train,
   Sparkles, Loader2, ArrowUpRight, Calendar,
-  CalendarPlus, Clock, DollarSign, X, Share2
+  CalendarPlus, Clock, DollarSign, X, Share2,
+  Wallet, Zap, Globe, SlidersHorizontal
 } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
 import ShareableTripCard from '@/components/ShareableTripCard';
 import { useI18n } from '@/lib/i18n';
 import { LanguageToggle } from '@/components/LanguageToggle';
