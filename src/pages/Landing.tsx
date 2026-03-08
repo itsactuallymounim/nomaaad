@@ -47,8 +47,54 @@ const VALUE_PROPS = [
 ];
 
 export default function Landing() {
+  const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState('All');
   const [hoveredPlace, setHoveredPlace] = useState<string | null>(null);
+  const [searchValue, setSearchValue] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const EXAMPLE_QUERY = 'Plan 7 days in Lisbon for a digital nomad — Budget: €900';
+
+  // Typewriter effect for placeholder
+  useEffect(() => {
+    if (isTyping) return;
+    let i = 0;
+    let direction: 'forward' | 'pause' | 'backward' = 'forward';
+    let pauseTimer = 0;
+    const interval = setInterval(() => {
+      if (direction === 'forward') {
+        i++;
+        setSearchValue(EXAMPLE_QUERY.slice(0, i));
+        if (i === EXAMPLE_QUERY.length) {
+          direction = 'pause';
+          pauseTimer = 0;
+        }
+      } else if (direction === 'pause') {
+        pauseTimer++;
+        if (pauseTimer > 30) {
+          direction = 'backward';
+        }
+      } else {
+        i--;
+        setSearchValue(EXAMPLE_QUERY.slice(0, i));
+        if (i === 0) {
+          direction = 'forward';
+        }
+      }
+    }, 60);
+    return () => clearInterval(interval);
+  }, [isTyping]);
+
+  const handleSearchFocus = () => {
+    setIsTyping(true);
+    setSearchValue('');
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    navigate('/auth');
+  };
 
   const filtered = activeCategory === 'All'
     ? PLACES
