@@ -57,6 +57,16 @@ const App = () => (
                   <PaymentSuccess />
                 </ProtectedRoute>
               } />
+              <Route path="/journey" element={
+                <ProtectedRoute>
+                  <Journey />
+                </ProtectedRoute>
+              } />
+              <Route path="/itinerary" element={
+                <ProtectedRoute>
+                  <Itinerary />
+                </ProtectedRoute>
+              } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
