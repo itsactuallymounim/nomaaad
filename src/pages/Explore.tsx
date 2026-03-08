@@ -268,7 +268,7 @@ export default function Explore() {
 
         {/* AI Search bar */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="mb-6 relative">
-          <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-primary/8 via-primary/4 to-transparent blur-xl pointer-events-none" />
+          <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-primary/8 via-primary/4 to-transparent blur-xl pointer-events-none" aria-hidden="true" />
           <form onSubmit={handleAiSearch} className="relative">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"><Sparkles className="h-4 w-4 text-primary" /></div>
             <input
