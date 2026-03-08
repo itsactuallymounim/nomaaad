@@ -461,6 +461,41 @@ export default function Explore() {
                           </ul>
                         </div>
                       )}
+
+                      {/* Export to Google Calendar — always visible in plan */}
+                      <div className="pt-4 border-t border-border/30 space-y-3">
+                        <Button
+                          onClick={() => {
+                            const all = aiPlan.activities;
+                            setTimeline(all.sort((a, b) => a.day === b.day ? a.time.localeCompare(b.time) : a.day - b.day));
+                            setShowTimeline(true);
+                            const city = aiPlan.title?.split('—')?.[0]?.trim() || 'Trip';
+                            all.forEach((activity, i) => {
+                              setTimeout(() => {
+                                window.open(buildGoogleCalendarUrl(activity, timelineStartDate, city), '_blank');
+                              }, i * 400);
+                            });
+                          }}
+                          className="w-full rounded-xl h-12 gap-2"
+                          size="lg"
+                        >
+                          <CalendarPlus className="h-4.5 w-4.5" />
+                          Export all {aiPlan.activities.length} activities to Google Calendar
+                        </Button>
+                        {timeline.length > 0 && timeline.length < aiPlan.activities.length && (
+                          <Button
+                            onClick={addAllToGoogleCalendar}
+                            variant="outline"
+                            className="w-full rounded-xl h-10 gap-2"
+                          >
+                            <Calendar className="h-4 w-4" />
+                            Export {timeline.length} selected to Google Calendar
+                          </Button>
+                        )}
+                        <p className="text-[10px] text-muted-foreground text-center">
+                          Each activity opens in a new tab for you to confirm
+                        </p>
+                      </div>
                     </div>
                   )}
                 </CardContent>
