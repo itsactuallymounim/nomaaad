@@ -274,8 +274,8 @@ export default function Landing() {
 
               <div className="px-5 pb-5 pt-2 border-t border-border/20">
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>6 activities · ~€35 estimated</span>
-                  <span className="text-primary font-medium">View full plan →</span>
+                  <span>{t('landing.sampleFooter')}</span>
+                  <span className="text-primary font-medium">{t('landing.sampleViewPlan')}</span>
                 </div>
               </div>
             </div>
