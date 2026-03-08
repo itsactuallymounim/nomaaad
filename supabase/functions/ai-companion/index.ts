@@ -7,6 +7,44 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+async function callLLM(messages: any[], openrouterKey: string, lovableKey?: string) {
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${openrouterKey}`,
+      "Content-Type": "application/json",
+      "HTTP-Referer": "https://nomaaad.lovable.app",
+      "X-Title": "nomaaad",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      messages,
+      stream: true,
+    }),
+  });
+
+  if (response.ok) return response;
+
+  if ((response.status === 402 || response.status === 429) && lovableKey) {
+    console.log("OpenRouter unavailable, falling back to Lovable AI");
+    await response.text();
+    return await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${lovableKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages,
+        stream: true,
+      }),
+    });
+  }
+
+  return response;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -14,16 +52,15 @@ serve(async (req) => {
 
   try {
     const { question } = await req.json();
-    const OPENROUTER_API_KEY = Deno.env.get("OPENROUTER_API_KEY");
+    const OPENROUTER_API_KEY = Deno.env.get("OPENROUTER_API_KEY")!;
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const VOYAGE_API_KEY = Deno.env.get("VOYAGE_AI_API_KEY");
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    if (!OPENROUTER_API_KEY) throw new Error("OPENROUTER_API_KEY is not configured");
+    if (!OPENROUTER_API_KEY && !LOVABLE_API_KEY) throw new Error("No LLM API key configured");
     if (!VOYAGE_API_KEY) throw new Error("VOYAGE_AI_API_KEY is not configured");
-    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) throw new Error("Supabase config missing");
 
-    // Get user from auth header
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -31,11 +68,9 @@ serve(async (req) => {
       });
     }
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const anonClient = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY")!, {
       global: { headers: { Authorization: authHeader } },
     });
-
     const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(
       authHeader.replace("Bearer ", "")
     );
@@ -46,112 +81,92 @@ serve(async (req) => {
     }
     const userId = claimsData.claims.sub as string;
 
-    // 1. Get user profile
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Get user profile
     const { data: profile } = await supabase
       .from("profiles")
       .select("*")
       .eq("id", userId)
       .single();
 
-    // 2. Embed the question using Voyage AI
-    const embedResponse = await fetch("https://api.voyageai.com/v1/embeddings", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${VOYAGE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "voyage-3",
-        input: [question],
-        input_type: "query",
-      }),
-    });
+    // Embed the question using Voyage AI for semantic search
+    let matchedPlaces: any[] = [];
+    try {
+      const embedResponse = await fetch("https://api.voyageai.com/v1/embeddings", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${VOYAGE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "voyage-3",
+          input: [question],
+          input_type: "query",
+        }),
+      });
 
-    if (!embedResponse.ok) {
-      const errText = await embedResponse.text();
-      console.error("Voyage embed error:", errText);
-      throw new Error("Failed to embed question");
-    }
+      if (embedResponse.ok) {
+        const embedData = await embedResponse.json();
+        const queryEmbedding = embedData.data[0].embedding;
 
-    const embedData = await embedResponse.json();
-    const queryEmbedding = embedData.data[0].embedding;
-
-    // 3. Semantic search on saved places
-    const { data: matchedPlaces, error: matchError } = await supabase.rpc(
-      "match_saved_places",
-      {
-        query_embedding: JSON.stringify(queryEmbedding),
-        match_user_id: userId,
-        match_threshold: 0.3,
-        match_count: 8,
+        const { data } = await supabase.rpc("match_saved_places", {
+          query_embedding: JSON.stringify(queryEmbedding),
+          match_user_id: userId,
+          match_threshold: 0.3,
+          match_count: 8,
+        });
+        if (data) matchedPlaces = data;
       }
-    );
-
-    if (matchError) {
-      console.error("Match error:", matchError);
+    } catch (e) {
+      console.error("Embedding/search error (non-fatal):", e);
     }
 
-    // 4. Get user's saved lists for context
-    const { data: lists } = await supabase
-      .from("saved_lists")
-      .select("name, icon")
-      .eq("user_id", userId);
-
-    // 5. Get all saved places for broader context
+    // Get all saved places for context
     const { data: allPlaces } = await supabase
       .from("saved_places")
       .select("name, description, address, category")
       .eq("user_id", userId)
       .limit(50);
 
-    // 6. Build context for the LLM
-    const profileContext = profile
-      ? `User profile: traveler type "${profile.traveler_type}", budget "${profile.monthly_budget}", accommodation "${profile.accommodation_style}", work setup "${profile.work_setup}", vibes: ${(profile.travel_vibe || []).join(", ")}`
-      : "No profile available";
+    const { data: lists } = await supabase
+      .from("saved_lists")
+      .select("name, icon")
+      .eq("user_id", userId);
 
-    const placesContext = matchedPlaces && matchedPlaces.length > 0
-      ? `\nRelevant saved places (semantic match):\n${matchedPlaces.map((p: any) => `- ${p.name} (${p.category}) at ${p.address} — similarity: ${p.similarity.toFixed(2)}`).join("\n")}`
+    // Build context
+    const profileContext = profile
+      ? `User profile: type "${profile.traveler_type}", budget "${profile.monthly_budget}", accommodation "${profile.accommodation_style}", work "${profile.work_setup}", vibes: ${(profile.travel_vibe || []).join(", ")}`
+      : "";
+
+    const placesContext = matchedPlaces.length > 0
+      ? `\nSemantically relevant saved places:\n${matchedPlaces.map((p: any) => `- ${p.name} (${p.category}) — ${p.address}`).join("\n")}`
       : "";
 
     const allPlacesContext = allPlaces && allPlaces.length > 0
       ? `\nAll saved places:\n${allPlaces.map((p: any) => `- ${p.name} (${p.category}): ${p.description || ""} — ${p.address || ""}`).join("\n")}`
-      : "\nUser has no saved places yet.";
+      : "\nNo saved places yet.";
 
     const listsContext = lists && lists.length > 0
-      ? `\nUser's lists: ${lists.map((l: any) => `${l.icon} ${l.name}`).join(", ")}`
+      ? `\nLists: ${lists.map((l: any) => `${l.icon} ${l.name}`).join(", ")}`
       : "";
 
-    const systemPrompt = `You are a friendly, knowledgeable AI travel companion for digital nomads. You have access to the user's profile and their saved places.
+    const systemPrompt = `You are a friendly AI travel companion for digital nomads. You know the user's preferences and their saved places.
 
-${profileContext}
-${placesContext}
-${allPlacesContext}
-${listsContext}
+${profileContext}${placesContext}${allPlacesContext}${listsContext}
 
-Answer the user's question in a helpful, concise way. If they ask about places, reference their saved ones when relevant. Suggest specific places, times, and practical tips. Use markdown formatting. Keep responses focused and actionable — 2-4 paragraphs max unless they ask for a full plan.`;
+Answer helpfully and concisely with markdown. Reference the user's saved places when relevant. Give specific recommendations with place names, prices, and practical tips. Keep responses to 2-4 focused paragraphs unless they ask for a full plan.`;
 
-    // 7. Stream response from OpenRouter
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": "https://nomaaad.lovable.app",
-        "X-Title": "nomaaad",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: question },
-        ],
-        stream: true,
-      }),
-    });
+    const messages = [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: question },
+    ];
+
+    const response = await callLLM(messages, OPENROUTER_API_KEY, LOVABLE_API_KEY);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("OpenRouter error:", response.status, errorText);
+      console.error("LLM error:", response.status, errorText);
       return new Response(
         JSON.stringify({ error: "Failed to get AI response" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }

@@ -6,6 +6,47 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+async function callLLM(messages: any[], apiKey: string, fallbackKey?: string) {
+  // Try OpenRouter first
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      "HTTP-Referer": "https://nomaaad.lovable.app",
+      "X-Title": "nomaaad",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      messages,
+      stream: true,
+    }),
+  });
+
+  if (response.ok) return response;
+
+  // Fallback to Lovable AI if OpenRouter fails with 402/429
+  if ((response.status === 402 || response.status === 429) && fallbackKey) {
+    console.log("OpenRouter unavailable, falling back to Lovable AI");
+    await response.text(); // consume body
+    const fallbackResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${fallbackKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages,
+        stream: true,
+      }),
+    });
+    return fallbackResponse;
+  }
+
+  return response;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -14,7 +55,8 @@ serve(async (req) => {
   try {
     const { query, profile } = await req.json();
     const OPENROUTER_API_KEY = Deno.env.get("OPENROUTER_API_KEY");
-    if (!OPENROUTER_API_KEY) throw new Error("OPENROUTER_API_KEY is not configured");
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!OPENROUTER_API_KEY && !LOVABLE_API_KEY) throw new Error("No LLM API key configured");
 
     const profileContext = profile
       ? `
@@ -44,66 +86,42 @@ Detailed budget breakdown with specific prices in local currency + EUR/USD.
 Top 3 accommodation recommendations matching the user's style, with:
 - Name, neighborhood, price per night
 - Wi-Fi speed rating, nomad-friendliness
-- Booking tip
 
 ### 💻 Where to Work
 Top 3 coworking spaces or work-friendly cafés with:
 - Name, address, daily/weekly pass price
 - Wi-Fi speed, power outlets, vibe
-- Best for: (focus work / calls / casual)
 
 ### 📅 Day-by-Day Itinerary
-For each day include a structured table:
+For each day include:
 | Time | Activity | Location | Est. Cost |
-Morning work spot, lunch recommendation, afternoon activity, evening social/cultural activity.
-Include specific place names, neighborhoods.
+Morning work spot, lunch, afternoon activity, evening social/cultural activity.
 
 ### 🍽️ Food & Drink
-- Budget meals (under €5-10)
-- Mid-range favorites
-- Must-try local dishes with where to find them
+Budget meals, mid-range favorites, must-try local dishes.
 
 ### 💡 Nomad Tips
 5 practical tips: SIM cards, transport, safety, community meetups, visa info.
 
-Be specific with real place names, current pricing, and practical details. Tailor everything to the user's profile.`;
+Be specific with real place names and practical details.`;
 
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": "https://nomaaad.lovable.app",
-        "X-Title": "nomaaad",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: query },
-        ],
-        stream: true,
-      }),
-    });
+    const messages = [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: query },
+    ];
+
+    const response = await callLLM(
+      messages,
+      OPENROUTER_API_KEY || LOVABLE_API_KEY!,
+      LOVABLE_API_KEY
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("OpenRouter error:", response.status, errorText);
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Please try again shortly." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "API credits exhausted." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
+      console.error("LLM error:", response.status, errorText);
       return new Response(
-        JSON.stringify({ error: "Failed to generate travel plan" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: response.status === 429 ? "Rate limit exceeded" : "Failed to generate travel plan" }),
+        { status: response.status >= 400 ? response.status : 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
