@@ -202,6 +202,31 @@ export default function Explore() {
   const handleAiSearch = (e: React.FormEvent) => { e.preventDefault(); if (!aiQuery.trim()) return; generatePlan(aiQuery.trim()); };
   const toggleTheme = () => { document.documentElement.classList.toggle('dark'); setIsDark(!isDark); };
 
+  const addToTimeline = (activity: AiActivity) => {
+    if (timeline.find(a => a.title === activity.title && a.day === activity.day && a.time === activity.time)) {
+      toast({ title: 'Already in timeline' }); return;
+    }
+    setTimeline(prev => [...prev, activity].sort((a, b) => a.day === b.day ? a.time.localeCompare(b.time) : a.day - b.day));
+    setShowTimeline(true);
+    toast({ title: '✅ Added to timeline', description: activity.title });
+  };
+
+  const removeFromTimeline = (idx: number) => {
+    setTimeline(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const isInTimeline = (activity: AiActivity) =>
+    timeline.some(a => a.title === activity.title && a.day === activity.day && a.time === activity.time);
+
+  const addAllToGoogleCalendar = () => {
+    const city = aiPlan?.title?.split('—')?.[0]?.trim() || 'Trip';
+    timeline.forEach((activity, i) => {
+      setTimeout(() => {
+        window.open(buildGoogleCalendarUrl(activity, timelineStartDate, city), '_blank');
+      }, i * 400);
+    });
+  };
+
   const fetchLists = useCallback(async () => {
     if (!user) return;
     const { data } = await supabase.from('saved_lists').select('id, name, icon').eq('user_id', user.id).order('created_at', { ascending: false });
