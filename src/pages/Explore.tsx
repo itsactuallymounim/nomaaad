@@ -463,7 +463,7 @@ export default function Explore() {
           <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-5 rounded-full" asChild>
             <Link to="/destinations">
               <MapPin className="h-5 w-5 text-muted-foreground" />
-              <span className="text-[10px] text-muted-foreground">Places</span>
+              <span className="text-[10px] text-muted-foreground">{t('explore.places')}</span>
             </Link>
           </Button>
           <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-5 rounded-full" asChild>
