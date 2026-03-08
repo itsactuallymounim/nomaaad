@@ -352,7 +352,7 @@ export default function Explore() {
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="pt-8 pb-5">
           <h1 className="text-2xl font-sans font-bold text-foreground">{t('explore.greeting')} 👋</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            {aiPlan ? aiPlan.summary : 'Generate your personalized travel plan below.'}
+            {aiPlan ? aiPlan.summary : t('explore.greetingSub')}
           </p>
         </motion.div>
 
