@@ -4,6 +4,10 @@ import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { ArrowUpRight, MapPin, Compass, Sparkles, Globe, Layers } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { LanguageToggle } from '@/components/LanguageToggle';
+import dogCharacter from '@/assets/characters/dog-icecream.png';
+import gorillaCharacter from '@/assets/characters/gorilla-pizza.png';
+import catCharacter from '@/assets/characters/cat-banana.png';
+import penguinCharacter from '@/assets/characters/penguin-icecream.png';
 
 const CATEGORIES_KEYS = ['cat.all', 'cat.coworking', 'cat.cafes', 'cat.food', 'cat.explore', 'cat.coliving'] as const;
 
@@ -130,9 +134,9 @@ export default function Landing() {
   const filtered = activeCategory === 'cat.all' ? visiblePlaces : visiblePlaces.filter(p => p.category === activeCategory);
 
   const VALUE_PROPS = [
-    { icon: Compass, titleKey: 'landing.valueProp1Title' as const, descKey: 'landing.valueProp1Desc' as const },
-    { icon: Layers, titleKey: 'landing.valueProp2Title' as const, descKey: 'landing.valueProp2Desc' as const },
-    { icon: Globe, titleKey: 'landing.valueProp3Title' as const, descKey: 'landing.valueProp3Desc' as const },
+    { icon: Compass, titleKey: 'landing.valueProp1Title' as const, descKey: 'landing.valueProp1Desc' as const, character: dogCharacter },
+    { icon: Layers, titleKey: 'landing.valueProp2Title' as const, descKey: 'landing.valueProp2Desc' as const, character: catCharacter },
+    { icon: Globe, titleKey: 'landing.valueProp3Title' as const, descKey: 'landing.valueProp3Desc' as const, character: gorillaCharacter },
   ];
 
   return (
@@ -265,13 +269,14 @@ export default function Landing() {
                 key={i}
                 variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0 } }}
                 transition={{ duration: 0.5 }}
-                className="group relative text-center md:text-left p-7 rounded-[1.75rem] bg-card/60 backdrop-blur-sm border border-border/30 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/[0.04] transition-all duration-500"
+                className="group relative text-center md:text-left p-7 rounded-[1.75rem] bg-card/60 backdrop-blur-sm border border-border/30 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/[0.04] transition-all duration-500 overflow-hidden"
               >
+                <img src={prop.character} alt="" className="absolute -bottom-4 -right-4 w-28 h-28 object-cover opacity-10 group-hover:opacity-20 transition-opacity duration-500 rounded-full" aria-hidden="true" />
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center mb-5 mx-auto md:mx-0 group-hover:scale-110 transition-transform duration-500" aria-hidden="true">
                   <prop.icon className="h-5 w-5 text-primary" />
                 </div>
-                <h3 className="font-semibold text-foreground text-base mb-2">{t(prop.titleKey)}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{t(prop.descKey)}</p>
+                <h3 className="font-semibold text-foreground text-base mb-2 relative">{t(prop.titleKey)}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed relative">{t(prop.descKey)}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -384,6 +389,7 @@ export default function Landing() {
           transition={{ duration: 0.7 }}
           className="max-w-lg mx-auto text-center relative"
         >
+          <img src={penguinCharacter} alt="" className="w-32 h-32 mx-auto mb-6 rounded-3xl object-cover shadow-xl" />
           <h2 className="text-3xl md:text-5xl font-sans font-bold text-foreground mb-4">
             {t('landing.ctaTitle')}
           </h2>

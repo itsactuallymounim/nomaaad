@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, ArrowLeft, Check, Search } from 'lucide-react';
+import catCharacter from '@/assets/characters/cat-banana.png';
+import dogCharacter from '@/assets/characters/dog-icecream.png';
+import gorillaCharacter from '@/assets/characters/gorilla-pizza.png';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
@@ -17,9 +20,9 @@ const STEPS = [
     subtitle: 'Your companion will guide you through trips and recommendations.',
     type: 'single' as const,
     options: [
-      { value: 'panda', emoji: '🐼', label: 'Panda', desc: 'Chill explorer' },
-      { value: 'cat', emoji: '🐱', label: 'Cat', desc: 'Curious wanderer' },
-      { value: 'dog', emoji: '🐶', label: 'Dog', desc: 'Social adventurer' },
+      { value: 'gorilla', emoji: '🦍', label: 'Gorilla', desc: 'Bold explorer', image: gorillaCharacter },
+      { value: 'cat', emoji: '🐱', label: 'Cat', desc: 'Curious wanderer', image: catCharacter },
+      { value: 'dog', emoji: '🐶', label: 'Dog', desc: 'Social adventurer', image: dogCharacter },
     ],
   },
   {
@@ -237,7 +240,7 @@ export default function Onboarding() {
     d.toLowerCase().includes(destSearch.toLowerCase())
   );
 
-  const mascotEmoji = answers.mascot === 'panda' ? '🐼' : answers.mascot === 'cat' ? '🐱' : answers.mascot === 'dog' ? '🐶' : '🧭';
+  const mascotImage = answers.mascot === 'gorilla' ? gorillaCharacter : answers.mascot === 'cat' ? catCharacter : answers.mascot === 'dog' ? dogCharacter : catCharacter;
 
   // Final screen
   if (step === totalSteps) {
@@ -253,15 +256,14 @@ export default function Onboarding() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-            className="text-7xl"
           >
-            {mascotEmoji}
+            <img src={mascotImage} alt="" className="w-32 h-32 mx-auto rounded-3xl object-cover shadow-xl" />
           </motion.div>
           <h1 className="text-3xl font-sans font-bold text-foreground">
             Your nomad profile is ready
           </h1>
           <p className="text-muted-foreground">
-            Your {answers.mascot === 'panda' ? 'Panda' : answers.mascot === 'cat' ? 'Cat' : 'Dog'} companion is preparing your first destinations.
+            Your {answers.mascot === 'gorilla' ? 'Gorilla' : answers.mascot === 'cat' ? 'Cat' : 'Dog'} companion is preparing your first destinations.
           </p>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -370,7 +372,11 @@ export default function Onboarding() {
                             : 'border-border bg-card hover:border-primary/30 hover:bg-card/80'
                         }`}
                       >
-                        <span className="text-2xl flex-shrink-0">{opt.emoji}</span>
+                        {(opt as any).image ? (
+                          <img src={(opt as any).image} alt="" className="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
+                        ) : (
+                          <span className="text-2xl flex-shrink-0">{opt.emoji}</span>
+                        )}
                         <div className="flex-1 min-w-0">
                           <span className="font-medium text-foreground text-sm">{opt.label}</span>
                           {opt.desc && (

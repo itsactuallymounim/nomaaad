@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { Compass, ArrowRight } from 'lucide-react';
+import dogCharacter from '@/assets/characters/dog-icecream.png';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -69,9 +70,9 @@ export default function Auth() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-              className="mx-auto w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mb-3 shadow-xl shadow-primary/25"
+              className="mx-auto w-20 h-20 rounded-2xl overflow-hidden mb-3 shadow-xl"
             >
-              <Compass className="h-7 w-7 text-primary-foreground" aria-hidden="true" />
+              <img src={dogCharacter} alt="" className="w-full h-full object-cover" />
             </motion.div>
             <CardTitle className="text-2xl font-sans">{t('auth.welcome')}</CardTitle>
             <CardDescription>{t('auth.subtitle')}</CardDescription>

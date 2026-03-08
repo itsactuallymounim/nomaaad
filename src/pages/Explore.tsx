@@ -1,5 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { embedSavedPlace } from '@/lib/embeddings';
+import penguinCharacter from '@/assets/characters/penguin-icecream.png';
+import catCharacter from '@/assets/characters/cat-banana.png';
+import dogCharacter from '@/assets/characters/dog-icecream.png';
+import gorillaCharacter from '@/assets/characters/gorilla-pizza.png';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useSearchParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
@@ -209,6 +213,7 @@ export default function Explore() {
   });
 
   const mascotEmoji = profile?.mascot === 'panda' ? '🐼' : profile?.mascot === 'cat' ? '🐱' : profile?.mascot === 'dog' ? '🐶' : '👋';
+  const mascotImg = profile?.mascot === 'gorilla' ? gorillaCharacter : profile?.mascot === 'cat' ? catCharacter : profile?.mascot === 'dog' ? dogCharacter : penguinCharacter;
 
   return (
     <div className="min-h-screen bg-background pb-28">
@@ -261,9 +266,12 @@ export default function Explore() {
 
       <div className="max-w-2xl mx-auto px-4">
         {/* Greeting */}
-        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="pt-8 pb-5">
-          <h1 className="text-2xl font-sans font-bold text-foreground">{mascotEmoji} {t('explore.greeting')}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{t('explore.greetingSub')}</p>
+        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="pt-8 pb-5 flex items-center gap-4">
+          <img src={mascotImg} alt="" className="w-14 h-14 rounded-2xl object-cover shadow-md" />
+          <div>
+            <h1 className="text-2xl font-sans font-bold text-foreground">{t('explore.greeting')}</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">{t('explore.greetingSub')}</p>
+          </div>
         </motion.div>
 
         {/* AI Search bar */}

@@ -5,6 +5,7 @@ import {
   Plus, Trash2, ArrowLeft, Search, MapPin, Star, Share2, Compass,
   BookmarkPlus, MoreHorizontal, Edit2, Check, X
 } from 'lucide-react';
+import catCharacter from '@/assets/characters/cat-banana.png';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -425,7 +426,7 @@ export default function Lists() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center py-20"
           >
-            <BookmarkPlus className="h-16 w-16 mx-auto mb-4 text-muted-foreground/20" />
+            <img src={catCharacter} alt="" className="w-28 h-28 mx-auto mb-4 rounded-3xl object-cover shadow-lg" />
             <h2 className="text-xl font-sans font-bold text-foreground mb-2">No lists yet</h2>
             <p className="text-muted-foreground text-sm mb-6">Save places into lists to access them anytime, even offline.</p>
             <Button onClick={() => setDialogOpen(true)} className="rounded-2xl h-11 px-6">
