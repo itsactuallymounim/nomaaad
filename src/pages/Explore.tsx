@@ -769,24 +769,24 @@ export default function Explore() {
         <div className="flex items-center gap-1 px-2 py-2 rounded-full bg-card/90 backdrop-blur-2xl border border-border/20 shadow-2xl shadow-foreground/10">
           <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-4 rounded-full bg-primary/10">
             <Compass className="h-5 w-5 text-primary" />
-            <span className="text-[10px] text-primary font-semibold">Explore</span>
+            <span className="text-[10px] text-primary font-semibold">{t('explore.explore')}</span>
           </Button>
           <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-4 rounded-full" asChild>
             <Link to="/journey">
               <Sparkles className="h-5 w-5 text-muted-foreground" />
-              <span className="text-[10px] text-muted-foreground">Journey</span>
+              <span className="text-[10px] text-muted-foreground">{t('explore.journey')}</span>
             </Link>
           </Button>
           <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-4 rounded-full" asChild>
             <Link to="/destinations">
               <MapPin className="h-5 w-5 text-muted-foreground" />
-              <span className="text-[10px] text-muted-foreground">Places</span>
+              <span className="text-[10px] text-muted-foreground">{t('explore.placesNav')}</span>
             </Link>
           </Button>
           <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-4 rounded-full" asChild>
             <Link to="/lists">
               <BookmarkPlus className="h-5 w-5 text-muted-foreground" />
-              <span className="text-[10px] text-muted-foreground">Lists</span>
+              <span className="text-[10px] text-muted-foreground">{t('explore.lists')}</span>
             </Link>
           </Button>
         </div>
