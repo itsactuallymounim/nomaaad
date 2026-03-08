@@ -20,6 +20,18 @@ const destinations = [
   { city: 'Marrakech', country: 'Morocco', tagline: 'A sensory feast of colour and spice', unsplashId: 'photo-1539020140153-e479b8c22e70', color: 'from-foreground/60' },
   { city: 'Amsterdam', country: 'Netherlands', tagline: 'Canals, culture and cycling', unsplashId: 'photo-1534351590666-13e3e96b5017', color: 'from-foreground/60' },
   { city: 'Lisbon', country: 'Portugal', tagline: 'Seven hills of fado and sunshine', unsplashId: 'photo-1536663815808-535e2280d2c2', color: 'from-foreground/60' },
+  { city: 'Berlin', country: 'Germany', tagline: 'Creative capital of Europe', unsplashId: 'photo-1560969184-10fe8719e047', color: 'from-foreground/60' },
+  { city: 'Buenos Aires', country: 'Argentina', tagline: 'Tango, steak and bohemian soul', unsplashId: 'photo-1589909202802-8f4aadce1849', color: 'from-foreground/60' },
+  { city: 'Seoul', country: 'South Korea', tagline: 'K-culture and street food heaven', unsplashId: 'photo-1517154421773-0529f29ea451', color: 'from-foreground/60' },
+  { city: 'Dubai', country: 'UAE', tagline: 'Futuristic skyline and desert adventures', unsplashId: 'photo-1512453979798-5ea266f8880c', color: 'from-foreground/60' },
+  { city: 'Prague', country: 'Czech Republic', tagline: 'Fairytale architecture and great beer', unsplashId: 'photo-1519677100203-a0e668c92439', color: 'from-foreground/60' },
+  { city: 'Bangkok', country: 'Thailand', tagline: 'Street food heaven with temples and markets', unsplashId: 'photo-1508009603885-50cf7c579365', color: 'from-foreground/60' },
+  { city: 'Reykjavik', country: 'Iceland', tagline: 'Northern lights and geothermal pools', unsplashId: 'photo-1504829857797-ddff29c27927', color: 'from-foreground/60' },
+  { city: 'Singapore', country: 'Singapore', tagline: 'Ultra-modern city-state with amazing food', unsplashId: 'photo-1525625293386-3f8f99389edd', color: 'from-foreground/60' },
+  { city: 'Tbilisi', country: 'Georgia', tagline: 'Incredible food and warm nomad community', unsplashId: 'photo-1565008576549-57569a49371d', color: 'from-foreground/60' },
+  { city: 'Porto', country: 'Portugal', tagline: 'Port wine, azulejo tiles and riverside charm', unsplashId: 'photo-1555881400-74d7acaacd8b', color: 'from-foreground/60' },
+  { city: 'Lima', country: 'Peru', tagline: 'Gastronomic capital of South America', unsplashId: 'photo-1531968455001-5c5272a67c71', color: 'from-foreground/60' },
+  { city: 'Edinburgh', country: 'Scotland', tagline: 'Historic charm and stunning hilltop views', unsplashId: 'photo-1506377585622-bedcbb027afc', color: 'from-foreground/60' },
 ];
 
 const fadeUp = { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0 } };
