@@ -4,6 +4,10 @@ import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { ArrowUpRight, MapPin, Compass, Sparkles, Globe, Layers } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { LanguageToggle } from '@/components/LanguageToggle';
+import dogCharacter from '@/assets/characters/dog-icecream.png';
+import gorillaCharacter from '@/assets/characters/gorilla-pizza.png';
+import catCharacter from '@/assets/characters/cat-banana.png';
+import penguinCharacter from '@/assets/characters/penguin-icecream.png';
 
 const CATEGORIES_KEYS = ['cat.all', 'cat.coworking', 'cat.cafes', 'cat.food', 'cat.explore', 'cat.coliving'] as const;
 
