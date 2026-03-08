@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
 import {
   Search, MapPin, Plus, Check, Compass, Moon, Sun, LogOut, User,
   BookmarkPlus, Star, Coffee, Utensils, Camera, Wifi, Home, TreePine,
-  ChevronRight, X
+  ChevronRight, X, Sparkles, Loader2, ArrowUpRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -74,9 +75,96 @@ const fadeUp = {
   visible: { opacity: 1, y: 0 },
 };
 
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/travel-chat`;
+
+async function streamTravelPlan({
+  query,
+  profile,
+  onDelta,
+  onDone,
+  onError,
+}: {
+  query: string;
+  profile: any;
+  onDelta: (text: string) => void;
+  onDone: () => void;
+  onError: (error: string) => void;
+}) {
+  try {
+    const resp = await fetch(CHAT_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ query, profile }),
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({ error: 'Failed to generate plan' }));
+      onError(err.error || `Error ${resp.status}`);
+      return;
+    }
+
+    if (!resp.body) {
+      onError('No response body');
+      return;
+    }
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      let newlineIdx: number;
+      while ((newlineIdx = buffer.indexOf('\n')) !== -1) {
+        let line = buffer.slice(0, newlineIdx);
+        buffer = buffer.slice(newlineIdx + 1);
+        if (line.endsWith('\r')) line = line.slice(0, -1);
+        if (line.startsWith(':') || line.trim() === '') continue;
+        if (!line.startsWith('data: ')) continue;
+        const jsonStr = line.slice(6).trim();
+        if (jsonStr === '[DONE]') { onDone(); return; }
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content;
+          if (content) onDelta(content);
+        } catch {
+          buffer = line + '\n' + buffer;
+          break;
+        }
+      }
+    }
+
+    // Final flush
+    if (buffer.trim()) {
+      for (let raw of buffer.split('\n')) {
+        if (!raw) continue;
+        if (raw.endsWith('\r')) raw = raw.slice(0, -1);
+        if (!raw.startsWith('data: ')) continue;
+        const jsonStr = raw.slice(6).trim();
+        if (jsonStr === '[DONE]') continue;
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content;
+          if (content) onDelta(content);
+        } catch { /* ignore */ }
+      }
+    }
+    onDone();
+  } catch (e) {
+    onError(e instanceof Error ? e.message : 'Network error');
+  }
+}
+
 export default function Explore() {
   const { user, signOut } = useAuth();
   const { profile } = useProfile();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
   const [isDark, setIsDark] = useState(false);
@@ -85,9 +173,58 @@ export default function Explore() {
   const [lists, setLists] = useState<SavedListOption[]>([]);
   const [addedToList, setAddedToList] = useState<Record<string, string[]>>({});
 
+  // AI travel plan state
+  const [aiQuery, setAiQuery] = useState('');
+  const [aiResult, setAiResult] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [showAiPanel, setShowAiPanel] = useState(false);
+  const aiPanelRef = useRef<HTMLDivElement>(null);
+  const hasTriggeredRef = useRef(false);
+
   useEffect(() => {
     setIsDark(document.documentElement.classList.contains('dark'));
   }, []);
+
+  // Auto-trigger from URL query param
+  useEffect(() => {
+    const q = searchParams.get('q');
+    if (q && !hasTriggeredRef.current) {
+      hasTriggeredRef.current = true;
+      sessionStorage.removeItem('nomaaad_pending_query');
+      setAiQuery(q);
+      setShowAiPanel(true);
+      generatePlan(q);
+      // Clean URL
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams]);
+
+  const generatePlan = (query: string) => {
+    setAiLoading(true);
+    setAiResult('');
+    setShowAiPanel(true);
+
+    let accumulated = '';
+    streamTravelPlan({
+      query,
+      profile,
+      onDelta: (chunk) => {
+        accumulated += chunk;
+        setAiResult(accumulated);
+      },
+      onDone: () => setAiLoading(false),
+      onError: (error) => {
+        setAiLoading(false);
+        toast({ title: 'AI Error', description: error, variant: 'destructive' });
+      },
+    });
+  };
+
+  const handleAiSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!aiQuery.trim()) return;
+    generatePlan(aiQuery.trim());
+  };
 
   const toggleTheme = () => {
     document.documentElement.classList.toggle('dark');
@@ -199,30 +336,106 @@ export default function Explore() {
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="pt-8 pb-6"
+          className="pt-8 pb-4"
         >
           <h1 className="text-2xl font-serif font-bold text-foreground">
             {mascotEmoji} Hey, explorer
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Discover curated places from around the world.
+            Discover curated places or generate an AI travel plan.
           </p>
         </motion.div>
 
-        {/* Search */}
+        {/* AI Search bar */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="mb-5"
+          className="mb-5 relative"
+        >
+          <div className="absolute -inset-3 rounded-3xl bg-gradient-to-br from-primary/8 via-primary/4 to-transparent blur-xl pointer-events-none" />
+          <form onSubmit={handleAiSearch} className="relative">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+              <Sparkles className="h-4 w-4 text-primary" />
+            </div>
+            <input
+              value={aiQuery}
+              onChange={e => setAiQuery(e.target.value)}
+              placeholder="Plan 7 days in Lisbon for a digital nomad..."
+              className="relative w-full h-13 pl-11 pr-14 rounded-2xl bg-card/80 backdrop-blur-xl border border-border/40 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all shadow-lg shadow-primary/5"
+            />
+            <button
+              type="submit"
+              disabled={aiLoading || !aiQuery.trim()}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-primary flex items-center justify-center hover:opacity-90 transition-opacity shadow-md shadow-primary/20 disabled:opacity-50"
+            >
+              {aiLoading ? (
+                <Loader2 className="h-4 w-4 text-primary-foreground animate-spin" />
+              ) : (
+                <ArrowUpRight className="h-4 w-4 text-primary-foreground" />
+              )}
+            </button>
+          </form>
+        </motion.div>
+
+        {/* AI Travel Plan result */}
+        <AnimatePresence>
+          {showAiPanel && (
+            <motion.div
+              ref={aiPanelRef}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.4 }}
+              className="mb-6 overflow-hidden"
+            >
+              <Card className="rounded-3xl border-border/40 overflow-hidden">
+                <div className="flex items-center justify-between px-5 pt-4 pb-2">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-semibold text-foreground">AI Travel Plan</span>
+                    {aiLoading && (
+                      <span className="text-xs text-muted-foreground animate-pulse">Generating...</span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => { setShowAiPanel(false); setAiResult(''); setAiQuery(''); }}
+                    className="w-7 h-7 rounded-xl hover:bg-secondary flex items-center justify-center transition-colors"
+                  >
+                    <X className="h-3.5 w-3.5 text-muted-foreground" />
+                  </button>
+                </div>
+                <CardContent className="px-5 pb-5 pt-2">
+                  {aiResult ? (
+                    <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:font-serif prose-headings:text-foreground prose-p:text-muted-foreground prose-li:text-muted-foreground prose-strong:text-foreground prose-h2:text-xl prose-h2:mt-6 prose-h2:mb-3 prose-h3:text-base prose-h3:mt-4 prose-h3:mb-2">
+                      <ReactMarkdown>{aiResult}</ReactMarkdown>
+                    </div>
+                  ) : aiLoading ? (
+                    <div className="flex items-center gap-3 py-8 justify-center">
+                      <Loader2 className="h-5 w-5 text-primary animate-spin" />
+                      <span className="text-sm text-muted-foreground">Building your perfect trip...</span>
+                    </div>
+                  ) : null}
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Places search */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-4"
         >
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Search places, cities..."
-              className="pl-10 rounded-2xl h-12 bg-card border-border/50"
+              placeholder="Filter places, cities..."
+              className="pl-10 rounded-2xl h-11 bg-card border-border/50"
             />
           </div>
         </motion.div>
@@ -231,7 +444,7 @@ export default function Explore() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
+          transition={{ delay: 0.15 }}
           className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4"
         >
           {CATEGORIES.map(cat => (
