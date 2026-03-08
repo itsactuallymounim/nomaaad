@@ -40,7 +40,7 @@ export default function Destinations() {
   );
 
   const handleCityClick = (city: string) => {
-    navigate(`/explore`);
+    navigate(`/auth`);
   };
 
   return (
