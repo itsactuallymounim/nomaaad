@@ -19,7 +19,7 @@ export default function Auth() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (loading) return null;
-  if (user) return <Navigate to="/planner" replace />;
+  if (user) return <Navigate to="/explore" replace />;
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
