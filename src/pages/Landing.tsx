@@ -368,6 +368,9 @@ export default function Landing() {
               ))}
             </AnimatePresence>
           </motion.div>
+
+          {/* Infinite scroll sentinel */}
+          <div ref={sentinelRef} className="h-px w-full" aria-hidden="true" />
         </div>
       </section>
 
