@@ -151,15 +151,15 @@ export default function Landing() {
     return () => clearInterval(interval);
   }, [isTyping]);
 
-  // Infinite scroll — endlessly generate more batches
+  // Infinite scroll — load next batch of unique places
   const loadMore = useCallback(() => {
-    setIsLoadingMore(true);
     setBatchCount(prev => {
-      const next = prev + 1;
-      const newBatch = generateBatch(next - 1, activeCategory);
+      const newBatch = generateBatch(prev, activeCategory);
+      if (newBatch.length === 0) return prev; // no more unique places
+      setIsLoadingMore(true);
       setVisiblePlaces(curr => [...curr, ...newBatch]);
       setTimeout(() => setIsLoadingMore(false), 300);
-      return next;
+      return prev + 1;
     });
   }, [activeCategory]);
 
