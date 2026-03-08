@@ -49,8 +49,11 @@ export default function Landing() {
   const [hoveredPlace, setHoveredPlace] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [visiblePlaces, setVisiblePlaces] = useState<Place[]>(() => BASE_PLACES);
+  const [batchCount, setBatchCount] = useState(1);
   const inputRef = useRef<HTMLInputElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({
     target: heroRef,
