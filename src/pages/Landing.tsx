@@ -401,7 +401,7 @@ export default function Landing() {
                     aria-label={`${place.name}`}
                   >
                     <img
-                      src={`https://images.unsplash.com/${place.image}?auto=format&fit=crop&w=800&q=80`}
+                      src={`https://images.unsplash.com/photo-${place.image}?auto=format&fit=crop&w=800&q=80`}
                       alt={`${place.name}`}
                       className={`w-full object-cover transition-transform duration-700 group-hover:scale-105 ${
                         place.span === 'tall' ? 'h-full min-h-[420px] sm:min-h-full' : 'aspect-[4/3]'
@@ -414,12 +414,12 @@ export default function Landing() {
                       <ArrowUpRight className="h-4 w-4 text-foreground" aria-hidden="true" />
                     </div>
 
-                    {/* Text overlay at bottom */}
-                    <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6 bg-gradient-to-t from-foreground/70 via-foreground/30 to-transparent">
-                      <h3 className="text-background font-bold text-lg md:text-xl leading-tight mb-1">
+                    {/* Text overlay at bottom — strong contrast */}
+                    <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+                      <h3 className="text-white font-bold text-lg md:text-xl leading-tight mb-1 drop-shadow-lg">
                         {place.city}, {place.country}
                       </h3>
-                      <p className="text-background/70 text-xs md:text-sm leading-relaxed line-clamp-2">
+                      <p className="text-white/80 text-xs md:text-sm leading-relaxed line-clamp-2 drop-shadow-md">
                         {place.description}
                       </p>
                     </div>
