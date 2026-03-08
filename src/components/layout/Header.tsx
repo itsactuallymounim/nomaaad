@@ -39,6 +39,17 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-1.5">
+        {user && !isPremium && (
+          <Button size="sm" onClick={startCheckout} className="gap-1.5">
+            <Crown className="h-4 w-4" />
+            <span className="hidden sm:inline">Upgrade</span>
+          </Button>
+        )}
+        {user && isPremium && (
+          <span className="text-xs font-medium text-primary flex items-center gap-1 px-2">
+            <Crown className="h-3.5 w-3.5" /> Premium
+          </span>
+        )}
         <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
           <Link to="/lists">
             <BookmarkPlus className="h-4 w-4 mr-1.5" />
