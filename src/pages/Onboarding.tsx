@@ -263,7 +263,7 @@ export default function Onboarding() {
             Your nomad profile is ready
           </h1>
           <p className="text-muted-foreground">
-            Your {answers.mascot === 'panda' ? 'Panda' : answers.mascot === 'cat' ? 'Cat' : 'Dog'} companion is preparing your first destinations.
+            Your {answers.mascot === 'gorilla' ? 'Gorilla' : answers.mascot === 'cat' ? 'Cat' : 'Dog'} companion is preparing your first destinations.
           </p>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
