@@ -72,11 +72,8 @@ const SAMPLE_ITINERARY = [
 { time: '20:00', title: 'Local dinner', icon: '🍽️' }];
 
 
-const BENEFITS = [
-{ icon: Route, text: 'Geographically optimized' },
-{ icon: Wallet, text: 'Budget-aware' },
-{ icon: MapPin, text: 'Walkability optimized' },
-{ icon: Clock, text: 'Realistic timing' }];
+const BENEFITS_KEYS = ['landing.benefitGeo', 'landing.benefitBudget', 'landing.benefitWalk', 'landing.benefitTime'] as const;
+const BENEFITS_ICONS = [Route, Wallet, MapPin, Clock];
 
 
 /* ── Component ── */
