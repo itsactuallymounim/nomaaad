@@ -393,9 +393,9 @@ export default function Landing() {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="mt-12 text-center">
             
-            <p className="text-lg md:text-xl font-serif italic text-foreground/80">
-              "The fastest way to get a complete travel plan."
-            </p>
+            
+
+            
           </motion.div>
         </div>
       </section>
