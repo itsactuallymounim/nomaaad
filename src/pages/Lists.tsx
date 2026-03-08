@@ -226,7 +226,7 @@ export default function Lists() {
         <div className="max-w-2xl mx-auto px-4 py-8">
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
             <div className="text-4xl mb-3">{list.icon}</div>
-            <h1 className="text-2xl font-serif font-bold text-foreground">{list.name}</h1>
+            <h1 className="text-2xl font-sans font-bold text-foreground">{list.name}</h1>
             <p className="text-sm text-muted-foreground mt-1">{list.places?.length || 0} places</p>
           </motion.div>
 
