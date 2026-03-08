@@ -423,10 +423,10 @@ export default function Explore() {
               </div>
               {lists.length === 0 ? (
                 <div className="text-center py-6">
-                  <BookmarkPlus className="h-10 w-10 mx-auto mb-2 text-muted-foreground/30" />
-                  <p className="text-sm text-muted-foreground mb-3">No lists yet</p>
-                  <Button asChild variant="outline" className="rounded-2xl" size="sm">
-                    <Link to="/lists" onClick={() => setAddDialogOpen(false)}>Create a list <ChevronRight className="h-3 w-3 ml-1" /></Link>
+                  <BookmarkPlus className="h-10 w-10 mx-auto mb-2 text-muted-foreground/30" aria-hidden="true" />
+                  <p className="text-sm text-muted-foreground mb-3">{t('explore.noLists')}</p>
+                  <Button asChild variant="outline" className="rounded-full" size="sm">
+                    <Link to="/lists" onClick={() => setAddDialogOpen(false)}>{t('explore.createList')} <ChevronRight className="h-3 w-3 ml-1" aria-hidden="true" /></Link>
                   </Button>
                 </div>
               ) : (
