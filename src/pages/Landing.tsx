@@ -182,12 +182,12 @@ export default function Landing() {
             </div>
 
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-sans font-bold text-background tracking-tight leading-[1.05] mb-5">
-              Your entire trip.<br />
-              <span className="text-slate-300">Planned in 30 seconds.</span>
+              {t('landing.heroTitle1')}<br />
+              <span className="text-slate-300">{t('landing.heroTitle2')}</span>
             </h1>
 
             <p className="text-background/70 text-base md:text-lg leading-relaxed mb-8 max-w-md mx-auto lg:mx-0">
-              Enter a city, pick your style. Get a complete day-by-day itinerary — geographically optimized, budget-aware, and realistically timed.
+              {t('landing.heroDesc')}
             </p>
 
             {/* ── Dynamic search bar ── */}
