@@ -446,8 +446,8 @@ export default function Explore() {
               <Loader2 className="h-7 w-7 text-primary animate-spin" />
             </div>
             <div className="text-center">
-              <p className="font-semibold text-foreground">Crafting your itinerary...</p>
-              <p className="text-sm text-muted-foreground mt-1">This usually takes about 30 seconds</p>
+              <p className="font-semibold text-foreground">{t('explore.crafting')}</p>
+              <p className="text-sm text-muted-foreground mt-1">{t('explore.craftingSub')}</p>
             </div>
           </motion.div>
         )}
