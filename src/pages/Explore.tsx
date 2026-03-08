@@ -282,8 +282,9 @@ export default function Explore() {
               type="submit"
               disabled={aiLoading || !aiQuery.trim()}
               className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-primary flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-primary/25 disabled:opacity-50"
+              aria-label="Generate travel plan"
             >
-              {aiLoading ? <Loader2 className="h-4 w-4 text-primary-foreground animate-spin" /> : <ArrowUpRight className="h-4 w-4 text-primary-foreground" />}
+              {aiLoading ? <Loader2 className="h-4 w-4 text-primary-foreground animate-spin" aria-hidden="true" /> : <ArrowUpRight className="h-4 w-4 text-primary-foreground" aria-hidden="true" />}
             </button>
           </form>
         </motion.div>
