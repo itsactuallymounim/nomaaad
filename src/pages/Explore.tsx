@@ -209,7 +209,6 @@ export default function Explore() {
   });
 
   const mascotEmoji = profile?.mascot === 'panda' ? '🐼' : profile?.mascot === 'cat' ? '🐱' : profile?.mascot === 'dog' ? '🐶' : '👋';
-  const mascotImg = profile?.mascot === 'gorilla' ? gorillaCharacter : profile?.mascot === 'cat' ? catCharacter : profile?.mascot === 'dog' ? dogCharacter : penguinCharacter;
 
   return (
     <div className="min-h-screen bg-background pb-28">
