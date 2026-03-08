@@ -143,7 +143,7 @@ export default function Landing() {
             alt=""
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-foreground/60 via-foreground/40 to-foreground/80" />
+          <div className="absolute inset-0 bg-gradient-to-b from-foreground/70 via-foreground/50 to-foreground/90" />
         </div>
 
         {/* Nav */}
@@ -194,23 +194,35 @@ export default function Landing() {
             </p>
 
             {/* ── Dynamic search bar ── */}
-            <form onSubmit={handleSearch} className="relative max-w-md mx-auto lg:mx-0 mb-6">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                <Sparkles className="h-5 w-5 text-primary" />
-              </div>
-              <input
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder="7 days in Bali as a digital nomad..."
-                className="w-full h-13 pl-12 pr-14 rounded-2xl bg-background/95 backdrop-blur-xl text-foreground text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/40 shadow-xl border-0 transition-all"
-              />
-              <button
-                type="submit"
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-primary flex items-center justify-center hover:scale-110 active:scale-95 transition-transform shadow-md"
+            <motion.form
+              onSubmit={handleSearch}
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.5, type: 'spring', stiffness: 100 }}
+              className="relative max-w-lg mx-auto lg:mx-0 mb-6"
+            >
+              <motion.div
+                animate={{ boxShadow: ['0 0 0 0 hsl(var(--primary) / 0)', '0 0 30px 4px hsl(var(--primary) / 0.15)', '0 0 0 0 hsl(var(--primary) / 0)'] }}
+                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                className="relative rounded-2xl"
               >
-                <ArrowUpRight className="h-4 w-4 text-primary-foreground" />
-              </button>
-            </form>
+                <div className="absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                </div>
+                <input
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="7 days in Bali as a digital nomad..."
+                  className="w-full h-14 md:h-16 pl-14 pr-16 rounded-2xl bg-background/95 backdrop-blur-xl text-foreground text-base placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/40 shadow-2xl border-0 transition-all"
+                />
+                <button
+                  type="submit"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 w-10 h-10 md:w-11 md:h-11 rounded-xl bg-primary flex items-center justify-center hover:scale-110 active:scale-95 transition-transform shadow-md"
+                >
+                  <ArrowUpRight className="h-4.5 w-4.5 text-primary-foreground" />
+                </button>
+              </motion.div>
+            </motion.form>
 
             {/* Benefit pills */}
             <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
