@@ -134,6 +134,7 @@ async function streamTravelPlan({
 export default function Explore() {
   const { user, signOut } = useAuth();
   const { profile } = useProfile();
+  const { t } = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
