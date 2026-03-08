@@ -237,7 +237,7 @@ export default function Onboarding() {
     d.toLowerCase().includes(destSearch.toLowerCase())
   );
 
-  const mascotImage = answers.mascot === 'gorilla' ? gorillaCharacter : answers.mascot === 'cat' ? catCharacter : answers.mascot === 'dog' ? dogCharacter : catCharacter;
+  const MascotIcon = answers.mascot === 'gorilla' ? Mountain : answers.mascot === 'cat' ? Cat : answers.mascot === 'dog' ? Dog : Cat;
 
   // Final screen
   if (step === totalSteps) {
