@@ -384,7 +384,7 @@ export default function Landing() {
           transition={{ duration: 0.7 }}
           className="max-w-lg mx-auto text-center relative"
         >
-          <h2 className="text-3xl md:text-5xl font-serif font-bold text-foreground mb-4">
+          <h2 className="text-3xl md:text-5xl font-sans font-bold text-foreground mb-4">
             {t('landing.ctaTitle')}
           </h2>
           <p className="text-muted-foreground text-sm md:text-base mb-10">

@@ -306,7 +306,7 @@ export default function Explore() {
                 </div>
                 <CardContent className="px-5 pb-5 pt-2">
                   {aiResult ? (
-                    <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:font-serif prose-headings:text-foreground prose-p:text-muted-foreground prose-li:text-muted-foreground prose-strong:text-foreground prose-h2:text-xl prose-h2:mt-6 prose-h2:mb-3 prose-h3:text-base prose-h3:mt-4 prose-h3:mb-2">
+                    <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:font-sans prose-headings:text-foreground prose-p:text-muted-foreground prose-li:text-muted-foreground prose-strong:text-foreground prose-h2:text-xl prose-h2:mt-6 prose-h2:mb-3 prose-h3:text-base prose-h3:mt-4 prose-h3:mb-2">
                       <ReactMarkdown>{aiResult}</ReactMarkdown>
                     </div>
                   ) : aiLoading ? (

@@ -308,7 +308,7 @@ export default function Onboarding() {
               className="space-y-6"
             >
               <div className="space-y-2">
-                <h2 className="text-2xl font-serif font-bold text-foreground">
+                <h2 className="text-2xl font-sans font-bold text-foreground">
                   {current.title}
                 </h2>
                 {current.subtitle && (
