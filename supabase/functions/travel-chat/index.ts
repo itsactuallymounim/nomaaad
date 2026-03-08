@@ -6,6 +6,47 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+async function callLLM(messages: any[], apiKey: string, fallbackKey?: string) {
+  // Try OpenRouter first
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      "HTTP-Referer": "https://nomaaad.lovable.app",
+      "X-Title": "nomaaad",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      messages,
+      stream: true,
+    }),
+  });
+
+  if (response.ok) return response;
+
+  // Fallback to Lovable AI if OpenRouter fails with 402/429
+  if ((response.status === 402 || response.status === 429) && fallbackKey) {
+    console.log("OpenRouter unavailable, falling back to Lovable AI");
+    await response.text(); // consume body
+    const fallbackResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${fallbackKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages,
+        stream: true,
+      }),
+    });
+    return fallbackResponse;
+  }
+
+  return response;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -13,90 +54,74 @@ serve(async (req) => {
 
   try {
     const { query, profile } = await req.json();
+    const OPENROUTER_API_KEY = Deno.env.get("OPENROUTER_API_KEY");
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    if (!OPENROUTER_API_KEY && !LOVABLE_API_KEY) throw new Error("No LLM API key configured");
 
     const profileContext = profile
       ? `
-User profile:
+User's digital nomad profile:
 - Traveler type: ${profile.traveler_type || "not specified"}
 - Monthly budget: ${profile.monthly_budget || "not specified"}
 - Accommodation style: ${profile.accommodation_style || "not specified"}
 - Work setup: ${profile.work_setup || "not specified"}
 - Travel vibe: ${(profile.travel_vibe || []).join(", ") || "not specified"}
 - Search priorities: ${(profile.search_priorities || []).join(", ") || "not specified"}
+- App goals: ${(profile.app_goals || []).join(", ") || "not specified"}
 `
       : "";
 
-    const systemPrompt = `You are an expert digital nomad travel planner. Generate detailed, actionable travel plans for digital nomads.
+    const systemPrompt = `You are an expert digital nomad travel planner powered by real local knowledge. Generate detailed, actionable travel plans personalized to the user.
 
 ${profileContext}
 
-When given a travel query, respond with a well-structured travel plan using markdown formatting:
+When given a travel query, respond with a well-structured travel plan using markdown:
 
 ## 🗺️ [City] — [Duration] Digital Nomad Guide
 
 ### 💰 Budget Overview
-A brief budget breakdown.
+Detailed budget breakdown with specific prices in local currency + EUR/USD.
 
 ### 🏠 Where to Stay
-Top 2-3 accommodation recommendations with prices.
+Top 3 accommodation recommendations matching the user's style, with:
+- Name, neighborhood, price per night
+- Wi-Fi speed rating, nomad-friendliness
 
 ### 💻 Where to Work
-Top 2-3 coworking spaces or cafés with Wi-Fi ratings.
+Top 3 coworking spaces or work-friendly cafés with:
+- Name, address, daily/weekly pass price
+- Wi-Fi speed, power outlets, vibe
 
 ### 📅 Day-by-Day Itinerary
-For each day, include:
-- **Morning**: Work or explore activity
-- **Afternoon**: Activity
-- **Evening**: Activity
-Include specific place names, neighborhoods, and estimated costs.
+For each day include:
+| Time | Activity | Location | Est. Cost |
+Morning work spot, lunch, afternoon activity, evening social/cultural activity.
 
 ### 🍽️ Food & Drink
-Top local food recommendations with price ranges.
+Budget meals, mid-range favorites, must-try local dishes.
 
 ### 💡 Nomad Tips
-3-5 practical tips for digital nomads in this city.
+5 practical tips: SIM cards, transport, safety, community meetups, visa info.
 
-Keep it practical, specific, and budget-conscious. Use real place names and current pricing estimates.`;
+Be specific with real place names and practical details.`;
 
-    const response = await fetch(
-      "https://ai.gateway.lovable.dev/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: query },
-          ],
-          stream: true,
-        }),
-      }
+    const messages = [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: query },
+    ];
+
+    const response = await callLLM(
+      messages,
+      OPENROUTER_API_KEY || LOVABLE_API_KEY!,
+      LOVABLE_API_KEY
     );
 
     if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "AI credits exhausted. Please add credits to continue." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
       const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
+      console.error("LLM error:", response.status, errorText);
       return new Response(
-        JSON.stringify({ error: "Failed to generate travel plan" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: response.status === 429 ? "Rate limit exceeded" : "Failed to generate travel plan" }),
+        { status: response.status >= 400 ? response.status : 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 

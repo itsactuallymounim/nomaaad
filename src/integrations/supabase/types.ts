@@ -116,6 +116,7 @@ export type Database = {
           accommodation_style: string | null
           app_goals: string[] | null
           created_at: string
+          embedding: string | null
           favorite_destinations: string[] | null
           id: string
           mascot: string | null
@@ -132,6 +133,7 @@ export type Database = {
           accommodation_style?: string | null
           app_goals?: string[] | null
           created_at?: string
+          embedding?: string | null
           favorite_destinations?: string[] | null
           id: string
           mascot?: string | null
@@ -148,6 +150,7 @@ export type Database = {
           accommodation_style?: string | null
           app_goals?: string[] | null
           created_at?: string
+          embedding?: string | null
           favorite_destinations?: string[] | null
           id?: string
           mascot?: string | null
@@ -198,6 +201,7 @@ export type Database = {
           category: string | null
           created_at: string
           description: string | null
+          embedding: string | null
           id: string
           image_url: string | null
           lat: number | null
@@ -213,6 +217,7 @@ export type Database = {
           category?: string | null
           created_at?: string
           description?: string | null
+          embedding?: string | null
           id?: string
           image_url?: string | null
           lat?: number | null
@@ -228,6 +233,7 @@ export type Database = {
           category?: string | null
           created_at?: string
           description?: string | null
+          embedding?: string | null
           id?: string
           image_url?: string | null
           lat?: number | null
@@ -291,6 +297,23 @@ export type Database = {
     Functions: {
       is_day_owner: { Args: { day_id: string }; Returns: boolean }
       is_trip_owner: { Args: { trip_id: string }; Returns: boolean }
+      match_saved_places: {
+        Args: {
+          match_count?: number
+          match_threshold?: number
+          match_user_id: string
+          query_embedding: string
+        }
+        Returns: {
+          address: string
+          category: string
+          description: string
+          id: string
+          list_id: string
+          name: string
+          similarity: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

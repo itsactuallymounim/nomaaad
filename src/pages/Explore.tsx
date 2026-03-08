@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { embedSavedPlace } from '@/lib/embeddings';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useSearchParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
@@ -245,17 +246,27 @@ export default function Explore() {
 
   const handleAddToList = async (listId: string) => {
     if (!user || !selectedPlace) return;
-    const { error } = await supabase.from('saved_places').insert({
+    const { data: inserted, error } = await supabase.from('saved_places').insert({
       list_id: listId,
       user_id: user.id,
       name: selectedPlace.name,
       description: selectedPlace.description,
       address: `${selectedPlace.city}, ${selectedPlace.country}`,
       category: selectedPlace.category,
-    });
+    }).select('id').single();
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
       return;
+    }
+    // Embed in background
+    if (inserted) {
+      embedSavedPlace({
+        id: inserted.id,
+        name: selectedPlace.name,
+        description: selectedPlace.description,
+        address: `${selectedPlace.city}, ${selectedPlace.country}`,
+        category: selectedPlace.category,
+      }).catch(() => {});
     }
     setAddedToList(prev => ({
       ...prev,

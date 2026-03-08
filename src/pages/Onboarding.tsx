@@ -6,7 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { useUpdateProfile } from '@/hooks/useProfile';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { embedProfile } from '@/lib/embeddings';
 
 const STEPS = [
   {
@@ -139,6 +141,7 @@ const POPULAR_DESTINATIONS = [
 
 export default function Onboarding() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const updateProfile = useUpdateProfile();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({
@@ -212,6 +215,18 @@ export default function Onboarding() {
         notification_prefs: answers.notification_prefs as string[],
         onboarding_completed: true,
       });
+      // Embed profile in background (non-blocking)
+      if (user?.id) {
+        embedProfile({
+          traveler_type: answers.traveler_type as string,
+          monthly_budget: answers.monthly_budget as string,
+          accommodation_style: answers.accommodation_style as string,
+          work_setup: answers.work_setup as string,
+          travel_vibe: answers.travel_vibe as string[],
+          search_priorities: answers.search_priorities as string[],
+          app_goals: answers.app_goals as string[],
+        }, user.id).catch(() => {});
+      }
       setStep(totalSteps); // show final screen
     } catch {
       toast({ title: 'Error saving profile', variant: 'destructive' });
