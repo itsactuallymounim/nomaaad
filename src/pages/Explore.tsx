@@ -262,7 +262,7 @@ export default function Explore() {
       <div className="max-w-2xl mx-auto px-4">
         {/* Greeting */}
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="pt-8 pb-5">
-          <h1 className="text-2xl font-serif font-bold text-foreground">{mascotEmoji} {t('explore.greeting')}</h1>
+          <h1 className="text-2xl font-sans font-bold text-foreground">{mascotEmoji} {t('explore.greeting')}</h1>
           <p className="text-sm text-muted-foreground mt-1">{t('explore.greetingSub')}</p>
         </motion.div>
 
@@ -306,7 +306,7 @@ export default function Explore() {
                 </div>
                 <CardContent className="px-5 pb-5 pt-2">
                   {aiResult ? (
-                    <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:font-serif prose-headings:text-foreground prose-p:text-muted-foreground prose-li:text-muted-foreground prose-strong:text-foreground prose-h2:text-xl prose-h2:mt-6 prose-h2:mb-3 prose-h3:text-base prose-h3:mt-4 prose-h3:mb-2">
+                    <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:font-sans prose-headings:text-foreground prose-p:text-muted-foreground prose-li:text-muted-foreground prose-strong:text-foreground prose-h2:text-xl prose-h2:mt-6 prose-h2:mb-3 prose-h3:text-base prose-h3:mt-4 prose-h3:mb-2">
                       <ReactMarkdown>{aiResult}</ReactMarkdown>
                     </div>
                   ) : aiLoading ? (

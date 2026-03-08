@@ -73,7 +73,7 @@ export default function Auth() {
             >
               <Compass className="h-7 w-7 text-primary-foreground" aria-hidden="true" />
             </motion.div>
-            <CardTitle className="text-2xl font-serif">{t('auth.welcome')}</CardTitle>
+            <CardTitle className="text-2xl font-sans">{t('auth.welcome')}</CardTitle>
             <CardDescription>{t('auth.subtitle')}</CardDescription>
           </CardHeader>
           <CardContent>

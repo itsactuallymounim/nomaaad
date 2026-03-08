@@ -193,7 +193,7 @@ export default function Landing() {
               <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
               {t('landing.badge')}
             </div>
-            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-serif font-bold text-foreground tracking-tight leading-[1.05]">
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-sans font-bold text-foreground tracking-tight leading-[1.05]">
               {t('landing.headline1')}
               <br />
               <span className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
@@ -285,7 +285,7 @@ export default function Landing() {
             className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8"
           >
             <div>
-              <h2 className="text-3xl md:text-4xl font-serif font-bold text-foreground">
+              <h2 className="text-3xl md:text-4xl font-sans font-bold text-foreground">
                 {t('landing.explorePlaces')}
               </h2>
               <p className="text-sm text-muted-foreground mt-1.5">{t('landing.exploreSubtitle')}</p>
@@ -384,7 +384,7 @@ export default function Landing() {
           transition={{ duration: 0.7 }}
           className="max-w-lg mx-auto text-center relative"
         >
-          <h2 className="text-3xl md:text-5xl font-serif font-bold text-foreground mb-4">
+          <h2 className="text-3xl md:text-5xl font-sans font-bold text-foreground mb-4">
             {t('landing.ctaTitle')}
           </h2>
           <p className="text-muted-foreground text-sm md:text-base mb-10">

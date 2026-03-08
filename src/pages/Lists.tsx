@@ -226,7 +226,7 @@ export default function Lists() {
         <div className="max-w-2xl mx-auto px-4 py-8">
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
             <div className="text-4xl mb-3">{list.icon}</div>
-            <h1 className="text-2xl font-serif font-bold text-foreground">{list.name}</h1>
+            <h1 className="text-2xl font-sans font-bold text-foreground">{list.name}</h1>
             <p className="text-sm text-muted-foreground mt-1">{list.places?.length || 0} places</p>
           </motion.div>
 
@@ -426,7 +426,7 @@ export default function Lists() {
             className="text-center py-20"
           >
             <BookmarkPlus className="h-16 w-16 mx-auto mb-4 text-muted-foreground/20" />
-            <h2 className="text-xl font-serif font-bold text-foreground mb-2">No lists yet</h2>
+            <h2 className="text-xl font-sans font-bold text-foreground mb-2">No lists yet</h2>
             <p className="text-muted-foreground text-sm mb-6">Save places into lists to access them anytime, even offline.</p>
             <Button onClick={() => setDialogOpen(true)} className="rounded-2xl h-11 px-6">
               <Plus className="h-4 w-4 mr-1.5" /> Create your first list
