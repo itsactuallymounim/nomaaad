@@ -8,6 +8,8 @@ import {
   BookmarkPlus, Star, Coffee, Utensils, Camera, Wifi, Home, TreePine,
   ChevronRight, X, Sparkles, Loader2, ArrowUpRight
 } from 'lucide-react';
+import { useI18n } from '@/lib/i18n';
+import { LanguageToggle } from '@/components/LanguageToggle';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -132,6 +134,7 @@ async function streamTravelPlan({
 export default function Explore() {
   const { user, signOut } = useAuth();
   const { profile } = useProfile();
+  const { t } = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
@@ -193,7 +196,7 @@ export default function Explore() {
       embedSavedPlace({ id: inserted.id, name: selectedPlace.name, description: selectedPlace.description, address: `${selectedPlace.city}, ${selectedPlace.country}`, category: selectedPlace.category }).catch(() => {});
     }
     setAddedToList(prev => ({ ...prev, [selectedPlace.id]: [...(prev[selectedPlace.id] || []), listId] }));
-    toast({ title: `Added to list` });
+    toast({ title: t('explore.addedToList') });
     setAddDialogOpen(false); setSelectedPlace(null);
   };
 
@@ -210,7 +213,7 @@ export default function Explore() {
   return (
     <div className="min-h-screen bg-background pb-28">
       {/* Ambient blobs */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10" aria-hidden="true">
         <div className="absolute -top-[30%] -right-[15%] w-[60vw] h-[60vw] rounded-full bg-primary/[0.03] blur-[100px]" />
       </div>
 
@@ -219,15 +222,17 @@ export default function Explore() {
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
         className="sticky top-0 z-50 backdrop-blur-2xl bg-background/60 border-b border-border/20"
+        aria-label="Main navigation"
       >
         <div className="flex items-center justify-between px-4 py-3 max-w-2xl mx-auto">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-2xl bg-primary flex items-center justify-center shadow-md shadow-primary/20">
-              <Compass className="h-4 w-4 text-primary-foreground" />
+              <Compass className="h-4 w-4 text-primary-foreground" aria-hidden="true" />
             </div>
             <span className="font-bold text-lg tracking-tight">nomaaad</span>
           </div>
           <div className="flex items-center gap-1">
+            <LanguageToggle />
             <Button asChild variant="ghost" size="icon" className="h-9 w-9 rounded-xl">
               <Link to="/lists"><BookmarkPlus className="h-4 w-4" /></Link>
             </Button>
@@ -244,9 +249,9 @@ export default function Explore() {
                 <DropdownMenuContent align="end" className="rounded-2xl w-56">
                   <DropdownMenuItem disabled className="text-xs text-muted-foreground">{user.email}</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild><Link to="/lists" className="cursor-pointer"><BookmarkPlus className="h-4 w-4 mr-2" /> My Lists</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link to="/lists" className="cursor-pointer"><BookmarkPlus className="h-4 w-4 mr-2" /> {t('explore.myLists')}</Link></DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={signOut}><LogOut className="h-4 w-4 mr-2" /> Sign Out</DropdownMenuItem>
+                  <DropdownMenuItem onClick={signOut}><LogOut className="h-4 w-4 mr-2" /> {t('explore.signOut')}</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
@@ -257,27 +262,29 @@ export default function Explore() {
       <div className="max-w-2xl mx-auto px-4">
         {/* Greeting */}
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="pt-8 pb-5">
-          <h1 className="text-2xl font-serif font-bold text-foreground">{mascotEmoji} Hey, explorer</h1>
-          <p className="text-sm text-muted-foreground mt-1">Discover curated places or generate an AI travel plan.</p>
+          <h1 className="text-2xl font-serif font-bold text-foreground">{mascotEmoji} {t('explore.greeting')}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t('explore.greetingSub')}</p>
         </motion.div>
 
         {/* AI Search bar */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="mb-6 relative">
-          <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-primary/8 via-primary/4 to-transparent blur-xl pointer-events-none" />
-          <form onSubmit={handleAiSearch} className="relative">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"><Sparkles className="h-4 w-4 text-primary" /></div>
+          <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-primary/8 via-primary/4 to-transparent blur-xl pointer-events-none" aria-hidden="true" />
+          <form onSubmit={handleAiSearch} className="relative" role="search" aria-label="AI travel planner">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"><Sparkles className="h-4 w-4 text-primary" aria-hidden="true" /></div>
             <input
               value={aiQuery}
               onChange={e => setAiQuery(e.target.value)}
-              placeholder="Plan 7 days in Lisbon for a digital nomad..."
+              placeholder={t('explore.aiPlaceholder')}
               className="relative w-full h-13 pl-11 pr-14 rounded-2xl bg-card/80 backdrop-blur-xl border border-border/30 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/30 transition-all shadow-lg shadow-primary/[0.04]"
+              aria-label={t('explore.aiPlaceholder')}
             />
             <button
               type="submit"
               disabled={aiLoading || !aiQuery.trim()}
               className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-primary flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-primary/25 disabled:opacity-50"
+              aria-label="Generate travel plan"
             >
-              {aiLoading ? <Loader2 className="h-4 w-4 text-primary-foreground animate-spin" /> : <ArrowUpRight className="h-4 w-4 text-primary-foreground" />}
+              {aiLoading ? <Loader2 className="h-4 w-4 text-primary-foreground animate-spin" aria-hidden="true" /> : <ArrowUpRight className="h-4 w-4 text-primary-foreground" aria-hidden="true" />}
             </button>
           </form>
         </motion.div>
@@ -285,17 +292,17 @@ export default function Explore() {
         {/* AI Travel Plan result */}
         <AnimatePresence>
           {showAiPanel && (
-            <motion.div ref={aiPanelRef} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.4 }} className="mb-6 overflow-hidden">
+            <motion.div ref={aiPanelRef} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.4 }} className="mb-6 overflow-hidden" role="region" aria-label="AI Travel Plan" aria-live="polite">
               <Card className="rounded-[1.75rem] border-border/30 overflow-hidden shadow-lg">
                 <div className="flex items-center justify-between px-5 pt-4 pb-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center" aria-hidden="true">
                       <Sparkles className="h-3.5 w-3.5 text-primary" />
                     </div>
-                    <span className="text-sm font-semibold text-foreground">AI Travel Plan</span>
-                    {aiLoading && <span className="text-xs text-muted-foreground animate-pulse">Generating...</span>}
+                    <span className="text-sm font-semibold text-foreground">{t('explore.aiTitle')}</span>
+                    {aiLoading && <span className="text-xs text-muted-foreground animate-pulse" role="status">{t('explore.generating')}</span>}
                   </div>
-                  <button onClick={() => { setShowAiPanel(false); setAiResult(''); setAiQuery(''); }} className="w-7 h-7 rounded-xl hover:bg-secondary flex items-center justify-center transition-colors"><X className="h-3.5 w-3.5 text-muted-foreground" /></button>
+                  <button onClick={() => { setShowAiPanel(false); setAiResult(''); setAiQuery(''); }} className="w-7 h-7 rounded-xl hover:bg-secondary flex items-center justify-center transition-colors" aria-label="Close AI panel"><X className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" /></button>
                 </div>
                 <CardContent className="px-5 pb-5 pt-2">
                   {aiResult ? (
@@ -303,9 +310,9 @@ export default function Explore() {
                       <ReactMarkdown>{aiResult}</ReactMarkdown>
                     </div>
                   ) : aiLoading ? (
-                    <div className="flex items-center gap-3 py-8 justify-center">
-                      <Loader2 className="h-5 w-5 text-primary animate-spin" />
-                      <span className="text-sm text-muted-foreground">Building your perfect trip...</span>
+                    <div className="flex items-center gap-3 py-8 justify-center" role="status">
+                      <Loader2 className="h-5 w-5 text-primary animate-spin" aria-hidden="true" />
+                      <span className="text-sm text-muted-foreground">{t('explore.building')}</span>
                     </div>
                   ) : null}
                 </CardContent>
@@ -318,7 +325,7 @@ export default function Explore() {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-4">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Filter places, cities..." className="pl-10 rounded-2xl h-11 bg-card/60 border-border/30" />
+            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('explore.filterPlaceholder')} className="pl-10 rounded-2xl h-11 bg-card/60 border-border/30" aria-label={t('explore.filterPlaceholder')} />
           </div>
         </motion.div>
 
@@ -392,9 +399,9 @@ export default function Explore() {
 
           {filtered.length === 0 && (
             <div className="col-span-full text-center py-16 text-muted-foreground">
-              <Search className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" />
-              <p className="font-medium">No places found</p>
-              <p className="text-sm mt-1">Try a different search or category.</p>
+              <Search className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" aria-hidden="true" />
+              <p className="font-medium">{t('explore.noPlaces')}</p>
+              <p className="text-sm mt-1">{t('explore.noPlacesSub')}</p>
             </div>
           )}
         </motion.div>
@@ -402,8 +409,9 @@ export default function Explore() {
 
       {/* Add to list dialog */}
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-        <DialogContent className="rounded-[1.75rem] max-w-sm">
-          <DialogHeader><DialogTitle className="text-lg">Save to list</DialogTitle></DialogHeader>
+        <DialogContent className="rounded-[1.75rem] max-w-sm" aria-describedby="save-dialog-desc">
+          <DialogHeader><DialogTitle className="text-lg">{t('explore.saveToList')}</DialogTitle></DialogHeader>
+          <p id="save-dialog-desc" className="sr-only">Choose a list to save this place to.</p>
           {selectedPlace && (
             <div className="space-y-3 pt-2">
               <div className="flex items-center gap-3 p-3 rounded-2xl bg-secondary/30">
@@ -415,10 +423,10 @@ export default function Explore() {
               </div>
               {lists.length === 0 ? (
                 <div className="text-center py-6">
-                  <BookmarkPlus className="h-10 w-10 mx-auto mb-2 text-muted-foreground/30" />
-                  <p className="text-sm text-muted-foreground mb-3">No lists yet</p>
-                  <Button asChild variant="outline" className="rounded-2xl" size="sm">
-                    <Link to="/lists" onClick={() => setAddDialogOpen(false)}>Create a list <ChevronRight className="h-3 w-3 ml-1" /></Link>
+                  <BookmarkPlus className="h-10 w-10 mx-auto mb-2 text-muted-foreground/30" aria-hidden="true" />
+                  <p className="text-sm text-muted-foreground mb-3">{t('explore.noLists')}</p>
+                  <Button asChild variant="outline" className="rounded-full" size="sm">
+                    <Link to="/lists" onClick={() => setAddDialogOpen(false)}>{t('explore.createList')} <ChevronRight className="h-3 w-3 ml-1" aria-hidden="true" /></Link>
                   </Button>
                 </div>
               ) : (
@@ -450,18 +458,18 @@ export default function Explore() {
         <div className="flex items-center gap-1 px-2 py-2 rounded-full bg-card/90 backdrop-blur-2xl border border-border/20 shadow-2xl shadow-foreground/10">
           <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-5 rounded-full bg-primary/10">
             <Compass className="h-5 w-5 text-primary" />
-            <span className="text-[10px] text-primary font-semibold">Explore</span>
+            <span className="text-[10px] text-primary font-semibold">{t('cat.explore')}</span>
           </Button>
           <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-5 rounded-full" asChild>
             <Link to="/destinations">
               <MapPin className="h-5 w-5 text-muted-foreground" />
-              <span className="text-[10px] text-muted-foreground">Places</span>
+              <span className="text-[10px] text-muted-foreground">{t('explore.places')}</span>
             </Link>
           </Button>
           <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-5 rounded-full" asChild>
             <Link to="/lists">
               <BookmarkPlus className="h-5 w-5 text-muted-foreground" />
-              <span className="text-[10px] text-muted-foreground">Lists</span>
+              <span className="text-[10px] text-muted-foreground">{t('explore.lists')}</span>
             </Link>
           </Button>
         </div>
