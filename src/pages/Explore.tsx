@@ -5,8 +5,9 @@ import {
   MapPin, Plus, Check, Compass, Moon, Sun, LogOut, User,
   BookmarkPlus, Coffee, Utensils, Camera, Wifi, Heart, Train,
   Sparkles, Loader2, ArrowUpRight, Calendar,
-  CalendarPlus, Clock, DollarSign, X
+  CalendarPlus, Clock, DollarSign, X, Share2
 } from 'lucide-react';
+import ShareableTripCard from '@/components/ShareableTripCard';
 import { useI18n } from '@/lib/i18n';
 import { LanguageToggle } from '@/components/LanguageToggle';
 import { Button } from '@/components/ui/button';
@@ -504,6 +505,18 @@ export default function Explore() {
               <p className="text-[10px] text-muted-foreground text-center mt-2">
                 Find your saved schedule in <Link to="/lists" className="text-primary underline">Lists</Link> — export to Google Calendar from there
               </p>
+
+              {/* Shareable trip summary card */}
+              <ShareableTripCard
+                destination={aiPlan.title}
+                totalDays={days.length}
+                totalActivities={aiPlan.activities.length}
+                budgetSummary={aiPlan.budget_summary}
+                categories={aiPlan.activities.reduce((acc, a) => {
+                  acc[a.category] = (acc[a.category] || 0) + 1;
+                  return acc;
+                }, {} as Record<string, number>)}
+              />
             </div>
           </motion.div>
         )}
