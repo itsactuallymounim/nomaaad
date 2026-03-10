@@ -126,6 +126,9 @@ const translations = {
     'explore.explore': 'Explore',
     'explore.journey': 'Journey',
     'explore.placesNav': 'Places',
+    'explore.suggestionsTitle': 'Where to next?',
+    'explore.myTrips': 'Your trips',
+    'explore.discoverPlaces': 'Discover places',
     // Destinations
     'dest.title': 'Popular destinations',
     'dest.subtitle': 'Pick a city and let our AI plan the perfect trip for you.',
