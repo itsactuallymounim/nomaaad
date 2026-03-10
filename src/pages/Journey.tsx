@@ -71,14 +71,18 @@ export default function Journey() {
   const updateProfile = useUpdateProfile();
   const { isPremium, startCheckout } = usePremium();
   const { t } = useI18n();
+  const location = useLocation();
+
+  // Accept prefill from Explore page
+  const prefill = (location.state as any) || {};
 
   // Step: 0 = destination + sliders, 1-3 = preference steps (if not onboarded)
   const needsPrefs = profile && !profile.onboarding_completed;
   const totalPrefSteps = needsPrefs ? PREFERENCE_STEPS.length : 0;
 
   const [currentStep, setCurrentStep] = useState(0); // 0 = main form, 1+ = pref steps
-  const [destination, setDestination] = useState('');
-  const [numDays, setNumDays] = useState(7);
+  const [destination, setDestination] = useState(prefill.prefillDestination || '');
+  const [numDays, setNumDays] = useState(prefill.prefillDays || 7);
   const [sliders, setSliders] = useState<Record<SliderKey, number>>({
     budget: 50, pace: 50, vibe: 50,
   });
