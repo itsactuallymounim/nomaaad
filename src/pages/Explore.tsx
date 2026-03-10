@@ -6,10 +6,11 @@ import {
   BookmarkPlus, Coffee, Utensils, Camera, Wifi, Heart, Train,
   Sparkles, Loader2, ArrowUpRight, Calendar,
   CalendarPlus, Clock, DollarSign, X, Share2,
-  Wallet, Zap, Globe, SlidersHorizontal, Crown
+  Wallet, Zap, Globe, SlidersHorizontal, Crown, ArrowRight
 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import ShareableTripCard from '@/components/ShareableTripCard';
+import TripTimelineCard from '@/components/TripTimelineCard';
 import { useI18n } from '@/lib/i18n';
 import { LanguageToggle } from '@/components/LanguageToggle';
 import { Button } from '@/components/ui/button';
@@ -44,6 +45,15 @@ interface AiPlan {
   tips: string[];
 }
 
+interface SavedTrip {
+  id: string;
+  name: string;
+  destination: string;
+  created_at: string;
+  plan?: AiPlan;
+  days?: { day_number: number; activities: { time_slot: string; name: string; category: string }[] }[];
+}
+
 const AI_CATEGORY_ICONS: Record<string, typeof Coffee> = {
   food: Utensils, work: Wifi, explore: Camera, transport: Train, social: Heart, wellness: Heart,
 };
@@ -60,6 +70,22 @@ const CATEGORY_IMAGES: Record<string, string> = {
   social: 'photo-1529156069898-49953e39b3ac', wellness: 'photo-1544161515-4ab6ce6db874',
 };
 
+// AI-powered destination suggestions
+const DESTINATION_SUGGESTIONS = [
+  { destination: 'Lisbon', days: 7, emoji: '🇵🇹', label: 'Lisbon · 7 days', vibe: 'Digital Nomad Hub' },
+  { destination: 'Bali', days: 14, emoji: '🌴', label: 'Bali · 14 days', vibe: 'Tropical Coworking' },
+  { destination: 'Tokyo', days: 5, emoji: '🇯🇵', label: 'Tokyo · 5 days', vibe: 'Culture & Tech' },
+  { destination: 'Medellín', days: 10, emoji: '🇨🇴', label: 'Medellín · 10 days', vibe: 'Affordable Paradise' },
+  { destination: 'Bangkok', days: 7, emoji: '🇹🇭', label: 'Bangkok · 7 days', vibe: 'Street Food Capital' },
+  { destination: 'Barcelona', days: 5, emoji: '🇪🇸', label: 'Barcelona · 5 days', vibe: 'Beach & Architecture' },
+  { destination: 'Chiang Mai', days: 14, emoji: '🏯', label: 'Chiang Mai · 14 days', vibe: 'Nomad Classic' },
+  { destination: 'Mexico City', days: 7, emoji: '🇲🇽', label: 'CDMX · 7 days', vibe: 'Art & Tacos' },
+  { destination: 'Tbilisi', days: 10, emoji: '🇬🇪', label: 'Tbilisi · 10 days', vibe: 'Hidden Gem' },
+  { destination: 'Porto', days: 5, emoji: '🍷', label: 'Porto · 5 days', vibe: 'Wine & Coastal Charm' },
+  { destination: 'Seoul', days: 7, emoji: '🇰🇷', label: 'Seoul · 7 days', vibe: 'K-Culture & Cafés' },
+  { destination: 'Cape Town', days: 10, emoji: '🇿🇦', label: 'Cape Town · 10 days', vibe: 'Nature Meets City' },
+];
+
 const FEED_CATEGORIES = ['Coworking', 'Café', 'Hostel', 'Restaurant', 'Temple', 'Market', 'Beach', 'Park'] as const;
 
 const FEED_LOCATIONS = [
@@ -75,22 +101,9 @@ const FEED_LOCATIONS = [
   { name: 'Echo Beach', city: 'Bali', category: 'Beach', rating: 4.4, image: 'photo-1507525428034-b723cf961d3e', description: 'Surfer beach with sunset bars in Canggu.' },
   { name: 'Dojo Bali', city: 'Bali', category: 'Coworking', rating: 4.5, image: 'photo-1517502884422-41eaead166d4', description: 'Open-air coworking with pool, right in Canggu.' },
   { name: 'Hoi An Market', city: 'Hoi An', category: 'Market', rating: 4.6, image: 'photo-1555992336-fb0d29498b13', description: 'Vibrant morning market with fresh produce and Banh Mi.' },
-  { name: 'Nusa Dua Beach', city: 'Bali', category: 'Beach', rating: 4.7, image: 'photo-1544551763-46a013bb70d5', description: 'Calm turquoise waters perfect for swimming.' },
-  { name: 'KOI Café', city: 'Seoul', category: 'Café', rating: 4.2, image: 'photo-1495474472287-4d71bcdd2085', description: 'Minimalist Korean café with specialty pour-over.' },
-  { name: 'Senso-ji Temple', city: 'Tokyo', category: 'Temple', rating: 4.8, image: 'photo-1540959733332-eab4deabeeaf', description: 'Tokyo\'s oldest and most significant temple in Asakusa.' },
-  { name: 'Botanischer Garten', city: 'Berlin', category: 'Park', rating: 4.5, image: 'photo-1560969184-10fe8719e047', description: 'One of the largest botanical gardens in the world.' },
-  { name: 'Pad Thai Thip Samai', city: 'Bangkok', category: 'Restaurant', rating: 4.7, image: 'photo-1508009603885-50cf7c579365', description: 'Legendary pad thai wrapped in egg, since 1966.' },
-  { name: 'A-Work Café', city: 'Amsterdam', category: 'Café', rating: 4.3, image: 'photo-1534351590666-13e3e96b5017', description: 'Laptop-friendly café with strong wifi and flat whites.' },
-  { name: 'Lumpini Park', city: 'Bangkok', category: 'Park', rating: 4.4, image: 'photo-1506665531195-3566af2b4dfa', description: 'Green oasis in downtown Bangkok with monitor lizards.' },
-  { name: 'La Boqueria', city: 'Barcelona', category: 'Market', rating: 4.6, image: 'photo-1539020140153-e479b8c22e70', description: 'Famous La Rambla market with tapas and fresh juices.' },
-  { name: 'Kata Beach', city: 'Phuket', category: 'Beach', rating: 4.5, image: 'photo-1519046904884-53103b34b206', description: 'Beautiful crescent bay popular with swimmers.' },
-  { name: 'Fabrika Tbilisi', city: 'Tbilisi', category: 'Hostel', rating: 4.6, image: 'photo-1565008576549-57569a49371d', description: 'Soviet-era factory turned creative hostel and hub.' },
-  { name: 'Warung Babi Guling', city: 'Bali', category: 'Restaurant', rating: 4.7, image: 'photo-1537996194471-e657df975ab4', description: 'Famous Balinese suckling pig in Ubud.' },
-  { name: 'Retiro Park', city: 'Madrid', category: 'Park', rating: 4.8, image: 'photo-1543783207-ec64e4d95325', description: 'Grand park with crystal palace and rowing boats.' },
 ];
 
 const ITEMS_PER_PAGE = 8;
-const DAYS_OPTIONS = [3, 5, 7, 10, 14];
 
 export default function Explore() {
   const { user, signOut } = useAuth();
@@ -107,12 +120,14 @@ export default function Explore() {
   const [aiLoading, setAiLoading] = useState(false);
   const [activeDay, setActiveDay] = useState(1);
   const hasTriggeredRef = useRef(false);
-  const [numDays, setNumDays] = useState(7);
+  const [generationTime, setGenerationTime] = useState<number | null>(null);
 
   const [savedActivities, setSavedActivities] = useState<Set<string>>(new Set());
   const [justSaved, setJustSaved] = useState<string | null>(null);
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const [sliders, setSliders] = useState({ budget: 50, pace: 50, vibe: 50 });
+
+  // Saved trips from DB
+  const [savedTrips, setSavedTrips] = useState<SavedTrip[]>([]);
+  const [tripsLoading, setTripsLoading] = useState(true);
 
   const [feedCategory, setFeedCategory] = useState<string>('All');
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
@@ -138,6 +153,53 @@ export default function Explore() {
 
   useEffect(() => { setIsDark(document.documentElement.classList.contains('dark')); }, []);
 
+  // Load saved trips
+  useEffect(() => {
+    if (!user) return;
+    const loadTrips = async () => {
+      setTripsLoading(true);
+      try {
+        const { data: trips } = await supabase
+          .from('trips')
+          .select('id, name, destination, created_at')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        if (trips && trips.length > 0) {
+          // Load days + activities for each trip
+          const tripsWithData = await Promise.all(trips.map(async (trip) => {
+            const { data: days } = await supabase
+              .from('days')
+              .select('id, day_number')
+              .eq('trip_id', trip.id)
+              .order('day_number');
+
+            if (!days?.length) return { ...trip, days: [] };
+
+            const daysWithActivities = await Promise.all(days.map(async (day) => {
+              const { data: activities } = await supabase
+                .from('activities')
+                .select('time_slot, name, category')
+                .eq('day_id', day.id)
+                .order('sort_order');
+              return { day_number: day.day_number, activities: activities || [] };
+            }));
+
+            return { ...trip, days: daysWithActivities };
+          }));
+
+          setSavedTrips(tripsWithData);
+        }
+      } catch (e) {
+        console.error('Failed to load trips:', e);
+      } finally {
+        setTripsLoading(false);
+      }
+    };
+    loadTrips();
+  }, [user]);
+
   // Accept plan from Journey page via location state
   useEffect(() => {
     const state = location.state as any;
@@ -145,8 +207,9 @@ export default function Explore() {
       hasTriggeredRef.current = true;
       setAiPlan(state.plan);
       setActiveDay(1);
-      if (state.numDays) setNumDays(state.numDays);
-      // Clear the state so refresh doesn't re-trigger
+      if (state.generationTime) setGenerationTime(state.generationTime);
+      // Save trip to DB
+      saveTripToDb(state.plan, state.destination || '', state.numDays || 7);
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
@@ -157,33 +220,25 @@ export default function Explore() {
       hasTriggeredRef.current = true;
       sessionStorage.removeItem('nomaaad_pending_query');
       setAiQuery(q);
+      // If not onboarded, redirect to journey with query
+      if (profile && !profile.onboarding_completed) {
+        navigate('/journey', { state: { prefillDestination: q } });
+        return;
+      }
       generatePlan(q);
       setSearchParams({}, { replace: true });
     }
-  }, [searchParams]);
-
-  useEffect(() => {
-    if (hasTriggeredRef.current || aiPlan || aiLoading) return;
-    if (!profile?.onboarding_completed) return;
-    if (!profile.favorite_destinations?.length) return;
-
-    hasTriggeredRef.current = true;
-    const dest = profile.favorite_destinations[0];
-    const budget = profile.monthly_budget || 'mid-range';
-    const vibe = profile.travel_vibe?.join(', ') || 'balanced';
-    const query = `Plan a 7-day trip to ${dest}. Budget: ${budget}. Vibe: ${vibe}. I'm a ${profile.traveler_type || 'digital nomad'}.`;
-    setAiQuery(query);
-    generatePlan(query);
-  }, [profile, aiPlan, aiLoading]);
+  }, [searchParams, profile]);
 
   const generatePlan = async (query: string) => {
     setAiLoading(true);
     setAiPlan(null);
     setSavedActivities(new Set());
+    const startTime = Date.now();
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
-      
+
       const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/travel-chat`, {
         method: 'POST',
         headers: {
@@ -197,8 +252,13 @@ export default function Explore() {
         throw new Error(err.error || 'Failed to generate plan');
       }
       const data = await resp.json();
+      const elapsed = Math.round((Date.now() - startTime) / 1000);
+      setGenerationTime(elapsed);
       setAiPlan(data.plan);
       setActiveDay(1);
+      // Save to DB
+      const dest = data.plan?.title?.split('—')?.[0]?.trim() || query.split(' ').slice(0, 3).join(' ');
+      saveTripToDb(data.plan, dest, Math.max(...(data.plan?.activities?.map((a: AiActivity) => a.day) || [7])));
     } catch (e) {
       toast({ title: 'AI Error', description: e instanceof Error ? e.message : 'Unknown error', variant: 'destructive' });
     } finally {
@@ -206,15 +266,87 @@ export default function Explore() {
     }
   };
 
+  const saveTripToDb = async (plan: AiPlan, destination: string, numDays: number) => {
+    if (!user || !plan) return;
+    try {
+      const { data: trip, error: tripErr } = await supabase.from('trips').insert({
+        user_id: user.id,
+        name: plan.title || `Trip to ${destination}`,
+        destination,
+      }).select().single();
+      if (tripErr || !trip) return;
+
+      const days = Array.from(new Set(plan.activities.map(a => a.day))).sort((a, b) => a - b);
+      for (const dayNum of days) {
+        const { data: day, error: dayErr } = await supabase.from('days').insert({
+          trip_id: trip.id,
+          day_number: dayNum,
+          title: `Day ${dayNum}`,
+        }).select().single();
+        if (dayErr || !day) continue;
+
+        const dayActivities = plan.activities
+          .filter(a => a.day === dayNum)
+          .sort((a, b) => a.time.localeCompare(b.time));
+
+        for (let i = 0; i < dayActivities.length; i++) {
+          const act = dayActivities[i];
+          await supabase.from('activities').insert({
+            day_id: day.id,
+            name: act.title,
+            description: act.description,
+            category: act.category,
+            time_slot: act.time,
+            duration: act.duration,
+            sort_order: i,
+            address: act.location,
+          });
+        }
+      }
+
+      // Refresh saved trips
+      const { data: allTrips } = await supabase
+        .from('trips')
+        .select('id, name, destination, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+      if (allTrips) {
+        const tripsWithData = await Promise.all(allTrips.map(async (t) => {
+          const { data: daysData } = await supabase.from('days').select('id, day_number').eq('trip_id', t.id).order('day_number');
+          if (!daysData?.length) return { ...t, days: [] };
+          const daysWithActs = await Promise.all(daysData.map(async (d) => {
+            const { data: acts } = await supabase.from('activities').select('time_slot, name, category').eq('day_id', d.id).order('sort_order');
+            return { day_number: d.day_number, activities: acts || [] };
+          }));
+          return { ...t, days: daysWithActs };
+        }));
+        setSavedTrips(tripsWithData);
+      }
+    } catch (e) {
+      console.error('Failed to save trip:', e);
+    }
+  };
+
+  const handleSearchOrSuggestion = (destination: string, days: number) => {
+    if (profile && !profile.onboarding_completed) {
+      navigate('/journey', { state: { prefillDestination: destination, prefillDays: days } });
+      return;
+    }
+    // Already onboarded — generate directly
+    const travelerType = profile?.traveler_type || 'digital nomad';
+    const vibes = profile?.travel_vibe?.join(', ') || 'balanced';
+    const budget = profile?.monthly_budget || 'mid-range';
+    const query = `Plan a trip to ${destination}. Duration: ${days} days. Budget: ${budget}. Vibes: ${vibes}. Traveler type: ${travelerType}.`;
+    setAiQuery(destination);
+    hasTriggeredRef.current = true;
+    generatePlan(query);
+  };
+
   const handleAiSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!aiQuery.trim()) return;
-    hasTriggeredRef.current = true;
-    const budgetLabel = sliders.budget < 33 ? 'budget-friendly' : sliders.budget < 66 ? 'mid-range' : 'luxury';
-    const paceLabel = sliders.pace < 33 ? 'relaxed' : sliders.pace < 66 ? 'moderate' : 'action-packed';
-    const vibeLabel = sliders.vibe < 33 ? 'local hidden gems' : sliders.vibe < 66 ? 'mix of local and popular' : 'must-see global highlights';
-    const enriched = `${aiQuery.trim()}. Duration: ${numDays} days. Style: ${budgetLabel} budget, ${paceLabel} pace, focusing on ${vibeLabel}.`;
-    generatePlan(enriched);
+    handleSearchOrSuggestion(aiQuery.trim(), 7);
   };
 
   const toggleTheme = () => {
@@ -251,7 +383,7 @@ export default function Explore() {
       setSavedActivities(prev => new Set(prev).add(activityKey));
       setJustSaved(activityKey);
       setTimeout(() => setJustSaved(null), 2500);
-      toast({ title: '✅ Saved to My Itinerary', description: 'Find your schedule in Lists. Don\'t forget to rate it later!' });
+      toast({ title: '✅ Saved to My Itinerary', description: 'Find your schedule in Lists.' });
     } catch (e) {
       toast({ title: 'Error saving', description: e instanceof Error ? e.message : 'Unknown error', variant: 'destructive' });
     }
@@ -259,6 +391,9 @@ export default function Explore() {
 
   const days = aiPlan ? Array.from(new Set(aiPlan.activities.map(a => a.day))).sort((a, b) => a - b) : [];
   const activitiesForDay = aiPlan ? aiPlan.activities.filter(a => a.day === activeDay).sort((a, b) => a.time.localeCompare(b.time)) : [];
+
+  // View: Dashboard (no active plan) vs Plan view
+  const showDashboard = !aiPlan && !aiLoading;
 
   return (
     <div className="min-h-screen bg-background pb-28 flex flex-col">
@@ -289,12 +424,6 @@ export default function Explore() {
               </span>
             )}
             <LanguageToggle />
-            <Button asChild variant="ghost" size="icon" className="h-9 w-9 rounded-xl">
-              <Link to="/journey"><Sparkles className="h-4 w-4" /></Link>
-            </Button>
-            <Button asChild variant="ghost" size="icon" className="h-9 w-9 rounded-xl">
-              <Link to="/lists"><BookmarkPlus className="h-4 w-4" /></Link>
-            </Button>
             <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-9 w-9 rounded-xl">
               {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
@@ -318,7 +447,7 @@ export default function Explore() {
         </div>
       </motion.nav>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-8 flex-1 flex flex-col">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 flex-1 flex flex-col w-full">
         {/* Greeting */}
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="pt-8 pb-5">
           <h1 className="text-2xl font-sans font-bold text-foreground">{t('explore.greeting')} 👋</h1>
@@ -327,12 +456,12 @@ export default function Explore() {
           </p>
         </motion.div>
 
-        {/* AI Search bar */}
+        {/* Search bar */}
         <motion.div
           initial={{ opacity: 0, y: 16, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ delay: 0.05, type: 'spring', stiffness: 200, damping: 20 }}
-          className="mb-4 relative max-w-3xl"
+          className="mb-6 relative max-w-3xl"
         >
           <form onSubmit={handleAiSearch} className="relative">
             <div className="absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -352,65 +481,7 @@ export default function Explore() {
               {aiLoading ? <Loader2 className="h-4 w-4 text-primary-foreground animate-spin" /> : <ArrowUpRight className="h-4 w-4 text-primary-foreground" />}
             </button>
           </form>
-
-          {/* Days selector + Filter toggle row */}
-          <div className="mt-3 flex items-center gap-3 flex-wrap">
-            {/* Days pills */}
-            <div className="flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5 text-primary" />
-              {DAYS_OPTIONS.map(d => (
-                <button
-                  key={d}
-                  onClick={() => setNumDays(d)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                    numDays === d
-                      ? 'bg-foreground text-background shadow-sm'
-                      : 'bg-secondary/50 text-muted-foreground hover:bg-secondary'
-                  }`}
-                >
-                  {d}d
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={() => setFiltersOpen(prev => !prev)}
-              className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
-                filtersOpen ? 'bg-primary/10 text-primary' : 'bg-secondary/50 text-muted-foreground hover:bg-secondary'
-              }`}
-            >
-              <SlidersHorizontal className="h-3 w-3" />
-              {filtersOpen ? t('explore.hideFilters') : t('explore.filters')}
-            </button>
-          </div>
         </motion.div>
-
-        {/* Journey-style sliders */}
-        <AnimatePresence>
-          {filtersOpen && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.25 }} className="overflow-hidden max-w-3xl mb-6">
-              <div className="grid sm:grid-cols-3 gap-4 p-4 rounded-2xl bg-card/80 backdrop-blur-xl border border-border/30">
-                {([
-                  { key: 'budget' as const, icon: Wallet, label: t('explore.budget'), left: t('explore.budgetLeft'), right: t('explore.budgetRight') },
-                  { key: 'pace' as const, icon: Zap, label: t('explore.pace'), left: t('explore.paceLeft'), right: t('explore.paceRight') },
-                  { key: 'vibe' as const, icon: Globe, label: t('explore.vibe'), left: t('explore.vibeLeft'), right: t('explore.vibeRight') },
-                ]).map(s => (
-                  <div key={s.key} className="space-y-2">
-                    <div className="flex items-center gap-1.5">
-                      <s.icon className="h-3.5 w-3.5 text-primary" />
-                      <span className="text-xs font-medium text-foreground">{s.label}</span>
-                    </div>
-                    <Slider value={[sliders[s.key]]} onValueChange={v => setSliders(prev => ({ ...prev, [s.key]: v[0] }))} max={100} step={1} className="w-full" />
-                    <div className="flex justify-between text-[10px] text-muted-foreground">
-                      <span>{s.left}</span>
-                      <span>{s.right}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {/* Loading state */}
         {aiLoading && !aiPlan && (
@@ -425,14 +496,19 @@ export default function Explore() {
           </motion.div>
         )}
 
-        {/* Plan loaded — Day tabs + Activity cards */}
+        {/* Active plan view */}
         {aiPlan && !aiLoading && (
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-            <div className="mb-6">
-              <h2 className="text-xl font-bold text-foreground">{aiPlan.title}</h2>
-              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                <DollarSign className="h-3 w-3" />{aiPlan.budget_summary}
-              </p>
+            <div className="mb-6 flex items-start justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-foreground">{aiPlan.title}</h2>
+                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                  <DollarSign className="h-3 w-3" />{aiPlan.budget_summary}
+                </p>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => { setAiPlan(null); setAiQuery(''); hasTriggeredRef.current = false; }} className="rounded-xl gap-1">
+                <X className="h-3.5 w-3.5" /> Back
+              </Button>
             </div>
 
             {/* Day tabs */}
@@ -470,21 +546,19 @@ export default function Explore() {
                         <img src={`https://images.unsplash.com/${imgKey}?auto=format&fit=crop&w=800&q=80`} alt={activity.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
                         <div className="absolute inset-0 bg-gradient-to-t from-foreground/50 via-transparent to-transparent" />
                         <div className="absolute top-3 right-3">
-                          <div className="relative">
-                            <motion.button onClick={() => saveActivityToList(activity)} whileTap={{ scale: 0.85 }} animate={isSaved ? { scale: [1, 1.3, 1] } : {}} transition={{ duration: 0.3 }}
-                              className={`w-9 h-9 rounded-2xl backdrop-blur-md flex items-center justify-center shadow-lg transition-all ${isSaved ? 'bg-primary text-primary-foreground' : 'bg-background/80 hover:bg-background hover:scale-110'}`} title="Save to My Itinerary">
-                              {isSaved ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4 text-foreground" />}
-                            </motion.button>
-                            <AnimatePresence>
-                              {isJustSaved && (
-                                <motion.div initial={{ opacity: 0, y: 4, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -4, scale: 0.9 }} className="absolute top-full right-0 mt-2 whitespace-nowrap">
-                                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-medium shadow-lg">
-                                    <BookmarkPlus className="h-3 w-3" /> Saved! Check Lists 📋
-                                  </div>
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
+                          <motion.button onClick={() => saveActivityToList(activity)} whileTap={{ scale: 0.85 }} animate={isSaved ? { scale: [1, 1.3, 1] } : {}} transition={{ duration: 0.3 }}
+                            className={`w-9 h-9 rounded-2xl backdrop-blur-md flex items-center justify-center shadow-lg transition-all ${isSaved ? 'bg-primary text-primary-foreground' : 'bg-background/80 hover:bg-background hover:scale-110'}`} title="Save to My Itinerary">
+                            {isSaved ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4 text-foreground" />}
+                          </motion.button>
+                          <AnimatePresence>
+                            {isJustSaved && (
+                              <motion.div initial={{ opacity: 0, y: 4, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -4, scale: 0.9 }} className="absolute top-full right-0 mt-2 whitespace-nowrap">
+                                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-medium shadow-lg">
+                                  <BookmarkPlus className="h-3 w-3" /> Saved!
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </div>
                         <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
                           <Badge variant="secondary" className="rounded-full bg-background/80 backdrop-blur-md text-foreground text-xs border-0 shadow-sm">
@@ -503,11 +577,6 @@ export default function Explore() {
                             <Icon className="h-3 w-3" />{activity.category}
                           </span>
                           <span className="px-2.5 py-1 rounded-full bg-secondary/50 text-[11px] text-muted-foreground font-medium">{activity.duration}min</span>
-                          {activity.location && (
-                            <span className="px-2.5 py-1 rounded-full bg-secondary/50 text-[11px] text-muted-foreground font-medium flex items-center gap-1 max-w-[180px]">
-                              <MapPin className="h-3 w-3 shrink-0" /><span className="truncate">{activity.location.split(',')[0]}</span>
-                            </span>
-                          )}
                         </div>
                       </CardContent>
                     </Card>
@@ -535,26 +604,14 @@ export default function Explore() {
                 onClick={async () => {
                   if (!aiPlan) return;
                   for (const activity of aiPlan.activities) await saveActivityToList(activity);
-                  toast({ title: '🎉 All activities saved!', description: 'Go to Lists to view your itinerary & export to Google Calendar.' });
+                  toast({ title: '🎉 All activities saved!', description: 'Go to Lists to view your itinerary.' });
                 }}
                 className="w-full rounded-xl h-12 gap-2" size="lg"
               >
                 <BookmarkPlus className="h-4 w-4" />
                 {t('explore.saveAll')}
               </Button>
-              <p className="text-[10px] text-muted-foreground text-center mt-2">
-                {t('explore.savedToLists')} <Link to="/lists" className="text-primary underline">{t('explore.listsLink')}</Link>
-              </p>
 
-              <ShareableTripCard
-                destination={aiPlan.title}
-                totalDays={days.length}
-                totalActivities={aiPlan.activities.length}
-                budgetSummary={aiPlan.budget_summary}
-                categories={aiPlan.activities.reduce((acc, a) => { acc[a.category] = (acc[a.category] || 0) + 1; return acc; }, {} as Record<string, number>)}
-              />
-
-              {/* Upgrade CTA */}
               {user && !isPremium && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6 bg-primary/5 border border-primary/20 rounded-2xl p-4 flex items-center gap-3">
                   <Crown className="h-5 w-5 text-primary shrink-0" />
@@ -571,18 +628,108 @@ export default function Explore() {
           </motion.div>
         )}
 
-        {/* Infinite scroll location feed */}
-        {!aiPlan && !aiLoading && (
+        {/* ===== DASHBOARD VIEW ===== */}
+        {showDashboard && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col">
-            <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4">
-              {['All', ...FEED_CATEGORIES].map(cat => (
-                <button key={cat} onClick={() => setFeedCategory(cat)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                    feedCategory === cat ? 'bg-foreground text-background shadow-sm' : 'bg-secondary/50 text-muted-foreground hover:bg-secondary'
-                  }`}>
-                  {cat}
-                </button>
-              ))}
+
+            {/* Destination Suggestions */}
+            <div className="mb-8">
+              <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-primary" />
+                {t('explore.suggestionsTitle')}
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                {DESTINATION_SUGGESTIONS.map((sug, idx) => (
+                  <motion.button
+                    key={sug.destination}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.03 }}
+                    onClick={() => handleSearchOrSuggestion(sug.destination, sug.days)}
+                    className="text-left p-4 rounded-2xl bg-card border border-border/30 hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group"
+                  >
+                    <span className="text-2xl">{sug.emoji}</span>
+                    <p className="font-semibold text-sm text-foreground mt-2">{sug.label}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{sug.vibe}</p>
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+
+            {/* Saved Trips as Timeline Cards */}
+            {savedTrips.length > 0 && (
+              <div className="mb-8">
+                <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-primary" />
+                  {t('explore.myTrips')}
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {savedTrips.map((trip) => {
+                    const day1 = trip.days?.find(d => d.day_number === 1);
+                    const totalDays = trip.days?.length || 0;
+                    const totalActivities = trip.days?.reduce((sum, d) => sum + d.activities.length, 0) || 0;
+
+                    return (
+                      <TripTimelineCard
+                        key={trip.id}
+                        destination={trip.destination || trip.name}
+                        dayNumber={1}
+                        totalDays={totalDays}
+                        travelerType={profile?.traveler_type || 'Digital Nomad'}
+                        budgetLabel={profile?.monthly_budget || 'Budget'}
+                        activities={day1?.activities.map(a => ({
+                          time: a.time_slot,
+                          title: a.name,
+                          category: a.category,
+                        })) || []}
+                        totalCost="~€35 estimated"
+                        onViewFullPlan={() => {
+                          // Navigate to itinerary view for this trip
+                          navigate('/itinerary', { state: { tripId: trip.id } });
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {tripsLoading && savedTrips.length === 0 && (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+              </div>
+            )}
+
+            {/* Upgrade CTA for dashboard */}
+            {user && !isPremium && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-8 bg-primary/5 border border-primary/20 rounded-2xl p-5 flex items-center gap-4">
+                <Crown className="h-6 w-6 text-primary shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground">Unlock unlimited AI plans</p>
+                  <p className="text-xs text-muted-foreground">Generate unlimited itineraries, save all your trips, and access premium features.</p>
+                </div>
+                <Button size="sm" onClick={startCheckout} className="shrink-0 gap-1">
+                  <Crown className="h-3.5 w-3.5" /> Upgrade
+                </Button>
+              </motion.div>
+            )}
+
+            {/* Location Feed */}
+            <div className="mb-4">
+              <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-primary" />
+                {t('explore.discoverPlaces')}
+              </h2>
+              <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4">
+                {['All', ...FEED_CATEGORIES].map(cat => (
+                  <button key={cat} onClick={() => setFeedCategory(cat)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                      feedCategory === cat ? 'bg-foreground text-background shadow-sm' : 'bg-secondary/50 text-muted-foreground hover:bg-secondary'
+                    }`}>
+                    {cat}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 flex-1">
@@ -642,9 +789,6 @@ export default function Explore() {
             )}
             {!hasMoreFeed && feedItems.length > 0 && (
               <p className="text-center text-xs text-muted-foreground py-6">{t('explore.seenAll')}</p>
-            )}
-            {feedItems.length === 0 && (
-              <p className="text-center text-muted-foreground py-16">{t('explore.noCategory')}</p>
             )}
           </motion.div>
         )}
