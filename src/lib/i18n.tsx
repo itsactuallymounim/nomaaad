@@ -126,6 +126,9 @@ const translations = {
     'explore.explore': 'Explore',
     'explore.journey': 'Journey',
     'explore.placesNav': 'Places',
+    'explore.suggestionsTitle': 'Where to next?',
+    'explore.myTrips': 'Your trips',
+    'explore.discoverPlaces': 'Discover places',
     // Destinations
     'dest.title': 'Popular destinations',
     'dest.subtitle': 'Pick a city and let our AI plan the perfect trip for you.',
@@ -267,6 +270,9 @@ const translations = {
     'explore.explore': 'Explorer',
     'explore.journey': 'Voyage',
     'explore.placesNav': 'Lieux',
+    'explore.suggestionsTitle': 'Où aller ensuite ?',
+    'explore.myTrips': 'Vos voyages',
+    'explore.discoverPlaces': 'Découvrir des lieux',
     // Destinations
     'dest.title': 'Destinations populaires',
     'dest.subtitle': 'Choisissez une ville et laissez notre IA planifier le voyage parfait.',
