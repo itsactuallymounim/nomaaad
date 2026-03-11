@@ -687,7 +687,6 @@ export default function Explore() {
                         })) || []}
                         totalCost="~€35 estimated"
                         onViewFullPlan={() => {
-                          // Navigate to itinerary view for this trip
                           navigate('/itinerary', { state: { tripId: trip.id } });
                         }}
                       />
