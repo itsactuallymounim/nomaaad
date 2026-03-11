@@ -199,16 +199,16 @@ export default function Itinerary() {
               </DialogHeader>
               <div className="grid grid-cols-2 gap-3 pt-2">
                 <Button variant="outline" onClick={shareWhatsApp} className="rounded-xl h-12 gap-2">
-                  <MessageCircle className="h-4 w-4 text-green-500" /> WhatsApp
+                  <MessageCircle className="h-4 w-4 text-chart-2" /> WhatsApp
                 </Button>
                 <Button variant="outline" onClick={shareTwitter} className="rounded-xl h-12 gap-2">
-                  <Twitter className="h-4 w-4 text-sky-500" /> Twitter/X
+                  <Twitter className="h-4 w-4 text-primary" /> Twitter/X
                 </Button>
                 <Button variant="outline" onClick={shareLinkedIn} className="rounded-xl h-12 gap-2">
-                  <Linkedin className="h-4 w-4 text-blue-600" /> LinkedIn
+                  <Linkedin className="h-4 w-4 text-primary" /> LinkedIn
                 </Button>
                 <Button variant="outline" onClick={shareInstagram} className="rounded-xl h-12 gap-2">
-                  <Instagram className="h-4 w-4 text-pink-500" /> Instagram
+                  <Instagram className="h-4 w-4 text-chart-4" /> Instagram
                 </Button>
                 <Button variant="outline" onClick={copyLink} className="rounded-xl h-12 gap-2 col-span-2">
                   <Copy className="h-4 w-4" /> Copy to clipboard
