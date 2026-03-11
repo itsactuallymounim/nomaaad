@@ -1,4 +1,4 @@
-import { Compass, Moon, Sun, LogOut, User, BookmarkPlus, Crown } from 'lucide-react';
+import { Compass, Moon, Sun, LogOut, User, Map, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -54,9 +54,9 @@ export function Header() {
           </span>
         )}
         <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
-          <Link to="/lists">
-            <BookmarkPlus className="h-4 w-4 mr-1.5" />
-            {t('header.lists')}
+          <Link to="/explore">
+            <Map className="h-4 w-4 mr-1.5" />
+            {t('header.yourTrips')}
           </Link>
         </Button>
 
@@ -79,9 +79,15 @@ export function Header() {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
+                <Link to="/explore" className="cursor-pointer">
+                  <Map className="h-4 w-4 mr-2" />
+                  {t('header.yourTrips')}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
                 <Link to="/lists" className="cursor-pointer">
-                  <BookmarkPlus className="h-4 w-4 mr-2" />
-                  {t('header.myLists')}
+                  <Map className="h-4 w-4 mr-2" />
+                  {t('header.savedPlaces')}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
