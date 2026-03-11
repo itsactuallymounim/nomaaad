@@ -438,6 +438,9 @@ export default function Explore() {
                   <DropdownMenuItem asChild>
                     <Link to="/lists" className="cursor-pointer"><BookmarkPlus className="h-4 w-4 mr-2" /> {t('explore.myLists')}</Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/explore" className="cursor-pointer"><Calendar className="h-4 w-4 mr-2" /> {t('explore.myTrips')}</Link>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={signOut}><LogOut className="h-4 w-4 mr-2" /> {t('explore.signOut')}</DropdownMenuItem>
                 </DropdownMenuContent>
@@ -684,7 +687,6 @@ export default function Explore() {
                         })) || []}
                         totalCost="~€35 estimated"
                         onViewFullPlan={() => {
-                          // Navigate to itinerary view for this trip
                           navigate('/itinerary', { state: { tripId: trip.id } });
                         }}
                       />
@@ -811,12 +813,6 @@ export default function Explore() {
             <Link to="/destinations">
               <MapPin className="h-5 w-5 text-muted-foreground" />
               <span className="text-[10px] text-muted-foreground">{t('explore.placesNav')}</span>
-            </Link>
-          </Button>
-          <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-4 rounded-full" asChild>
-            <Link to="/lists">
-              <BookmarkPlus className="h-5 w-5 text-muted-foreground" />
-              <span className="text-[10px] text-muted-foreground">{t('explore.lists')}</span>
             </Link>
           </Button>
         </div>
