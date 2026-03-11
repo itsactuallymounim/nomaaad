@@ -813,12 +813,6 @@ export default function Explore() {
               <span className="text-[10px] text-muted-foreground">{t('explore.placesNav')}</span>
             </Link>
           </Button>
-          <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-2 px-4 rounded-full" asChild>
-            <Link to="/lists">
-              <BookmarkPlus className="h-5 w-5 text-muted-foreground" />
-              <span className="text-[10px] text-muted-foreground">{t('explore.lists')}</span>
-            </Link>
-          </Button>
         </div>
       </div>
     </div>
