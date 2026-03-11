@@ -438,6 +438,9 @@ export default function Explore() {
                   <DropdownMenuItem asChild>
                     <Link to="/lists" className="cursor-pointer"><BookmarkPlus className="h-4 w-4 mr-2" /> {t('explore.myLists')}</Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/explore" className="cursor-pointer"><Calendar className="h-4 w-4 mr-2" /> {t('explore.myTrips')}</Link>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={signOut}><LogOut className="h-4 w-4 mr-2" /> {t('explore.signOut')}</DropdownMenuItem>
                 </DropdownMenuContent>
