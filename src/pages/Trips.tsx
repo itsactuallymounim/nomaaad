@@ -82,7 +82,7 @@ export default function Trips() {
 
         {!loading && savedTrips.length === 0 && (
           <div className="text-center py-20">
-            <p className="text-muted-foreground">{t('explore.noTripsYet')}</p>
+            <p className="text-muted-foreground">No trips yet. Start exploring!</p>
           </div>
         )}
 
