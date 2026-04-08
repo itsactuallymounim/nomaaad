@@ -13,6 +13,7 @@ import Explore from "./pages/Explore";
 import Destinations from "./pages/Destinations";
 import Lists from "./pages/Lists";
 import TripPlanner from "./pages/TripPlanner";
+import Trips from "./pages/Trips";
 import NotFound from "./pages/NotFound";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Journey from "./pages/Journey";
@@ -50,6 +51,11 @@ const App = () => (
               <Route path="/plan" element={
                 <ProtectedRoute>
                   <TripPlanner />
+                </ProtectedRoute>
+              } />
+              <Route path="/trips" element={
+                <ProtectedRoute>
+                  <Trips />
                 </ProtectedRoute>
               } />
               <Route path="/payment-success" element={
