@@ -10,7 +10,7 @@ import { Header } from '@/components/layout/Header';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile, useUpdateProfile } from '@/hooks/useProfile';
-import { usePremium } from '@/hooks/usePremium';
+
 import { useI18n } from '@/lib/i18n';
 import { toast } from 'sonner';
 
@@ -69,7 +69,7 @@ export default function Journey() {
   const { user } = useAuth();
   const { profile } = useProfile();
   const updateProfile = useUpdateProfile();
-  const { isPremium, startCheckout } = usePremium();
+  
   const { t } = useI18n();
   const location = useLocation();
 
@@ -327,19 +327,8 @@ export default function Journey() {
             ))}
           </div>
 
-          {/* Upgrade CTA */}
-          {user && !isPremium && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-primary/5 border border-primary/20 rounded-2xl p-4 flex items-center gap-3">
-              <Crown className="h-5 w-5 text-primary shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground">Unlock unlimited plans</p>
-                <p className="text-xs text-muted-foreground">Upgrade to Premium for unlimited AI itineraries.</p>
-              </div>
-              <Button size="sm" onClick={startCheckout} className="shrink-0 gap-1">
-                <Crown className="h-3.5 w-3.5" /> Upgrade
-              </Button>
-            </motion.div>
-          )}
+
+
 
           {/* Build Button */}
           <AnimatePresence>

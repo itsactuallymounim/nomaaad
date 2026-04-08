@@ -23,7 +23,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
-import { usePremium } from '@/hooks/usePremium';
+
 import { toast } from '@/hooks/use-toast';
 
 interface AiActivity {
@@ -108,7 +108,7 @@ const ITEMS_PER_PAGE = 8;
 export default function Explore() {
   const { user, signOut } = useAuth();
   const { profile } = useProfile();
-  const { isPremium, startCheckout } = usePremium();
+  
   const { t } = useI18n();
   const navigate = useNavigate();
   const location = useLocation();
@@ -412,17 +412,8 @@ export default function Explore() {
             <span className="font-bold text-lg tracking-tight">nomaaad</span>
           </div>
           <div className="flex items-center gap-1">
-            {user && !isPremium && (
-              <Button size="sm" onClick={startCheckout} className="gap-1.5 mr-1">
-                <Crown className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">{t('header.upgrade')}</span>
-              </Button>
-            )}
-            {user && isPremium && (
-              <span className="text-xs font-medium text-primary flex items-center gap-1 px-2">
-                <Crown className="h-3.5 w-3.5" /> {t('header.premium')}
-              </span>
-            )}
+
+
             <LanguageToggle />
             <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-9 w-9 rounded-xl">
               {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -615,18 +606,8 @@ export default function Explore() {
                 {t('explore.saveAll')}
               </Button>
 
-              {user && !isPremium && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6 bg-primary/5 border border-primary/20 rounded-2xl p-4 flex items-center gap-3">
-                  <Crown className="h-5 w-5 text-primary shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground">Unlock unlimited plans</p>
-                    <p className="text-xs text-muted-foreground">Upgrade to Premium for unlimited AI itineraries.</p>
-                  </div>
-                  <Button size="sm" onClick={startCheckout} className="shrink-0 gap-1">
-                    <Crown className="h-3.5 w-3.5" /> Upgrade
-                  </Button>
-                </motion.div>
-              )}
+
+
             </div>
           </motion.div>
         )}
@@ -703,18 +684,8 @@ export default function Explore() {
             )}
 
             {/* Upgrade CTA for dashboard */}
-            {user && !isPremium && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-8 bg-primary/5 border border-primary/20 rounded-2xl p-5 flex items-center gap-4">
-                <Crown className="h-6 w-6 text-primary shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-foreground">Unlock unlimited AI plans</p>
-                  <p className="text-xs text-muted-foreground">Generate unlimited itineraries, save all your trips, and access premium features.</p>
-                </div>
-                <Button size="sm" onClick={startCheckout} className="shrink-0 gap-1">
-                  <Crown className="h-3.5 w-3.5" /> Upgrade
-                </Button>
-              </motion.div>
-            )}
+
+
 
             {/* Location Feed */}
             <div className="mb-4">
