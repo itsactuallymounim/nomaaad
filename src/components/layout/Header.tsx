@@ -1,9 +1,8 @@
-import { Compass, Moon, Sun, LogOut, User, Map, Crown } from 'lucide-react';
+import { Compass, Moon, Sun, LogOut, User, Map, BookmarkPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { usePremium } from '@/hooks/usePremium';
 import { useI18n } from '@/lib/i18n';
 import { LanguageToggle } from '@/components/LanguageToggle';
 import {
@@ -17,7 +16,6 @@ import {
 export function Header() {
   const [isDark, setIsDark] = useState(false);
   const { user, signOut } = useAuth();
-  const { isPremium, startCheckout } = usePremium();
   const { t } = useI18n();
 
   useEffect(() => {
@@ -42,21 +40,16 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-1.5">
-        {user && !isPremium && (
-          <Button size="sm" onClick={startCheckout} className="gap-1.5">
-            <Crown className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('header.upgrade')}</span>
-          </Button>
-        )}
-        {user && isPremium && (
-          <span className="text-xs font-medium text-primary flex items-center gap-1 px-2">
-            <Crown className="h-3.5 w-3.5" /> {t('header.premium')}
-          </span>
-        )}
         <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
-          <Link to="/explore">
+          <Link to="/trips">
             <Map className="h-4 w-4 mr-1.5" />
             {t('header.yourTrips')}
+          </Link>
+        </Button>
+        <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
+          <Link to="/lists">
+            <BookmarkPlus className="h-4 w-4 mr-1.5" />
+            {t('header.savedPlaces')}
           </Link>
         </Button>
 
