@@ -6,7 +6,7 @@ import {
   BookmarkPlus, Coffee, Utensils, Camera, Wifi, Heart, Train,
   Sparkles, Loader2, ArrowUpRight, Calendar,
   CalendarPlus, Clock, DollarSign, X, Share2,
-  Wallet, Zap, Globe, SlidersHorizontal, Crown, ArrowRight
+  Wallet, Zap, Globe, SlidersHorizontal, ArrowRight
 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import ShareableTripCard from '@/components/ShareableTripCard';
