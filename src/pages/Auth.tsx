@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
-import { Compass, ArrowRight } from 'lucide-react';
+import { Navigate, useLocation } from 'react-router-dom';
+import { Compass, ArrowRight, Mail, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,12 +17,16 @@ import { LanguageToggle } from '@/components/LanguageToggle';
 export default function Auth() {
   const { user, loading, signIn, signUp } = useAuth();
   const { t } = useI18n();
+  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
 
   if (loading) return null;
   if (user) {
+    const from = (location.state as { from?: string } | null)?.from;
+    if (from && from !== '/auth') return <Navigate to={from} replace />;
     const pendingQuery = sessionStorage.getItem('nomaaad_pending_query');
     if (pendingQuery) {
       return <Navigate to={`/explore?q=${encodeURIComponent(pendingQuery)}`} replace />;
@@ -44,8 +48,14 @@ export default function Auth() {
     setIsSubmitting(true);
     const { error } = await signUp(email, password);
     if (error) toast({ title: t('auth.signUpFailed'), description: error.message, variant: 'destructive' });
-    else toast({ title: t('auth.checkEmail'), description: t('auth.confirmLink') });
+    else setPendingEmail(email);
     setIsSubmitting(false);
+  };
+
+  const handleResend = async () => {
+    if (!pendingEmail) return;
+    await signUp(pendingEmail, password);
+    toast({ title: t('auth.resendSent') });
   };
 
   return (
@@ -68,6 +78,34 @@ export default function Auth() {
         className="w-full max-w-sm relative"
       >
         <Card className="rounded-[1.75rem] border-border/30 shadow-2xl backdrop-blur-sm">
+          {pendingEmail ? (
+            <>
+              <CardHeader className="text-center pb-4">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
+                  className="mx-auto w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-3 shadow-xl"
+                >
+                  <Mail className="h-9 w-9 text-primary" />
+                </motion.div>
+                <CardTitle className="text-2xl font-sans">{t('auth.checkEmailTitle')}</CardTitle>
+                <CardDescription>{t('auth.checkEmailBody', { email: pendingEmail })}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button onClick={handleResend} variant="outline" className="w-full rounded-full h-11">
+                  {t('auth.resend')}
+                </Button>
+                <button
+                  onClick={() => { setPendingEmail(null); setPassword(''); }}
+                  className="w-full text-sm text-muted-foreground hover:text-foreground flex items-center justify-center gap-1.5 pt-1"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" /> {t('auth.backToSignIn')}
+                </button>
+              </CardContent>
+            </>
+          ) : (
+          <>
           <CardHeader className="text-center pb-4">
             <motion.div
               initial={{ scale: 0 }}
@@ -144,6 +182,8 @@ export default function Auth() {
               </TabsContent>
             </Tabs>
           </CardContent>
+          </>
+          )}
         </Card>
       </motion.div>
     </div>
