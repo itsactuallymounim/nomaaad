@@ -541,7 +541,8 @@ export default function Landing() {
                     className={`w-full object-cover transition-transform duration-700 group-hover:scale-105 ${
                     place.span === 'tall' ? 'h-full min-h-[420px] sm:min-h-full' : 'aspect-[4/3]'}`
                     }
-                    loading="lazy" />
+                    loading="lazy"
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/placeholder.svg'; }} />
                   
                     <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center opacity-80 group-hover:opacity-100 group-hover:bg-background transition-all duration-300 shadow-md">
                       <ArrowUpRight className="h-4 w-4 text-foreground" />
