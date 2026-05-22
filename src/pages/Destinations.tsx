@@ -30,7 +30,7 @@ const destinations = [
   { city: 'Singapore', country: 'Singapore', tagline: 'Ultra-modern city-state with amazing food', unsplashId: 'photo-1525625293386-3f8f99389edd', color: 'from-foreground/60' },
   { city: 'Tbilisi', country: 'Georgia', tagline: 'Incredible food and warm nomad community', unsplashId: 'photo-1565008576549-57569a49371d', color: 'from-foreground/60' },
   { city: 'Porto', country: 'Portugal', tagline: 'Port wine, azulejo tiles and riverside charm', unsplashId: 'photo-1555881400-74d7acaacd8b', color: 'from-foreground/60' },
-  { city: 'Lima', country: 'Peru', tagline: 'Gastronomic capital of South America', unsplashId: 'photo-1531968455001-5c5272a67c71', color: 'from-foreground/60' },
+  { city: 'Lima', country: 'Peru', tagline: 'Gastronomic capital of South America', unsplashId: 'photo-1564507592333-c60657eea523', color: 'from-foreground/60' },
   { city: 'Edinburgh', country: 'Scotland', tagline: 'Historic charm and stunning hilltop views', unsplashId: 'photo-1506377585622-bedcbb027afc', color: 'from-foreground/60' },
 ];
 
@@ -137,6 +137,7 @@ export default function Destinations() {
                 alt={`${dest.city}, ${dest.country}`}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 loading="lazy"
+                onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/placeholder.svg'; }}
               />
               <div className={`absolute inset-0 bg-gradient-to-t ${dest.color} to-transparent`} />
               <div className="absolute bottom-0 left-0 right-0 p-5">
