@@ -84,6 +84,11 @@ const translations = {
     'auth.confirmLink': 'We sent you a confirmation link to verify your account.',
     'auth.signInFailed': 'Sign in failed',
     'auth.signUpFailed': 'Sign up failed',
+    'auth.checkEmailTitle': 'Check your email',
+    'auth.checkEmailBody': 'We sent a confirmation link to {email}. Click it to activate your account.',
+    'auth.resend': 'Resend email',
+    'auth.resendSent': 'Confirmation email re-sent',
+    'auth.backToSignIn': 'Back to sign in',
     // Explore
     'explore.greeting': 'Hey, explorer',
     'explore.greetingSub': 'Discover curated places or generate an AI travel plan.',
@@ -148,6 +153,21 @@ const translations = {
     // Onboarding
     'onboarding.chooseCompanion': 'Choose your travel companion 🧭',
     'onboarding.companionDesc': 'Your companion will guide you through trips and recommendations.',
+    'onboarding.intro': 'Takes about a minute — you can skip anytime.',
+    'onboarding.skip': 'Skip for now',
+    'onboarding.optional': 'Optional',
+    'onboarding.stepCounter': 'Step {n} of {total} · ~{min} min left',
+    'onboarding.back': 'Back',
+    'onboarding.continue': 'Continue',
+    'onboarding.finish': 'Finish',
+    'onboarding.saving': 'Saving...',
+    'onboarding.readyTitle': "You're all set",
+    'onboarding.readySub': "Here's what you can do next:",
+    'onboarding.readyBullet1': 'Browse AI destination suggestions',
+    'onboarding.readyBullet2': 'Plan a full trip in seconds',
+    'onboarding.readyBullet3': 'Save places you love into lists',
+    'onboarding.startExploring': 'Start exploring',
+    'common.loading': 'Setting things up…',
     // General
     'lang.toggle': 'FR',
   },
@@ -232,6 +252,11 @@ const translations = {
     'auth.confirmLink': 'Nous vous avons envoyé un lien de confirmation.',
     'auth.signInFailed': 'Échec de la connexion',
     'auth.signUpFailed': 'Échec de l\'inscription',
+    'auth.checkEmailTitle': 'Vérifiez votre e-mail',
+    'auth.checkEmailBody': 'Nous avons envoyé un lien de confirmation à {email}. Cliquez dessus pour activer votre compte.',
+    'auth.resend': 'Renvoyer l\'e-mail',
+    'auth.resendSent': 'E-mail de confirmation renvoyé',
+    'auth.backToSignIn': 'Retour à la connexion',
     // Explore
     'explore.greeting': 'Salut, explorateur',
     'explore.greetingSub': 'Découvrez des lieux ou générez un plan de voyage par IA.',
@@ -296,6 +321,21 @@ const translations = {
     // Onboarding
     'onboarding.chooseCompanion': 'Choisissez votre compagnon de voyage 🧭',
     'onboarding.companionDesc': 'Votre compagnon vous guidera à travers vos voyages et recommandations.',
+    'onboarding.intro': 'Environ une minute — vous pouvez passer à tout moment.',
+    'onboarding.skip': 'Passer pour le moment',
+    'onboarding.optional': 'Optionnel',
+    'onboarding.stepCounter': 'Étape {n} sur {total} · ~{min} min restantes',
+    'onboarding.back': 'Retour',
+    'onboarding.continue': 'Continuer',
+    'onboarding.finish': 'Terminer',
+    'onboarding.saving': 'Enregistrement...',
+    'onboarding.readyTitle': 'Vous êtes prêt',
+    'onboarding.readySub': 'Voici ce que vous pouvez faire :',
+    'onboarding.readyBullet1': 'Parcourir les suggestions IA',
+    'onboarding.readyBullet2': 'Planifier un voyage complet en quelques secondes',
+    'onboarding.readyBullet3': 'Sauvegarder vos lieux favoris dans des listes',
+    'onboarding.startExploring': 'Commencer à explorer',
+    'common.loading': 'Préparation en cours…',
     // General
     'lang.toggle': 'EN',
   },
@@ -305,7 +345,7 @@ type TranslationKey = keyof typeof translations.en;
 
 interface I18nContextType {
   locale: Locale;
-  t: (key: TranslationKey) => string;
+  t: (key: TranslationKey, params?: Record<string, string | number>) => string;
   toggleLocale: () => void;
 }
 
@@ -326,8 +366,14 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const t = useCallback((key: TranslationKey): string => {
-    return translations[locale][key] || translations.en[key] || key;
+  const t = useCallback((key: TranslationKey, params?: Record<string, string | number>): string => {
+    let out: string = translations[locale][key] || translations.en[key] || key;
+    if (params) {
+      for (const k of Object.keys(params)) {
+        out = out.replace(new RegExp(`\\{${k}\\}`, 'g'), String(params[k]));
+      }
+    }
+    return out;
   }, [locale]);
 
   return (
