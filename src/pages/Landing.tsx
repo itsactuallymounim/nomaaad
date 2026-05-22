@@ -43,7 +43,7 @@ const ALL_PLACES: Place[] = [
 { id: '16', name: 'Amsterdam, Netherlands', city: 'Amsterdam', country: 'Netherlands', category: 'cat.cafes', image: '1534351590666-13e3e96b5017', description: 'Canals, world-class museums and the coziest café culture.', span: 'normal' },
 { id: '17', name: 'Tbilisi, Georgia', city: 'Tbilisi', country: 'Georgia', category: 'cat.coliving', image: '1565008576549-57569a49371d', description: 'Incredible food, low cost of living and a warm nomad community.', span: 'normal' },
 { id: '18', name: 'New York, United States', city: 'New York', country: 'United States', category: 'cat.explore', image: '1496442226666-8d4d0e62e6e9', description: 'The city that never sleeps — endless energy and inspiration.', span: 'tall' },
-{ id: '19', name: 'Dubrovnik, Croatia', city: 'Dubrovnik', country: 'Croatia', category: 'cat.explore', image: '1555990538-1e15e83f5e9a', description: 'Medieval walls meet crystal-clear Adriatic waters.', span: 'normal' },
+{ id: '19', name: 'Dubrovnik, Croatia', city: 'Dubrovnik', country: 'Croatia', category: 'cat.explore', image: '1505761671935-60b3a7427bad', description: 'Medieval walls meet crystal-clear Adriatic waters.', span: 'normal' },
 { id: '20', name: 'Seoul, South Korea', city: 'Seoul', country: 'South Korea', category: 'cat.cafes', image: '1517154421773-0529f29ea451', description: 'K-culture, incredible street food and lightning-fast wifi.', span: 'normal' },
 { id: '21', name: 'Playa del Carmen, Mexico', city: 'Playa del Carmen', country: 'Mexico', category: 'cat.coworking', image: '1552074284-5e88ef1aef18', description: 'Beach life meets coworking on the Caribbean coast.', span: 'normal' },
 { id: '22', name: 'Prague, Czech Republic', city: 'Prague', country: 'Czech Republic', category: 'cat.cafes', image: '1519677100203-a0e668c92439', description: 'Fairytale architecture, great beer and a thriving café scene.', span: 'tall' },
@@ -541,7 +541,8 @@ export default function Landing() {
                     className={`w-full object-cover transition-transform duration-700 group-hover:scale-105 ${
                     place.span === 'tall' ? 'h-full min-h-[420px] sm:min-h-full' : 'aspect-[4/3]'}`
                     }
-                    loading="lazy" />
+                    loading="lazy"
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/placeholder.svg'; }} />
                   
                     <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center opacity-80 group-hover:opacity-100 group-hover:bg-background transition-all duration-300 shadow-md">
                       <ArrowUpRight className="h-4 w-4 text-foreground" />
