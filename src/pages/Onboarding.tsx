@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, ArrowLeft, Check, Search, Mountain, Cat, Dog, Compass } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { useUpdateProfile } from '@/hooks/useProfile';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { embedProfile } from '@/lib/embeddings';
+import { useI18n } from '@/lib/i18n';
 
 const STEPS = [
   {
@@ -16,6 +17,7 @@ const STEPS = [
     title: 'Choose your travel companion 🧭',
     subtitle: 'Your companion will guide you through trips and recommendations.',
     type: 'single' as const,
+    optional: false,
     options: [
       { value: 'gorilla', emoji: '🦍', label: 'Gorilla', desc: 'Bold explorer', lucideIcon: Mountain },
       { value: 'cat', emoji: '🐱', label: 'Cat', desc: 'Curious wanderer', lucideIcon: Cat },
@@ -27,6 +29,7 @@ const STEPS = [
     title: 'What kind of traveler are you?',
     subtitle: 'This helps us personalize your recommendations.',
     type: 'single' as const,
+    optional: false,
     options: [
       { value: 'slow', emoji: '🌍', label: 'Slow traveler', desc: '1–3 months per city' },
       { value: 'fast', emoji: '✈️', label: 'Fast explorer', desc: '1–2 weeks per place' },
@@ -40,6 +43,7 @@ const STEPS = [
     title: 'When you arrive in a new city, what do you search first?',
     subtitle: 'Select all that apply.',
     type: 'multi' as const,
+    optional: true,
     options: [
       { value: 'coworking', emoji: '🧑‍💻', label: 'Coworking spaces', desc: '' },
       { value: 'hostels', emoji: '🛏', label: 'Affordable hostels', desc: '' },
@@ -53,6 +57,7 @@ const STEPS = [
     title: "What's your usual monthly travel budget?",
     subtitle: 'We\'ll filter recommendations to match.',
     type: 'single' as const,
+    optional: false,
     options: [
       { value: 'under-800', emoji: '💸', label: 'Under €800', desc: '' },
       { value: '800-1500', emoji: '💰', label: '€800 – €1500', desc: '' },
@@ -65,6 +70,7 @@ const STEPS = [
     title: 'Where do you usually stay?',
     subtitle: '',
     type: 'single' as const,
+    optional: true,
     options: [
       { value: 'hostels', emoji: '🏨', label: 'Hostels', desc: '' },
       { value: 'airbnb', emoji: '🏠', label: 'Airbnb / apartments', desc: '' },
@@ -78,6 +84,7 @@ const STEPS = [
     title: 'Where do you prefer working?',
     subtitle: '',
     type: 'single' as const,
+    optional: true,
     options: [
       { value: 'coworking', emoji: '💻', label: 'Coworking spaces', desc: '' },
       { value: 'cafes', emoji: '☕', label: 'Cafés', desc: '' },
@@ -90,6 +97,7 @@ const STEPS = [
     title: 'What do you want help with the most?',
     subtitle: 'Select all that apply.',
     type: 'multi' as const,
+    optional: true,
     options: [
       { value: 'places', emoji: '📍', label: 'Finding cool places', desc: '' },
       { value: 'guides', emoji: '📅', label: '7-day travel guides', desc: '' },
@@ -103,6 +111,7 @@ const STEPS = [
     title: 'Where do you want to go next?',
     subtitle: 'Search and pick 3–5 destinations.',
     type: 'destinations' as const,
+    optional: true,
     options: [],
   },
   {
@@ -110,6 +119,7 @@ const STEPS = [
     title: "What's your travel vibe?",
     subtitle: 'Select all that apply.',
     type: 'multi' as const,
+    optional: true,
     options: [
       { value: 'nature', emoji: '🌴', label: 'Chill & nature', desc: '' },
       { value: 'cities', emoji: '🏙', label: 'Big cities', desc: '' },
@@ -123,6 +133,7 @@ const STEPS = [
     title: 'Want smart travel alerts?',
     subtitle: 'Select all that apply.',
     type: 'multi' as const,
+    optional: true,
     options: [
       { value: 'coworking', emoji: '🔔', label: 'New coworking spots', desc: '' },
       { value: 'hostels', emoji: '💸', label: 'Cheap hostels', desc: '' },
@@ -141,8 +152,10 @@ const POPULAR_DESTINATIONS = [
 
 export default function Onboarding() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const updateProfile = useUpdateProfile();
+  const { t } = useI18n();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({
     search_priorities: [],
@@ -156,6 +169,18 @@ export default function Onboarding() {
   const current = STEPS[step];
   const totalSteps = STEPS.length;
   const progress = ((step + 1) / (totalSteps + 1)) * 100;
+  const minutesLeft = Math.max(1, Math.round((totalSteps - step) * 0.15));
+
+  const resolveRedirect = () => {
+    const from = (location.state as { from?: string } | null)?.from;
+    if (from && from !== '/onboarding' && from !== '/auth') return from;
+    const pendingQuery = sessionStorage.getItem('nomaaad_pending_query');
+    if (pendingQuery) {
+      sessionStorage.removeItem('nomaaad_pending_query');
+      return `/explore?q=${encodeURIComponent(pendingQuery)}`;
+    }
+    return '/explore';
+  };
 
   const handleSingleSelect = (value: string) => {
     setAnswers((prev) => ({ ...prev, [current.key]: value }));
@@ -181,6 +206,7 @@ export default function Onboarding() {
   };
 
   const canProceed = () => {
+    if ((current as { optional?: boolean }).optional) return true;
     const val = answers[current.key];
     if (current.type === 'single') return !!val;
     if (current.type === 'multi') return (val as string[])?.length > 0;
@@ -200,21 +226,23 @@ export default function Onboarding() {
     if (step > 0) setStep((s) => s - 1);
   };
 
+  const buildPayload = (completed: boolean) => ({
+    mascot: answers.mascot as string,
+    traveler_type: answers.traveler_type as string,
+    search_priorities: answers.search_priorities as string[],
+    monthly_budget: answers.monthly_budget as string,
+    accommodation_style: answers.accommodation_style as string,
+    work_setup: answers.work_setup as string,
+    app_goals: answers.app_goals as string[],
+    favorite_destinations: answers.favorite_destinations as string[],
+    travel_vibe: answers.travel_vibe as string[],
+    notification_prefs: answers.notification_prefs as string[],
+    onboarding_completed: completed,
+  });
+
   const handleFinish = async () => {
     try {
-      await updateProfile.mutateAsync({
-        mascot: answers.mascot as string,
-        traveler_type: answers.traveler_type as string,
-        search_priorities: answers.search_priorities as string[],
-        monthly_budget: answers.monthly_budget as string,
-        accommodation_style: answers.accommodation_style as string,
-        work_setup: answers.work_setup as string,
-        app_goals: answers.app_goals as string[],
-        favorite_destinations: answers.favorite_destinations as string[],
-        travel_vibe: answers.travel_vibe as string[],
-        notification_prefs: answers.notification_prefs as string[],
-        onboarding_completed: true,
-      });
+      await updateProfile.mutateAsync(buildPayload(true));
       // Embed profile in background (non-blocking)
       if (user?.id) {
         embedProfile({
@@ -231,6 +259,15 @@ export default function Onboarding() {
     } catch {
       toast({ title: 'Error saving profile', variant: 'destructive' });
     }
+  };
+
+  const handleSkip = async () => {
+    try {
+      await updateProfile.mutateAsync(buildPayload(true));
+    } catch {
+      // non-blocking; still navigate
+    }
+    navigate(resolveRedirect(), { replace: true });
   };
 
   const filteredDest = POPULAR_DESTINATIONS.filter((d) =>
@@ -259,18 +296,23 @@ export default function Onboarding() {
             </div>
           </motion.div>
           <h1 className="text-3xl font-sans font-bold text-foreground">
-            Your nomad profile is ready
+            {t('onboarding.readyTitle')}
           </h1>
-          <p className="text-muted-foreground">
-            Your {answers.mascot === 'gorilla' ? 'Gorilla' : answers.mascot === 'cat' ? 'Cat' : 'Dog'} companion is preparing your first destinations.
-          </p>
+          <p className="text-muted-foreground">{t('onboarding.readySub')}</p>
+          <ul className="text-left space-y-2 max-w-xs mx-auto">
+            {[t('onboarding.readyBullet1'), t('onboarding.readyBullet2'), t('onboarding.readyBullet3')].map((b) => (
+              <li key={b} className="flex items-start gap-2 text-sm text-foreground">
+                <Check className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" /> {b}
+              </li>
+            ))}
+          </ul>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
           >
-            <Button size="lg" onClick={() => navigate('/explore')} className="mt-4">
-              Start Exploring
+            <Button size="lg" onClick={() => navigate(resolveRedirect(), { replace: true })} className="mt-4">
+              {t('onboarding.startExploring')}
               <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </motion.div>
@@ -285,15 +327,23 @@ export default function Onboarding() {
       <div className="px-6 pt-6 pb-2 max-w-lg mx-auto w-full">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-medium text-muted-foreground">
-            {step + 1} of {totalSteps}
+            {t('onboarding.stepCounter', { n: step + 1, total: totalSteps, min: minutesLeft })}
           </span>
-          {step > 0 && (
-            <button onClick={handleBack} className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
-              <ArrowLeft className="h-3 w-3" /> Back
+          <div className="flex items-center gap-3">
+            {step > 0 && (
+              <button onClick={handleBack} className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
+                <ArrowLeft className="h-3 w-3" /> {t('onboarding.back')}
+              </button>
+            )}
+            <button onClick={handleSkip} className="text-xs font-medium text-primary hover:underline transition-colors">
+              {t('onboarding.skip')}
             </button>
-          )}
+          </div>
         </div>
         <Progress value={progress} className="h-1.5" />
+        {step === 0 && (
+          <p className="text-xs text-muted-foreground mt-2">{t('onboarding.intro')}</p>
+        )}
       </div>
 
       {/* Content */}
@@ -312,8 +362,15 @@ export default function Onboarding() {
                 <h2 className="text-2xl font-sans font-bold text-foreground">
                   {current.title}
                 </h2>
-                {current.subtitle && (
-                  <p className="text-sm text-muted-foreground">{current.subtitle}</p>
+                {(current.subtitle || (current as { optional?: boolean }).optional) && (
+                  <p className="text-sm text-muted-foreground">
+                    {current.subtitle}
+                    {(current as { optional?: boolean }).optional && (
+                      <span className="ml-2 inline-block px-2 py-0.5 rounded-full bg-secondary text-xs text-secondary-foreground align-middle">
+                        {t('onboarding.optional')}
+                      </span>
+                    )}
+                  </p>
                 )}
               </div>
 
@@ -412,8 +469,8 @@ export default function Onboarding() {
           size="lg"
         >
           {step === totalSteps - 1
-            ? updateProfile.isPending ? 'Saving...' : 'Finish'
-            : 'Continue'}
+            ? updateProfile.isPending ? t('onboarding.saving') : t('onboarding.finish')
+            : t('onboarding.continue')}
           <ArrowRight className="ml-1 h-4 w-4" />
         </Button>
       </div>
