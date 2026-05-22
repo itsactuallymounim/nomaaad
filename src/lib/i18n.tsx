@@ -345,7 +345,7 @@ type TranslationKey = keyof typeof translations.en;
 
 interface I18nContextType {
   locale: Locale;
-  t: (key: TranslationKey) => string;
+  t: (key: TranslationKey, params?: Record<string, string | number>) => string;
   toggleLocale: () => void;
 }
 
@@ -366,8 +366,14 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const t = useCallback((key: TranslationKey): string => {
-    return translations[locale][key] || translations.en[key] || key;
+  const t = useCallback((key: TranslationKey, params?: Record<string, string | number>): string => {
+    let out: string = translations[locale][key] || translations.en[key] || key;
+    if (params) {
+      for (const k of Object.keys(params)) {
+        out = out.replace(new RegExp(`\\{${k}\\}`, 'g'), String(params[k]));
+      }
+    }
+    return out;
   }, [locale]);
 
   return (
