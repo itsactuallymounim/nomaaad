@@ -33,20 +33,62 @@ serve(async (req) => {
       });
     }
 
-    const { query, profile } = await req.json();
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { query, profile } = (body ?? {}) as { query?: unknown; profile?: unknown };
+
+    // Validate query
+    if (typeof query !== "string" || query.trim().length === 0) {
+      return new Response(JSON.stringify({ error: "Invalid request: 'query' must be a non-empty string" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (query.length > 4000) {
+      return new Response(JSON.stringify({ error: "Query too long (max 4000 characters)" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Validate profile (optional)
+    const sanitizeStr = (v: unknown, max = 200): string | null =>
+      typeof v === "string" && v.length <= max ? v : null;
+    const sanitizeArr = (v: unknown, maxItems = 20, maxLen = 100): string[] =>
+      Array.isArray(v)
+        ? v.filter((x) => typeof x === "string" && x.length <= maxLen).slice(0, maxItems)
+        : [];
+    let safeProfile: Record<string, unknown> | null = null;
+    if (profile && typeof profile === "object") {
+      const p = profile as Record<string, unknown>;
+      safeProfile = {
+        traveler_type: sanitizeStr(p.traveler_type),
+        monthly_budget: sanitizeStr(p.monthly_budget),
+        accommodation_style: sanitizeStr(p.accommodation_style),
+        work_setup: sanitizeStr(p.work_setup),
+        travel_vibe: sanitizeArr(p.travel_vibe),
+        search_priorities: sanitizeArr(p.search_priorities),
+        app_goals: sanitizeArr(p.app_goals),
+      };
+    }
+    const safeQuery = query.trim();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const profileContext = profile
+    const profileContext = safeProfile
       ? `
 User's digital nomad profile:
-- Traveler type: ${profile.traveler_type || "not specified"}
-- Monthly budget: ${profile.monthly_budget || "not specified"}
-- Accommodation style: ${profile.accommodation_style || "not specified"}
-- Work setup: ${profile.work_setup || "not specified"}
-- Travel vibe: ${(profile.travel_vibe || []).join(", ") || "not specified"}
-- Search priorities: ${(profile.search_priorities || []).join(", ") || "not specified"}
-- App goals: ${(profile.app_goals || []).join(", ") || "not specified"}
+- Traveler type: ${safeProfile.traveler_type || "not specified"}
+- Monthly budget: ${safeProfile.monthly_budget || "not specified"}
+- Accommodation style: ${safeProfile.accommodation_style || "not specified"}
+- Work setup: ${safeProfile.work_setup || "not specified"}
+- Travel vibe: ${(safeProfile.travel_vibe as string[]).join(", ") || "not specified"}
+- Search priorities: ${(safeProfile.search_priorities as string[]).join(", ") || "not specified"}
+- App goals: ${(safeProfile.app_goals as string[]).join(", ") || "not specified"}
 `
       : "";
 
@@ -58,7 +100,7 @@ Return a JSON object with this structure using the travel_plan tool. Generate 8-
 
     const messages = [
       { role: "system", content: systemPrompt },
-      { role: "user", content: query },
+      { role: "user", content: safeQuery },
     ];
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
