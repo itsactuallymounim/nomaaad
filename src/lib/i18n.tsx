@@ -311,6 +311,12 @@ const translations = {
     'explore.tripsNav': 'Voyages',
     'explore.viewFullPlan': 'Voir le plan complet',
     'explore.saveTrip': 'Sauvegarder le voyage',
+    'card.generatedIn': 'Généré en {s}s',
+    'card.dayLabel': 'Jour',
+    'card.daysUnit': 'Jours',
+    'card.activitiesUnit': 'activités',
+    'card.estimated': '~{cost}€ estimé',
+    'card.viewFullPlan': 'Voir le plan complet',
     // Destinations
     'dest.title': 'Destinations populaires',
     'dest.subtitle': 'Choisissez une ville et laissez notre IA planifier le voyage parfait.',
