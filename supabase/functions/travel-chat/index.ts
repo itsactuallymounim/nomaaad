@@ -96,7 +96,7 @@ User's digital nomad profile:
 
 ${profileContext}
 
-Return a JSON object with this structure using the travel_plan tool. Generate 8-15 activity cards covering work spots, food, exploration, and social activities across the trip duration. Each activity should have a specific time, real place name, and practical details. Distribute activities across days evenly.`;
+Return a JSON object with this structure using the travel_plan tool. Generate 4-6 activity cards PER DAY covering work spots, food, exploration and social activities. Use REAL, well-known place names with full address (street + city + country) so they can be geocoded on Google Maps. Keep descriptions short (max 20 words). Distribute activities across days evenly.`;
 
     const messages = [
       { role: "system", content: systemPrompt },
@@ -110,7 +110,7 @@ Return a JSON object with this structure using the travel_plan tool. Generate 8-
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-flash-lite",
         messages,
         stream: false,
         tools: [

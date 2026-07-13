@@ -11,6 +11,7 @@ import {
 import { Slider } from '@/components/ui/slider';
 import ShareableTripCard from '@/components/ShareableTripCard';
 import TripTimelineCard from '@/components/TripTimelineCard';
+import ItineraryMap from '@/components/ItineraryMap';
 import { useI18n } from '@/lib/i18n';
 import { LanguageToggle } from '@/components/LanguageToggle';
 import { Button } from '@/components/ui/button';
@@ -496,8 +497,13 @@ export default function Explore() {
             <div className="mb-6 flex items-start justify-between">
               <div>
                 <h2 className="text-xl font-bold text-foreground">{aiPlan.title}</h2>
-                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                  <DollarSign className="h-3 w-3" />{aiPlan.budget_summary}
+                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
+                  <span className="flex items-center gap-1"><DollarSign className="h-3 w-3" />{aiPlan.budget_summary}</span>
+                  {generationTime !== null && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                      <Sparkles className="h-3 w-3" /> Generated in {generationTime}s
+                    </span>
+                  )}
                 </p>
               </div>
               <Button variant="outline" size="sm" onClick={() => { setAiPlan(null); setAiQuery(''); hasTriggeredRef.current = false; }} className="rounded-xl gap-1">
@@ -524,6 +530,10 @@ export default function Explore() {
             </div>
 
             {/* Activity cards grid */}
+            <ItineraryMap
+              dayLabel={`Day ${activeDay}`}
+              activities={activitiesForDay.map(a => ({ title: a.title, location: a.location, time: a.time }))}
+            />
             <motion.div key={activeDay} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 pt-2">
               {activitiesForDay.map((activity, idx) => {
                 const Icon = AI_CATEGORY_ICONS[activity.category] || Camera;
