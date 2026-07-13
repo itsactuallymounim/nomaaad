@@ -68,7 +68,6 @@ export default function ItineraryMap({
         await loadMapsApi();
         if (cancelled || !containerRef.current || !window.google) return;
         const g = window.google;
-        const geocoder = new g.maps.Geocoder();
 
         const map = new g.maps.Map(containerRef.current, {
           center: { lat: 20, lng: 0 },
@@ -84,32 +83,55 @@ export default function ItineraryMap({
         });
 
         const bounds = new g.maps.LatLngBounds();
-        const geocode = (addr: string) =>
-          new Promise<any>((resolve) => {
-            geocoder.geocode({ address: addr }, (results: any, status: string) => {
-              resolve(status === 'OK' && results?.[0] ? results[0].geometry.location : null);
-            });
-          });
+        // Batch geocode via edge function (browser key isn't authorized for Geocoding API)
+        const addressesToLookup: string[] = [];
+        if (city) addressesToLookup.push(city);
+        activities.forEach((a) => addressesToLookup.push(a.location));
 
-        // Center on city first so user sees the destination immediately
+        let savedRows: { name: string; address: string }[] = [];
+        if (user) {
+          const { data } = await supabase
+            .from('saved_places')
+            .select('name, address')
+            .eq('user_id', user.id)
+            .not('address', 'is', null)
+            .limit(50);
+          savedRows = (data as any[]) || [];
+          savedRows.forEach((r) => addressesToLookup.push(r.address));
+        }
+
+        let coords: Array<{ lat: number; lng: number } | null> = [];
+        if (addressesToLookup.length > 0) {
+          const { data, error: fnErr } = await supabase.functions.invoke('geocode', {
+            body: {
+              city,
+              queries: addressesToLookup.map((a) => ({ address: a })),
+            },
+          });
+          if (fnErr) console.error('geocode invoke failed', fnErr);
+          coords = (data?.results as any[]) || [];
+        }
+
+        let cursor = 0;
         if (city) {
-          const cityLoc = await geocode(city);
+          const cityLoc = coords[cursor++];
           if (cityLoc && !cancelled) {
-            map.setCenter(cityLoc);
+            const pos = { lat: cityLoc.lat, lng: cityLoc.lng };
+            map.setCenter(pos);
             map.setZoom(12);
-            bounds.extend(cityLoc);
+            bounds.extend(pos);
           }
         }
 
-        // Activity markers (numbered)
-        const locations = await Promise.all(activities.map((a) => geocode(a.location)));
+        const locations = activities.map(() => coords[cursor++] || null);
         const pathCoords: any[] = [];
         locations.forEach((loc, i) => {
           if (!loc) return;
-          bounds.extend(loc);
-          pathCoords.push(loc);
+          const pos = { lat: loc.lat, lng: loc.lng };
+          bounds.extend(pos);
+          pathCoords.push(pos);
           new g.maps.Marker({
-            position: loc,
+            position: pos,
             map,
             label: { text: String(i + 1), color: '#fff', fontWeight: '700', fontSize: '12px' },
             title: `${activities[i].time} — ${activities[i].title}`,
@@ -127,45 +149,36 @@ export default function ItineraryMap({
           });
         }
 
-        // Saved places from user's Lists — plotted as red hearts
-        if (user) {
-          const { data: saved } = await supabase
-            .from('saved_places')
-            .select('name, address')
-            .eq('user_id', user.id)
-            .not('address', 'is', null)
-            .limit(50);
-          if (saved && saved.length > 0 && !cancelled) {
-            const savedLocs = await Promise.all(
-              saved.map((p: any) => geocode(p.address as string)),
-            );
-            const heartIcon = {
-              path: 'M12 21s-7-4.35-7-10a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 5.65-7 10-7 10z',
-              fillColor: '#ef4444',
-              fillOpacity: 1,
-              strokeColor: '#ffffff',
-              strokeWeight: 1.5,
-              scale: 1.3,
-              anchor: new g.maps.Point(12, 22),
-            };
-            let plotted = 0;
-            savedLocs.forEach((loc, i) => {
-              if (!loc) return;
-              bounds.extend(loc);
-              plotted++;
-              const marker = new g.maps.Marker({
-                position: loc,
-                map,
-                icon: heartIcon,
-                title: saved[i].name,
-              });
-              const info = new g.maps.InfoWindow({
-                content: `<div style="font-size:12px;font-weight:600">❤ ${saved[i].name}</div>`,
-              });
-              marker.addListener('click', () => info.open({ map, anchor: marker }));
+        // Saved places (red hearts)
+        if (savedRows.length > 0) {
+          const heartIcon = {
+            path: 'M12 21s-7-4.35-7-10a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 5.65-7 10-7 10z',
+            fillColor: '#ef4444',
+            fillOpacity: 1,
+            strokeColor: '#ffffff',
+            strokeWeight: 1.5,
+            scale: 1.3,
+            anchor: new g.maps.Point(12, 22),
+          };
+          let plotted = 0;
+          savedRows.forEach((row, i) => {
+            const loc = coords[cursor + i];
+            if (!loc) return;
+            const pos = { lat: loc.lat, lng: loc.lng };
+            bounds.extend(pos);
+            plotted++;
+            const marker = new g.maps.Marker({
+              position: pos,
+              map,
+              icon: heartIcon,
+              title: row.name,
             });
-            if (!cancelled) setSavedCount(plotted);
-          }
+            const info = new g.maps.InfoWindow({
+              content: `<div style="font-size:12px;font-weight:600">❤ ${row.name}</div>`,
+            });
+            marker.addListener('click', () => info.open({ map, anchor: marker }));
+          });
+          if (!cancelled) setSavedCount(plotted);
         }
 
         if (!bounds.isEmpty()) {
