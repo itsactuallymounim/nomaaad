@@ -214,7 +214,7 @@ export default function ItineraryMap({
   })();
 
   return (
-    <div className="mb-6 -mx-4 md:-mx-8 rounded-none md:rounded-[1.5rem] overflow-hidden border-y md:border border-border/30 bg-card">
+    <div className="mb-6 rounded-3xl overflow-hidden border border-border/30 bg-card">
       <div className="flex items-center justify-between px-4 py-3 border-b border-border/30">
         <div className="flex items-center gap-2 flex-wrap">
           <MapPin className="h-4 w-4 text-primary" />
@@ -234,7 +234,7 @@ export default function ItineraryMap({
           Open in Google Maps <ExternalLink className="h-3 w-3" />
         </a>
       </div>
-      <div className="relative w-full h-[75vh] min-h-[480px] bg-secondary/30">
+      <div className="relative w-full h-[320px] bg-secondary/30">
         <div ref={containerRef} className="absolute inset-0" />
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-sm">

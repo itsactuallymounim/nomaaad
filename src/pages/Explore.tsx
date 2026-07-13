@@ -557,7 +557,7 @@ export default function Explore() {
               </div>
             </div>
 
-            {/* Tips + Save All */}
+            {/* Tips */}
             <div className="mt-10 max-w-2xl">
               {aiPlan.tips?.length > 0 && (
                 <div className="mb-6 bg-card border border-border/30 rounded-2xl p-5">
@@ -571,20 +571,6 @@ export default function Explore() {
                   </ul>
                 </div>
               )}
-
-              <Button
-                onClick={async () => {
-                  if (!aiPlan) return;
-                  for (const activity of aiPlan.activities) await saveActivityToList(activity);
-                  toast({ title: '🎉 All activities saved!', description: 'Go to Lists to view your itinerary.' });
-                }}
-                className="w-full rounded-xl h-12 gap-2" size="lg"
-              >
-                <BookmarkPlus className="h-4 w-4" />
-                {t('explore.saveAll')}
-              </Button>
-
-
 
             </div>
           </motion.div>
