@@ -532,6 +532,7 @@ export default function Explore() {
             {/* Activity cards grid */}
             <ItineraryMap
               dayLabel={`Day ${activeDay}`}
+              city={aiPlan.title?.split('—')?.[0]?.trim() || aiQuery}
               activities={activitiesForDay.map(a => ({ title: a.title, location: a.location, time: a.time }))}
             />
             <motion.div key={activeDay} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 pt-2">
