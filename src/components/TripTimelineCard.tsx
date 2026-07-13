@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
+import { useI18n } from '@/lib/i18n';
 
 interface TimelineActivity {
   time: string;
@@ -16,6 +17,7 @@ interface TripTimelineCardProps {
   activities: TimelineActivity[];
   totalCost: string;
   generatedIn?: number;
+  highlightIndex?: number;
   onViewFullPlan: () => void;
 }
 
@@ -37,33 +39,36 @@ export default function TripTimelineCard({
   activities,
   totalCost,
   generatedIn,
+  highlightIndex,
   onViewFullPlan,
 }: TripTimelineCardProps) {
+  const { t } = useI18n();
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-card rounded-3xl border border-border/30 shadow-lg p-6 w-full max-w-md"
+      className="bg-card rounded-3xl border border-border/30 shadow-lg p-6 w-full"
     >
       {/* Header */}
       {generatedIn && (
         <div className="flex items-center gap-1.5 mb-2">
           <div className="w-2 h-2 rounded-full bg-primary" />
-          <span className="text-xs font-mono text-primary">Generated in {generatedIn}s</span>
+          <span className="text-xs font-mono text-primary">{t('card.generatedIn', { s: generatedIn })}</span>
         </div>
       )}
       <h3 className="text-xl font-bold text-foreground">
-        {destination} — Day {dayNumber}
+        {destination} — {t('card.dayLabel')} {dayNumber}
       </h3>
       <p className="text-sm text-muted-foreground mt-0.5">
-        {budgetLabel} · {travelerType} · {totalDays} Days
+        {budgetLabel} · {travelerType} · {totalDays} {t('card.daysUnit')}
       </p>
 
       {/* Timeline */}
       <div className="mt-6 space-y-0">
-        {activities.slice(0, 7).map((act, idx) => {
+        {activities.slice(0, 8).map((act, idx) => {
           const emoji = CATEGORY_EMOJI[act.category] || '📍';
-          const isHighlighted = idx === 3; // highlight one for visual interest
+          const isHighlighted =
+            highlightIndex !== undefined ? idx === highlightIndex : idx === 3;
           return (
             <div
               key={idx}
@@ -75,7 +80,7 @@ export default function TripTimelineCard({
                 {act.time}
               </span>
               <span className="text-xl shrink-0">{emoji}</span>
-              <span className="text-sm font-medium text-foreground truncate">
+              <span className={`text-sm truncate ${isHighlighted ? 'font-bold text-foreground' : 'font-medium text-foreground'}`}>
                 {act.title}
               </span>
             </div>
@@ -86,13 +91,13 @@ export default function TripTimelineCard({
       {/* Footer */}
       <div className="mt-4 pt-4 border-t border-border/30 flex items-center justify-between">
         <span className="text-sm text-muted-foreground">
-          {activities.length} activities · {totalCost}
+          {activities.length} {t('card.activitiesUnit')} · {totalCost}
         </span>
         <button
           onClick={onViewFullPlan}
           className="text-sm font-medium text-primary hover:underline flex items-center gap-1"
         >
-          View full plan <ArrowRight className="h-3.5 w-3.5" />
+          {t('card.viewFullPlan')} <ArrowRight className="h-3.5 w-3.5" />
         </button>
       </div>
     </motion.div>

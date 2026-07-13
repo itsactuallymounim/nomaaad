@@ -524,71 +524,38 @@ export default function Explore() {
                   }`}
                 >
                   <Calendar className="h-3.5 w-3.5" />
-                  Day {day}
+                  {t('card.dayLabel')} {day}
                 </button>
               ))}
             </div>
 
-            {/* Activity cards grid */}
-            <ItineraryMap
-              dayLabel={`Day ${activeDay}`}
-              city={aiPlan.title?.split('—')?.[0]?.trim() || aiQuery}
-              activities={activitiesForDay.map(a => ({ title: a.title, location: a.location, time: a.time }))}
-            />
-            <motion.div key={activeDay} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 pt-2">
-              {activitiesForDay.map((activity, idx) => {
-                const Icon = AI_CATEGORY_ICONS[activity.category] || Camera;
-                const colorClass = AI_CATEGORY_COLORS[activity.category] || 'bg-secondary text-muted-foreground';
-                const imgKey = CATEGORY_IMAGES[activity.category] || CATEGORY_IMAGES.explore;
-                const activityKey = `${activity.day}-${activity.time}-${activity.title}`;
-                const isSaved = savedActivities.has(activityKey);
-                const isJustSaved = justSaved === activityKey;
-
-                return (
-                  <motion.div key={`${activeDay}-${idx}`} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}>
-                    <Card className="rounded-[1.5rem] border-border/30 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-500 group">
-                      <div className="relative aspect-[16/10] overflow-hidden">
-                        <img src={`https://images.unsplash.com/${imgKey}?auto=format&fit=crop&w=800&q=80`} alt={activity.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-foreground/50 via-transparent to-transparent" />
-                        <div className="absolute top-3 right-3">
-                          <motion.button onClick={() => saveActivityToList(activity)} whileTap={{ scale: 0.85 }} animate={isSaved ? { scale: [1, 1.3, 1] } : {}} transition={{ duration: 0.3 }}
-                            className={`w-9 h-9 rounded-2xl backdrop-blur-md flex items-center justify-center shadow-lg transition-all ${isSaved ? 'bg-primary text-primary-foreground' : 'bg-background/80 hover:bg-background hover:scale-110'}`} title="Save to My Itinerary">
-                            {isSaved ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4 text-foreground" />}
-                          </motion.button>
-                          <AnimatePresence>
-                            {isJustSaved && (
-                              <motion.div initial={{ opacity: 0, y: 4, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -4, scale: 0.9 }} className="absolute top-full right-0 mt-2 whitespace-nowrap">
-                                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-medium shadow-lg">
-                                  <BookmarkPlus className="h-3 w-3" /> Saved!
-                                </div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                        <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
-                          <Badge variant="secondary" className="rounded-full bg-background/80 backdrop-blur-md text-foreground text-xs border-0 shadow-sm">
-                            <Clock className="h-3 w-3 mr-1" />{activity.time}
-                          </Badge>
-                          <Badge variant="secondary" className="rounded-full bg-background/80 backdrop-blur-md text-foreground text-xs border-0 shadow-sm">
-                            <DollarSign className="h-3 w-3 mr-1" />{activity.cost}
-                          </Badge>
-                        </div>
-                      </div>
-                      <CardContent className="p-4">
-                        <h3 className="font-semibold text-foreground text-sm">{activity.title}</h3>
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{activity.description}</p>
-                        <div className="flex gap-1.5 mt-3 flex-wrap">
-                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium capitalize ${colorClass}`}>
-                            <Icon className="h-3 w-3" />{activity.category}
-                          </span>
-                          <span className="px-2.5 py-1 rounded-full bg-secondary/50 text-[11px] text-muted-foreground font-medium">{activity.duration}min</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                );
-              })}
-            </motion.div>
+            {/* Timeline card + map, matching the reference layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+              <motion.div key={`card-${activeDay}`} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+                <TripTimelineCard
+                  destination={aiPlan.title?.split('—')?.[0]?.trim() || aiQuery || 'Trip'}
+                  dayNumber={activeDay}
+                  totalDays={days.length}
+                  travelerType={profile?.traveler_type ? profile.traveler_type.replace(/^./, c => c.toUpperCase()) : (t('landing.sampleMeta').split('·')[1]?.trim() || 'Digital Nomad')}
+                  budgetLabel={profile?.monthly_budget || (t('landing.sampleMeta').split('·')[0]?.trim() || 'Budget')}
+                  activities={activitiesForDay.map(a => ({ time: a.time, title: a.title, category: a.category }))}
+                  totalCost={t('card.estimated', { cost: 35 })}
+                  generatedIn={generationTime ?? undefined}
+                  onViewFullPlan={async () => {
+                    if (!aiPlan) return;
+                    for (const activity of aiPlan.activities) await saveActivityToList(activity);
+                    toast({ title: t('explore.allSaved') });
+                  }}
+                />
+              </motion.div>
+              <div className="lg:sticky lg:top-20">
+                <ItineraryMap
+                  dayLabel={`${t('card.dayLabel')} ${activeDay}`}
+                  city={aiPlan.title?.split('—')?.[0]?.trim() || aiQuery}
+                  activities={activitiesForDay.map(a => ({ title: a.title, location: a.location, time: a.time }))}
+                />
+              </div>
+            </div>
 
             {/* Tips + Save All */}
             <div className="mt-10 max-w-2xl">
