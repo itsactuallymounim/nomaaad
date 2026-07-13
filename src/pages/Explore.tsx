@@ -617,6 +617,11 @@ export default function Explore() {
                     const totalDays = trip.days?.length || 0;
                     const totalActivities = trip.days?.reduce((sum, d) => sum + d.activities.length, 0) || 0;
 
+                    const allActs = (trip.days || []).flatMap(d => d.activities.map(a => ({
+                      time: a.time_slot,
+                      title: a.name,
+                      category: a.category,
+                    })));
                     return (
                       <TripTimelineCard
                         key={trip.id}
@@ -625,11 +630,11 @@ export default function Explore() {
                         totalDays={totalDays}
                         travelerType={profile?.traveler_type || 'Digital Nomad'}
                         budgetLabel={profile?.monthly_budget || 'Budget'}
-                        activities={day1?.activities.map(a => ({
+                        activities={allActs.length ? allActs : (day1?.activities.map(a => ({
                           time: a.time_slot,
                           title: a.name,
                           category: a.category,
-                        })) || []}
+                        })) || [])}
                         totalCost="~€35 estimated"
                         onViewFullPlan={() => {
                           navigate('/itinerary', { state: { tripId: trip.id } });
