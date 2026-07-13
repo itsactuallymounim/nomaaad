@@ -497,8 +497,13 @@ export default function Explore() {
             <div className="mb-6 flex items-start justify-between">
               <div>
                 <h2 className="text-xl font-bold text-foreground">{aiPlan.title}</h2>
-                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                  <DollarSign className="h-3 w-3" />{aiPlan.budget_summary}
+                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
+                  <span className="flex items-center gap-1"><DollarSign className="h-3 w-3" />{aiPlan.budget_summary}</span>
+                  {generationTime !== null && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                      <Sparkles className="h-3 w-3" /> Generated in {generationTime}s
+                    </span>
+                  )}
                 </p>
               </div>
               <Button variant="outline" size="sm" onClick={() => { setAiPlan(null); setAiQuery(''); hasTriggeredRef.current = false; }} className="rounded-xl gap-1">
