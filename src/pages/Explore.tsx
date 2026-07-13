@@ -524,7 +524,7 @@ export default function Explore() {
                   }`}
                 >
                   <Calendar className="h-3.5 w-3.5" />
-                  Day {day}
+                  {t('card.dayLabel')} {day}
                 </button>
               ))}
             </div>
