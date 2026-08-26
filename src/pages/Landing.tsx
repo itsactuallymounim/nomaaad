@@ -549,7 +549,7 @@ export default function Landing() {
                     </div>
                     <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-foreground/85 via-foreground/25 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5">
-                      <div className="rounded-[1.25rem] bg-background/10 backdrop-blur-xl ring-1 ring-background/15 px-4 py-3">
+                      <div className="rounded-[1.25rem] bg-foreground/25 backdrop-blur-xl ring-1 ring-background/20 px-4 py-3">
                       <h3 className="text-background font-semibold tracking-tight text-lg md:text-xl leading-tight mb-1">
                         {place.city}, {place.country}
                       </h3>

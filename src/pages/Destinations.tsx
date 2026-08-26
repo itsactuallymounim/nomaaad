@@ -141,7 +141,7 @@ export default function Destinations() {
               />
               <div className={`absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t ${dest.color} to-transparent`} />
               <div className="absolute bottom-0 left-0 right-0 p-3.5">
-                <div className="rounded-[1.25rem] bg-primary-foreground/10 backdrop-blur-xl ring-1 ring-primary-foreground/15 px-4 py-3">
+                <div className="rounded-[1.25rem] bg-foreground/25 backdrop-blur-xl ring-1 ring-primary-foreground/20 px-4 py-3">
                   <p className="text-[11px] text-primary-foreground/70 font-medium tracking-wide uppercase mb-0.5">{dest.country}</p>
                   <h3 className="text-lg font-semibold tracking-tight text-primary-foreground leading-tight mb-0.5">{dest.city}</h3>
                   <p className="text-primary-foreground/80 text-xs line-clamp-1">{dest.tagline}</p>
