@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import { Compass, ArrowRight, Mail, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +17,6 @@ import { LanguageToggle } from '@/components/LanguageToggle';
 export default function Auth() {
   const { user, loading, signIn, signUp } = useAuth();
   const { t } = useI18n();
-  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
