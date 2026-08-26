@@ -15,10 +15,11 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
+import type { Json } from '@/integrations/supabase/types';
 import { toast } from '@/hooks/use-toast';
 import { useI18n } from '@/lib/i18n';
 
-const CATEGORIES = ['restaurant', 'cafe', 'coworking', 'hotel', 'activity', 'shop', 'wellness', 'other'];
+const CATEGORIES = ['restaurant', 'cafe', 'coworking', 'hotel', 'activity', 'shop', 'wellness', 'other'] as const;
 const CURRENCIES = ['EUR', 'USD', 'GBP', 'MAD', 'THB', 'COP'];
 const PRICE_LEVELS = [1, 2, 3, 4];
 
@@ -159,7 +160,7 @@ export default function BusinessSignup() {
       google_address: match?.address ?? null,
       google_rating: match?.rating ?? null,
       google_review_count: match?.review_count ?? null,
-      google_reviews: match?.reviews ?? [],
+      google_reviews: (match?.reviews ?? []) as unknown as Json,
       google_synced_at: match ? new Date().toISOString() : null,
     });
     setSaving(false);
