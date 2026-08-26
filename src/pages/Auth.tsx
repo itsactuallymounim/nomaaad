@@ -1,7 +1,6 @@
-import { useState } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { Compass, ArrowRight, Mail, ArrowLeft } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Compass, ArrowRight, Mail, ArrowLeft } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,23 +16,19 @@ import { LanguageToggle } from '@/components/LanguageToggle';
 export default function Auth() {
   const { user, loading, signIn, signUp } = useAuth();
   const { t } = useI18n();
-  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
 
-  if (loading) return null;
-  if (user) {
-    const from = (location.state as { from?: string } | null)?.from;
-    if (from && from !== '/auth') return <Navigate to={from} replace />;
-    const pendingQuery = sessionStorage.getItem('nomaaad_pending_query');
-    if (pendingQuery) {
-      return <Navigate to={`/explore?q=${encodeURIComponent(pendingQuery)}`} replace />;
+  useEffect(() => {
+    if (user && !loading) {
+      window.location.replace('https://nomaaad.lovable.app/explore');
     }
-    // New signups go to onboarding via ProtectedRoute; existing users go to explore
-    return <Navigate to="/explore" replace />;
-  }
+  }, [user, loading]);
+
+  if (loading) return null;
+  if (user) return null;
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
