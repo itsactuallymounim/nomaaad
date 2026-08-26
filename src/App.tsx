@@ -18,6 +18,7 @@ import NotFound from "./pages/NotFound";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Journey from "./pages/Journey";
 import Itinerary from "./pages/Itinerary";
+import BusinessSignup from "./pages/BusinessSignup";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => (
               <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/destinations" element={<Destinations />} />
+              <Route path="/for-business" element={<BusinessSignup />} />
               <Route path="/onboarding" element={
                 <ProtectedRoute>
                   <Onboarding />

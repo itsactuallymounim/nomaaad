@@ -1,4 +1,4 @@
-import { Compass, Moon, Sun, LogOut, User, Map, BookmarkPlus } from 'lucide-react';
+import { Compass, Moon, Sun, LogOut, User, Map, BookmarkPlus, Store } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -50,6 +50,13 @@ export function Header() {
           <Link to="/lists">
             <BookmarkPlus className="h-4 w-4 mr-1.5" />
             {t('header.savedPlaces')}
+          </Link>
+        </Button>
+
+        <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
+          <Link to="/for-business">
+            <Store className="h-4 w-4 mr-1.5" />
+            {t('header.forBusiness')}
           </Link>
         </Button>
 
