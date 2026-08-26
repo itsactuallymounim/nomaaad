@@ -328,8 +328,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      is_day_owner: { Args: { day_id: string }; Returns: boolean }
-      is_trip_owner: { Args: { trip_id: string }; Returns: boolean }
       match_saved_places: {
         Args: {
           match_count?: number
