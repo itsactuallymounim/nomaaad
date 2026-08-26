@@ -76,6 +76,90 @@ export type Database = {
           },
         ]
       }
+      businesses: {
+        Row: {
+          address: string
+          category: string
+          city: string
+          contact_email: string | null
+          created_at: string
+          currency: string
+          description: string
+          google_address: string | null
+          google_name: string | null
+          google_place_id: string | null
+          google_rating: number | null
+          google_review_count: number | null
+          google_reviews: Json
+          google_synced_at: string | null
+          id: string
+          image_url: string | null
+          lat: number | null
+          lng: number | null
+          name: string
+          phone: string | null
+          price_level: number
+          price_max: number | null
+          price_min: number | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string
+          category?: string
+          city?: string
+          contact_email?: string | null
+          created_at?: string
+          currency?: string
+          description?: string
+          google_address?: string | null
+          google_name?: string | null
+          google_place_id?: string | null
+          google_rating?: number | null
+          google_review_count?: number | null
+          google_reviews?: Json
+          google_synced_at?: string | null
+          id?: string
+          image_url?: string | null
+          lat?: number | null
+          lng?: number | null
+          name: string
+          phone?: string | null
+          price_level?: number
+          price_max?: number | null
+          price_min?: number | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string
+          category?: string
+          city?: string
+          contact_email?: string | null
+          created_at?: string
+          currency?: string
+          description?: string
+          google_address?: string | null
+          google_name?: string | null
+          google_place_id?: string | null
+          google_rating?: number | null
+          google_review_count?: number | null
+          google_reviews?: Json
+          google_synced_at?: string | null
+          id?: string
+          image_url?: string | null
+          lat?: number | null
+          lng?: number | null
+          name?: string
+          phone?: string | null
+          price_level?: number
+          price_max?: number | null
+          price_min?: number | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       days: {
         Row: {
           created_at: string
