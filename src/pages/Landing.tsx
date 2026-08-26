@@ -533,7 +533,7 @@ export default function Landing() {
                 
                   <Link
                   to="/auth"
-                  className="group relative block rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-500 h-full">
+                  className="group relative block rounded-[1.75rem] overflow-hidden ring-1 ring-foreground/5 shadow-sm hover:shadow-2xl active:scale-[0.985] transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] h-full">
                   
                     <img
                     src={`https://images.unsplash.com/photo-${place.image}?auto=format&fit=crop&w=800&q=80`}
@@ -544,16 +544,19 @@ export default function Landing() {
                     loading="lazy"
                     onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/placeholder.svg'; }} />
                   
-                    <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center opacity-80 group-hover:opacity-100 group-hover:bg-background transition-all duration-300 shadow-md">
+                    <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-background/60 backdrop-blur-xl ring-1 ring-background/40 flex items-center justify-center opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300 shadow-lg">
                       <ArrowUpRight className="h-4 w-4 text-foreground" />
                     </div>
-                    <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6 bg-gradient-to-t from-foreground/80 via-foreground/40 to-transparent">
-                      <h3 className="text-background font-bold text-lg md:text-xl leading-tight mb-1">
+                    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-foreground/85 via-foreground/25 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5">
+                      <div className="rounded-[1.25rem] bg-background/10 backdrop-blur-xl ring-1 ring-background/15 px-4 py-3">
+                      <h3 className="text-background font-semibold tracking-tight text-lg md:text-xl leading-tight mb-1">
                         {place.city}, {place.country}
                       </h3>
                       <p className="text-background/80 text-xs md:text-sm leading-relaxed line-clamp-2">
                         {place.description}
                       </p>
+                      </div>
                     </div>
                   </Link>
                 </motion.div>

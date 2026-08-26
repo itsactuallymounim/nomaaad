@@ -131,7 +131,7 @@ export default function Destinations() {
             onClick={() => navigate('/auth')}
             role="listitem"
           >
-            <div className="relative rounded-[1.5rem] overflow-hidden aspect-[4/3] shadow-md hover:shadow-2xl border border-border/20 transition-shadow duration-500">
+            <div className="relative rounded-[1.75rem] overflow-hidden aspect-[4/3] shadow-md hover:shadow-2xl ring-1 ring-foreground/5 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-active:scale-[0.985]">
               <img
                 src={`https://images.unsplash.com/${dest.unsplashId}?auto=format&fit=crop&w=800&q=80`}
                 alt={`${dest.city}, ${dest.country}`}
@@ -139,14 +139,16 @@ export default function Destinations() {
                 loading="lazy"
                 onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/placeholder.svg'; }}
               />
-              <div className={`absolute inset-0 bg-gradient-to-t ${dest.color} to-transparent`} />
-              <div className="absolute bottom-0 left-0 right-0 p-5">
-                <p className="text-xs text-primary-foreground/70 font-medium tracking-wide uppercase mb-1">{dest.country}</p>
-                <h3 className="text-xl font-bold text-primary-foreground leading-tight mb-1">{dest.city}</h3>
-                <p className="text-primary-foreground/80 text-xs line-clamp-1">{dest.tagline}</p>
+              <div className={`absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t ${dest.color} to-transparent`} />
+              <div className="absolute bottom-0 left-0 right-0 p-3.5">
+                <div className="rounded-[1.25rem] bg-primary-foreground/10 backdrop-blur-xl ring-1 ring-primary-foreground/15 px-4 py-3">
+                  <p className="text-[11px] text-primary-foreground/70 font-medium tracking-wide uppercase mb-0.5">{dest.country}</p>
+                  <h3 className="text-lg font-semibold tracking-tight text-primary-foreground leading-tight mb-0.5">{dest.city}</h3>
+                  <p className="text-primary-foreground/80 text-xs line-clamp-1">{dest.tagline}</p>
+                </div>
               </div>
               <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-1 group-hover:translate-y-0">
-                <div className="bg-background/90 backdrop-blur-md rounded-full px-4 py-2 flex items-center gap-1.5 text-xs font-medium text-foreground shadow-lg">
+                <div className="bg-background/70 backdrop-blur-xl ring-1 ring-background/40 rounded-full px-4 py-2 flex items-center gap-1.5 text-xs font-medium text-foreground shadow-lg">
                   {t('dest.planTrip')} <ArrowRight className="h-3 w-3" aria-hidden="true" />
                 </div>
               </div>
